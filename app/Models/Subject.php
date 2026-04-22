@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 class Subject extends BaseModel
 {
     use HasFactory;
@@ -16,9 +13,9 @@ class Subject extends BaseModel
         'active' => 'boolean'
     ];
 
-    public function stage(): BelongsTo
+    public function teachers()
     {
-        return $this->belongsTo(Stage::class);
+        return $this->belongsToMany(Teacher::class);
     }
 
 }

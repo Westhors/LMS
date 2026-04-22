@@ -13,6 +13,7 @@ use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends BaseController
@@ -40,12 +41,44 @@ class TeacherController extends BaseController
     {
         try {
             $data = $request->validated();
+
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-            $this->crudRepository->create($data);
+
+            $teacher = $this->crudRepository->create($data);
+
+            /**
+             * stages + images
+             */
+            if ($request->filled('stage')) {
+                foreach ($request->stage as $item) {
+
+                    $teacher->stages()->attach($item['stage_id']);
+
+                    if (!empty($item['image'])) {
+                        DB::table('mediable')->insert([
+                            'model_type' => \App\Models\Stage::class,
+                            'model_id'   => $item['stage_id'],
+                            'media_id'   => $item['image'],
+                            'collection' => 'stage_image',
+                        ]);
+                    }
+                }
+            }
+
+            /**
+             * subjects
+             */
+            if ($request->filled('subject')) {
+                foreach ($request->subject as $item) {
+                    $teacher->subjects()->attach($item['subject_id']);
+                }
+            }
+
             return JsonResponse::respondSuccess(
-                trans(JsonResponse::MSG_ADDED_SUCCESSFULLY)
+                trans(JsonResponse::MSG_ADDED_SUCCESSFULLY),
+                $teacher->load(['stages', 'subjects'])
             );
 
         } catch (Exception $e) {
@@ -53,11 +86,10 @@ class TeacherController extends BaseController
         }
     }
 
-
     public function show(Teacher $teacher): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $teacher->load(['stage', 'subject']);
+            $teacher->load(['stages', 'subjects']);
 
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',

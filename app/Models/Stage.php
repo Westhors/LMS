@@ -15,5 +15,9 @@ class Stage extends BaseModel
         'active' => 'boolean'
     ];
 
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class);
+    }
 }
 

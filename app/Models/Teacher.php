@@ -15,14 +15,14 @@ class Teacher extends BaseModel
         'active' => 'boolean'
     ];
 
-    public function stage(): BelongsTo
+    public function stages()
     {
-        return $this->belongsTo(Stage::class);
+        return $this->belongsToMany(Stage::class);
     }
 
-    public function subject(): BelongsTo
+    public function subjects()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsToMany(Subject::class);
     }
 
     public function assistantTeachers()

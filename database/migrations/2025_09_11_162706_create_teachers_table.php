@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->string('password')->nullable();
-            $table->foreignId('stage_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+   
             $table->boolean('active')->default(1);
             $table->softDeletes();
             $table->timestamps();
