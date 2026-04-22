@@ -23,6 +23,7 @@ class SubjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'name_ar' => 'required|string',
             'position' => 'nullable',
             'active' => 'boolean',
             'stage_id' => 'required|exists:stages,id',

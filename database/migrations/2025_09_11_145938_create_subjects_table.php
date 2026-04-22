@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
+            $table->string('name_ar')->nullable();
             $table->foreignId('stage_id')->constrained()->cascadeOnDelete();
             $table->integer('position')->nullable();
             $table->boolean('active')->default(1);

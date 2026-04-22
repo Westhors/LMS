@@ -23,8 +23,10 @@ class StageRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'name_ar' => 'required|string',
             'position' => 'nullable',
             'active' => 'boolean',
         ];
     }
 }
+

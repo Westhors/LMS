@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('stages', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
+            $table->string('name_ar')->nullable();
             $table->integer('position')->nullable();
             $table->boolean('active')->default(1);
             $table->softDeletes();

@@ -11,6 +11,7 @@ class StageResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'name_ar' => $this->name_ar,
             'position' => $this->position ?? null,
             'active' => $this->active ?? null,
             'image' => $this->teacher_image
