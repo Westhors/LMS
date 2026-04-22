@@ -29,6 +29,15 @@ class Teacher extends BaseModel
     {
         return $this->hasMany(AssistantTeacher::class);
     }
-
+public function teacherImage()
+{
+    return $this->hasOne(Media::class, 'id', 'id')
+        ->whereIn('id', function ($q) {
+            $q->select('media_id')
+              ->from('mediable')
+              ->where('teacher_id', $this->id)
+              ->where('collection', 'teacher_image');
+        });
+}
 }
 

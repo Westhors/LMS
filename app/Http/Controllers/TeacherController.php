@@ -30,7 +30,9 @@ class TeacherController extends BaseController
     public function index()
     {
         try {
-            $brands = TeacherResource::collection($this->crudRepository->all());
+            $brands = TeacherResource::collection($this->crudRepository->all(
+                ['stages.media', 'subjects'],[],['*']
+            ));
             return $brands->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -41,20 +43,14 @@ class TeacherController extends BaseController
     {
         try {
             $data = $request->validated();
-
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-
             $teacher = $this->crudRepository->create($data);
-
-            /**
-             * stages + images
-             */
             if ($request->filled('stage')) {
                 foreach ($request->stage as $item) {
 
-                    $teacher->stages()->attach($item['stage_id']);
+                    $teacher->stages()->sync($item['stage_id']);
 
                     if (!empty($item['image'])) {
                         DB::table('mediable')->insert([
@@ -62,39 +58,42 @@ class TeacherController extends BaseController
                             'model_id'   => $item['stage_id'],
                             'media_id'   => $item['image'],
                             'collection' => 'stage_image',
+                            'teacher_id' => $teacher->id
                         ]);
                     }
                 }
             }
-
-            /**
-             * subjects
-             */
             if ($request->filled('subject')) {
                 foreach ($request->subject as $item) {
-                    $teacher->subjects()->attach($item['subject_id']);
+                    $teacher->subjects()->sync($item['subject_id']);
                 }
             }
-
             return JsonResponse::respondSuccess(
-                trans(JsonResponse::MSG_ADDED_SUCCESSFULLY),
-                $teacher->load(['stages', 'subjects'])
+                trans(JsonResponse::MSG_ADDED_SUCCESSFULLY)
             );
-
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
-    public function show(Teacher $teacher): ?\Illuminate\Http\JsonResponse
+    public function show(Teacher $teacher): \Illuminate\Http\JsonResponse
     {
         try {
             $teacher->load(['stages', 'subjects']);
-
+            $teacher->stages->each(function ($stage) use ($teacher) {
+            $stage->teacher_image = \DB::table('mediable')
+                    ->join('media', 'media.id', '=', 'mediable.media_id')
+                    ->where('mediable.teacher_id', $teacher->id)
+                    ->where('mediable.model_type', \App\Models\Stage::class)
+                    ->where('mediable.model_id', $stage->id)
+                    ->where('mediable.collection', 'stage_image')
+                    ->first();
+            });
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
                 new TeacherResource($teacher)
             );
+
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
@@ -104,16 +103,43 @@ class TeacherController extends BaseController
     {
         try {
             $data = $request->validated();
-
+            unset($data['stage'], $data['subject']);
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-
             $this->crudRepository->update($data, $teacher->id);
-
-            activity()->performedOn($teacher)->withProperties(['attributes' => $teacher])->log('update');
-
-            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
+            if ($request->filled('stage')) {
+                $stageIds = collect($request->stage)
+                    ->pluck('stage_id')
+                    ->toArray();
+                $teacher->stages()->sync($stageIds);
+                foreach ($request->stage as $item) {
+                    if (!empty($item['image'])) {
+                        DB::table('mediable')
+                            ->where('model_type', \App\Models\Stage::class)
+                            ->where('model_id', $item['stage_id'])
+                            ->where('collection', 'stage_image')
+                            ->where('teacher_id', $teacher->id)
+                            ->delete();
+                        DB::table('mediable')->insert([
+                            'model_type' => \App\Models\Stage::class,
+                            'model_id'   => $item['stage_id'],
+                            'media_id'   => $item['image'],
+                            'teacher_id' => $teacher->id,
+                            'collection' => 'stage_image',
+                        ]);
+                    }
+                }
+            }
+            if ($request->filled('subject')) {
+                $subjectIds = collect($request->subject)
+                    ->pluck('subject_id')
+                    ->toArray();
+                $teacher->subjects()->sync($subjectIds);
+            }
+            return JsonResponse::respondSuccess(
+                trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY)
+            );
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }

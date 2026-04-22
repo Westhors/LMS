@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 class Stage extends BaseModel
 {
     use HasFactory;
+
+    use HasMedia;
+    
+    protected $with = [
+        'media',
+    ];
 
     protected $guarded = ['id'];
 

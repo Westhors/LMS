@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssistantTeacherController;
+use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\StageController;
@@ -105,6 +106,17 @@ Route::apiResource('home', HomeController::class);
 
 
 
+//////////////////////////////////////////////////////////Feature//////////////////////////////////////
+
+Route::post('feature/index', [FeatureController::class, 'index']);
+Route::post('feature/restore', [FeatureController::class, 'restore']);
+Route::delete('feature/delete', [FeatureController::class, 'destroy']);
+Route::delete('feature/force-delete', [FeatureController::class, 'forceDelete']);
+Route::post('feature/update/{feature}', [FeatureController::class, 'forceUpdate']);
+Route::put('/feature/{id}/{column}', [FeatureController::class, 'toggle']);
+Route::apiResource('feature', FeatureController::class);
+
+//////////////////////////////////////////////////////////Feature//////////////////////////////////////
 
 
 ////////////////////////////////////////// media ////////////////////////////////

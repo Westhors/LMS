@@ -13,6 +13,9 @@ class StageResource extends JsonResource
             'name' => $this->name,
             'position' => $this->position ?? null,
             'active' => $this->active ?? null,
+            'image' => $this->teacher_image
+            ? asset('storage/' . $this->teacher_image->file_path)
+            : null,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
