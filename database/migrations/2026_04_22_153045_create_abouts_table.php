@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('homes', function (Blueprint $table) {
+        Schema::create('abouts', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
-            $table->string('sub_title')->unique()->nullable();
-            $table->string('description')->unique()->nullable();
-            $table->string('title_ar')->nullable();
-            $table->string('sub_title_ar')->unique()->nullable();
+            $table->string('name')->nullable();
+            $table->text('description')->nullable();
+            $table->string('name_ar')->nullable();
             $table->text('description_ar')->nullable();
-            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->boolean('active')->default(1);
+            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('homes');
+        Schema::dropIfExists('abouts');
     }
 };

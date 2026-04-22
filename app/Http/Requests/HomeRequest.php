@@ -25,6 +25,9 @@ class HomeRequest extends FormRequest
             'title' => 'required|string',
             'sub_title' => 'required|string',
             'description' => 'required|string',
+            'title_ar' => 'required|string',
+            'sub_title_ar' => 'required|string',
+            'description_ar' => 'required|string',
             'teacher_id' => 'required|exists:teachers,id',
         ];
     }

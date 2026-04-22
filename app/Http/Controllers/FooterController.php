@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
-use App\Http\Requests\FeatureRequest;
-use App\Http\Requests\FeatureUpdateRequest;
-use App\Http\Resources\FeatureResource;
-use App\Interfaces\FeatureRepositoryInterface;
-use App\Models\Feature;
+use App\Http\Requests\FooterRequest;
+use App\Http\Requests\FooterUpdateRequest;
+use App\Http\Resources\FooterResource;
+use App\Interfaces\FooterRepositoryInterface;
+use App\Models\Footer;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 
-class FeatureController extends BaseController
+class FooterController extends BaseController
 {
     use HttpResponses;
 
     protected mixed $crudRepository;
 
-    public function __construct(FeatureRepositoryInterface $pattern)
+    public function __construct(FooterRepositoryInterface $pattern)
     {
         $this->crudRepository = $pattern;
     }
@@ -26,20 +26,17 @@ class FeatureController extends BaseController
     public function index()
     {
         try {
-            $Feature = FeatureResource::collection($this->crudRepository->all());
-            return $Feature->additional(JsonResponse::success());
+            $Footer = FooterResource::collection($this->crudRepository->all());
+            return $Footer->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
-    public function store(FeatureRequest $request)
+    public function store(FooterRequest $request)
     {
         try {
            $event = $this->crudRepository->create($request->validated());
-            if (request('image') !== null) {
-                $this->crudRepository->AddMediaCollection('image', $event);
-            }
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -48,27 +45,23 @@ class FeatureController extends BaseController
 
 
 
-    public function show(Feature $feature): ?\Illuminate\Http\JsonResponse
+    public function show(Footer $footer): ?\Illuminate\Http\JsonResponse
     {
         try {
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
-                new FeatureResource($feature)
+                new FooterResource($footer)
             );
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
-    public function update(FeatureUpdateRequest $request, Feature $feature): \Illuminate\Http\JsonResponse
+    public function update(FooterUpdateRequest $request, Footer $footer): \Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->update($request->validated(), $feature->id);
-            if ($request->filled('image')) {
-                $feature = Feature::find($feature->id);
-                $this->crudRepository->AddMediaCollection('image', $feature);
-            }
-            activity()->performedOn($feature)->withProperties(['attributes' => $feature])->log('update');
+            $this->crudRepository->update($request->validated(), $footer->id);
+            activity()->performedOn($footer)->withProperties(['attributes' => $footer])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -79,7 +72,7 @@ class FeatureController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->deleteRecords('features', $request['items']);
+            $this->crudRepository->deleteRecords('footers', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -89,7 +82,7 @@ class FeatureController extends BaseController
     public function restore(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->restoreItem(Feature::class, $request['items']);
+            $this->crudRepository->restoreItem(Footer::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_RESTORED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -99,11 +92,11 @@ class FeatureController extends BaseController
     public function forceDelete(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exists = Feature::whereIn('id', $request['items'])->exists();
+            $exists = Footer::whereIn('id', $request['items'])->exists();
             if (!$exists) {
                 return JsonResponse::respondError("One or more records do not exist. Please refresh the page.");
             }
-            $this->crudRepository->deleteRecordsFinal(Feature::class, $request['items']);
+            $this->crudRepository->deleteRecordsFinal(Footer::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

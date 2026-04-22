@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssistantTeacherController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\StageController;
@@ -117,6 +119,33 @@ Route::put('/feature/{id}/{column}', [FeatureController::class, 'toggle']);
 Route::apiResource('feature', FeatureController::class);
 
 //////////////////////////////////////////////////////////Feature//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////About//////////////////////////////////////
+
+Route::post('about/index', [AboutController::class, 'index']);
+Route::post('about/restore', [AboutController::class, 'restore']);
+Route::delete('about/delete', [AboutController::class, 'destroy']);
+Route::delete('about/force-delete', [AboutController::class, 'forceDelete']);
+Route::post('about/update/{about}', [AboutController::class, 'forceUpdate']);
+Route::put('/about/{id}/{column}', [AboutController::class, 'toggle']);
+Route::apiResource('about', AboutController::class);
+
+//////////////////////////////////////////////////////////About//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////Footer//////////////////////////////////////
+
+Route::post('footer/index', [FooterController::class, 'index']);
+Route::post('footer/restore', [FooterController::class, 'restore']);
+Route::delete('footer/delete', [FooterController::class, 'destroy']);
+Route::delete('footer/force-delete', [FooterController::class, 'forceDelete']);
+Route::post('footer/update/{footer}', [FooterController::class, 'forceUpdate']);
+Route::put('/footer/{id}/{column}', [FooterController::class, 'toggle']);
+Route::apiResource('footer', FooterController::class);
+
+//////////////////////////////////////////////////////////Footer//////////////////////////////////////
+
 
 
 ////////////////////////////////////////// media ////////////////////////////////

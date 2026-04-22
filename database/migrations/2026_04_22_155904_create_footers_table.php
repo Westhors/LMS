@@ -11,11 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('features', function (Blueprint $table) {
+        Schema::create('footers', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->text('description')->nullable();
             $table->string('name_ar')->nullable();
+            $table->string('facebook_link')->nullable();
+            $table->string('youtube_link')->nullable();
+            $table->string('instagram_link')->nullable();
+            $table->string('tiktok_link')->nullable();
+            $table->string('whatsapp_link')->nullable();
+            $table->text('description')->nullable();
             $table->text('description_ar')->nullable();
             $table->boolean('active')->default(1);
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
@@ -29,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('features');
+        Schema::dropIfExists('footers');
     }
 };

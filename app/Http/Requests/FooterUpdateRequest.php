@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class HomeUpdateRequest extends FormRequest
+class FooterUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,12 +22,16 @@ class HomeUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'nullable|string',
-            'sub_title' => 'nullable|string',
+            'name' => 'nullable|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'facebook_link' => 'nullable|url',
+            'youtube_link' => 'nullable|url',
+            'instagram_link' => 'nullable|url',
+            'tiktok_link' => 'nullable|url',
+            'whatsapp_link' => 'nullable|url',
             'description' => 'nullable|string',
-            'title_ar' => 'nullable|string',
-            'sub_title_ar' => 'nullable|string',
             'description_ar' => 'nullable|string',
+            'active' => 'boolean',
             'teacher_id' => 'nullable|exists:teachers,id',
         ];
     }

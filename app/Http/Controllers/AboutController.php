@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
-use App\Http\Requests\FeatureRequest;
-use App\Http\Requests\FeatureUpdateRequest;
-use App\Http\Resources\FeatureResource;
-use App\Interfaces\FeatureRepositoryInterface;
-use App\Models\Feature;
+use App\Http\Requests\AboutRequest;
+use App\Http\Requests\AboutUpdateRequest;
+use App\Http\Resources\AboutResource;
+use App\Interfaces\AboutRepositoryInterface;
+use App\Models\About;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 
-class FeatureController extends BaseController
+class AboutController extends BaseController
 {
     use HttpResponses;
 
     protected mixed $crudRepository;
 
-    public function __construct(FeatureRepositoryInterface $pattern)
+    public function __construct(AboutRepositoryInterface $pattern)
     {
         $this->crudRepository = $pattern;
     }
@@ -26,14 +26,14 @@ class FeatureController extends BaseController
     public function index()
     {
         try {
-            $Feature = FeatureResource::collection($this->crudRepository->all());
-            return $Feature->additional(JsonResponse::success());
+            $About = AboutResource::collection($this->crudRepository->all());
+            return $About->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
-    public function store(FeatureRequest $request)
+    public function store(AboutRequest $request)
     {
         try {
            $event = $this->crudRepository->create($request->validated());
@@ -48,27 +48,27 @@ class FeatureController extends BaseController
 
 
 
-    public function show(Feature $feature): ?\Illuminate\Http\JsonResponse
+    public function show(About $about): ?\Illuminate\Http\JsonResponse
     {
         try {
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
-                new FeatureResource($feature)
+                new AboutResource($about)
             );
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
-    public function update(FeatureUpdateRequest $request, Feature $feature): \Illuminate\Http\JsonResponse
+    public function update(AboutUpdateRequest $request, About $about): \Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->update($request->validated(), $feature->id);
+            $this->crudRepository->update($request->validated(), $about->id);
             if ($request->filled('image')) {
-                $feature = Feature::find($feature->id);
-                $this->crudRepository->AddMediaCollection('image', $feature);
+                $about = About::find($about->id);
+                $this->crudRepository->AddMediaCollection('image', $about);
             }
-            activity()->performedOn($feature)->withProperties(['attributes' => $feature])->log('update');
+            activity()->performedOn($about)->withProperties(['attributes' => $about])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -79,7 +79,7 @@ class FeatureController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->deleteRecords('features', $request['items']);
+            $this->crudRepository->deleteRecords('abouts', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -89,7 +89,7 @@ class FeatureController extends BaseController
     public function restore(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->restoreItem(Feature::class, $request['items']);
+            $this->crudRepository->restoreItem(About::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_RESTORED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -99,11 +99,11 @@ class FeatureController extends BaseController
     public function forceDelete(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exists = Feature::whereIn('id', $request['items'])->exists();
+            $exists = About::whereIn('id', $request['items'])->exists();
             if (!$exists) {
                 return JsonResponse::respondError("One or more records do not exist. Please refresh the page.");
             }
-            $this->crudRepository->deleteRecordsFinal(Feature::class, $request['items']);
+            $this->crudRepository->deleteRecordsFinal(About::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
