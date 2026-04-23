@@ -12,6 +12,7 @@ class AdminResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'type' =>"admin",
+            'role' => 'admin',
         ];
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Laravel\Sanctum\HasApiTokens;
 class Teacher extends BaseModel
 {
-    use HasFactory;
+    use HasFactory,Authenticatable,HasApiTokens;
 
     protected $guarded = ['id'];
 

@@ -18,7 +18,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 
-Route::post('admin/login', [AdminController::class, 'login']);
+Route::post('login', [AdminController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('admin/logout', [AdminController::class, 'logout']);
     Route::get('admin/check-auth', [AdminController::class, 'checkAuth']);

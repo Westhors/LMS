@@ -7,9 +7,6 @@ use App\Http\Resources\AdminResource;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Models\Student;
-use App\Models\Course;
 use App\Models\Teacher;
 use Exception;
 
@@ -28,39 +25,58 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
+        // 🔹 أولاً: Admin
         $admin = Admin::where('email', $request->email)->first();
 
-        if (! $admin || ! Hash::check($request->password, $admin->password)) {
+        if ($admin && Hash::check($request->password, $admin->password)) {
+            $token = $admin->createToken('auth_token')->plainTextToken;
+
             return response()->json([
-                'message' => 'الايميل او كلمة المرور غير صحيحة'
-            ], 401);
+                'message' => 'Login success',
+                'role'    => 'admin',
+                'token'   => $token,
+                'data'    => $admin,
+            ]);
         }
 
-        $token = $admin->createToken('admin-token')->plainTextToken;
+        // 🔹 ثانياً: Teacher
+        $teacher = Teacher::where('email', $request->email)->first();
 
+        if ($teacher && Hash::check($request->password, $teacher->password)) {
+            $token = $teacher->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login success',
+                'role'    => 'teacher',
+                'token'   => $token,
+                'data'    => $teacher,
+            ]);
+        }
+
+        // ❌ لو الاتنين غلط
         return response()->json([
-            'token' => $token,
-            'admin' => $admin
-        ]);
+            'message' => 'الايميل او كلمة المرور غير صحيحة'
+        ], 401);
     }
-public function checkAuth(Request $request)
-{
-    try {
-        $admin = $request->user(); // Sanctum يرجّع الـ authenticated model
 
-        if (!$admin) {
-            return JsonResponse::respondError('Unauthenticated', 401);
+    public function checkAuth(Request $request)
+    {
+        try {
+            $admin = $request->user(); // Sanctum يرجّع الـ authenticated model
+
+            if (!$admin) {
+                return JsonResponse::respondError('Unauthenticated', 401);
+            }
+
+            return JsonResponse::respondSuccess(
+                'Admin Fetched Successfully',
+                new AdminResource($admin)
+            );
+
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
         }
-
-        return JsonResponse::respondSuccess(
-            'Admin Fetched Successfully',
-            new AdminResource($admin)
-        );
-
-    } catch (Exception $e) {
-        return JsonResponse::respondError($e->getMessage());
     }
-}
 
     public function logout(Request $request)
     {
