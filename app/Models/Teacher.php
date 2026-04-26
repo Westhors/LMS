@@ -29,15 +29,37 @@ class Teacher extends BaseModel
     {
         return $this->hasMany(AssistantTeacher::class);
     }
-public function teacherImage()
-{
-    return $this->hasOne(Media::class, 'id', 'id')
-        ->whereIn('id', function ($q) {
-            $q->select('media_id')
-              ->from('mediable')
-              ->where('teacher_id', $this->id)
-              ->where('collection', 'teacher_image');
-        });
-}
+
+    public function home()
+    {
+        return $this->hasOne(Home::class);
+    }
+
+    public function features()
+    {
+        return $this->hasMany(Feature::class);
+    }
+
+    public function about()
+    {
+        return $this->hasOne(About::class);
+    }
+
+    public function footer()
+    {
+        return $this->hasOne(Footer::class);
+    }
+
+
+    public function teacherImage()
+    {
+        return $this->hasOne(Media::class, 'id', 'id')
+            ->whereIn('id', function ($q) {
+                $q->select('media_id')
+                ->from('mediable')
+                ->where('teacher_id', $this->id)
+                ->where('collection', 'teacher_image');
+            });
+    }
 }
 

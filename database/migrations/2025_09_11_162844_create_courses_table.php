@@ -17,12 +17,18 @@ return new class extends Migration
             $table->foreignId('stage_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('subject_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title')->nullable();
+            $table->string('title_ar')->nullable();
             $table->text('description')->nullable();
+            $table->text('description_ar')->nullable();
+            $table->text('about')->nullable();
+            $table->text('about_ar')->nullable();
+            $table->string('hour_time_course')->nullable();
             $table->enum('type', ['online', 'center'])->default('center');
-            $table->integer('count_student')->nullable(); // السعر قبل الخصم
+            $table->integer('count_student')->nullable();
             $table->decimal('price', 10, 2)->default(0);
-            $table->string('currency')->nullable();
             $table->boolean('active')->default(1);
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

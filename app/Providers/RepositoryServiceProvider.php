@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Interfaces\AboutRepositoryInterface;
 use App\Interfaces\AssistantTeacherRepositoryInterface;
+use App\Interfaces\CourseDetailRepositoryInterface;
 use App\Interfaces\CourseRepositoryInterface;
 use App\Interfaces\FeatureRepositoryInterface;
 use App\Interfaces\FooterRepositoryInterface;
@@ -16,6 +17,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Interfaces\UserRepositoryInterface;
 use App\Repositories\AboutRepository;
 use App\Repositories\AssistantTeacherRepository;
+use App\Repositories\CourseDetailRepository;
 use App\Repositories\CourseRepository;
 use App\Repositories\FeatureRepository;
 use App\Repositories\FooterRepository;
@@ -44,6 +46,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(FeatureRepositoryInterface::class, FeatureRepository::class);
         $this->app->bind(AboutRepositoryInterface::class, AboutRepository::class);
         $this->app->bind(FooterRepositoryInterface::class, FooterRepository::class);
+        $this->app->bind(CourseDetailRepositoryInterface::class, CourseDetailRepository::class);
     }
 
     /**

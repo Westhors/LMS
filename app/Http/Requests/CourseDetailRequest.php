@@ -15,22 +15,13 @@ class CourseDetailRequest extends FormRequest
     {
         return [
             'course_id'    => 'required|exists:courses,id',
-            'title'        => 'nullable|string|max:255',
             'description'  => 'nullable|string',
-
-            'content_type' => 'required|in:video,pdf,file,zoom',
-
-            // زووم فقط
-            'content_link' => 'nullable|url|required_if:content_type,zoom',
-
-            // ملفات عادية
-            'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:5120|required_if:content_type,pdf,file',
-
-            // 🎥 فيديو إجباري لما النوع video
-            'video' => 'nullable|file|mimes:mp4,mov,avi,webm|max:5120|required_if:content_type,video',
-
-            'session_date' => 'nullable|date',
-            'session_time' => 'nullable|date_format:H:i',
+            'description_ar' => 'nullable|string',
+            'title'        => 'nullable|string|max:255',
+            'title_ar' => 'nullable|string|max:255',
+            'content_link' => 'nullable|url',
+            'lession_date' => 'nullable|date',
+            'lession_time' => 'nullable|date_format:H:i',
         ];
     }
 

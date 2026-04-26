@@ -15,8 +15,17 @@ class TeacherResource extends JsonResource
             'sub_domain' => $this->sub_domain ?? null,
             'phone' => $this->phone ?? null,
             'active' => $this->active ?? null,
-            'stages' => StageResource::collection($this->whenLoaded('stages')),
-            'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
+
+            'website' => [
+
+                'home' => new HomeResource($this->whenLoaded('home')),
+                'features' => FeatureResource::collection($this->whenLoaded('features')),
+                'about' => new AboutResource($this->whenLoaded('about')),
+                'stages' => StageResource::collection($this->whenLoaded('stages')),
+                'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
+                'footer' => new FooterResource($this->whenLoaded('footer')),
+            ],
+
             'createdAt' => $this->created_at?->format('d F, Y'),
         ];
     }

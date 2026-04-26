@@ -3,6 +3,8 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssistantTeacherController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseDetailController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
@@ -94,17 +96,30 @@ Route::apiResource('home', HomeController::class);
 
 
 
-//////////////////////////////////////////////////////////home//////////////////////////////////////
+//////////////////////////////////////////////////////////course//////////////////////////////////////
 
-Route::post('home/index', [HomeController::class, 'index']);
-Route::post('home/restore', [HomeController::class, 'restore']);
-Route::delete('home/delete', [HomeController::class, 'destroy']);
-Route::delete('home/force-delete', [HomeController::class, 'forceDelete']);
-Route::post('home/update/{home}', [HomeController::class, 'forceUpdate']);
-Route::put('/home/{id}/{column}', [HomeController::class, 'toggle']);
-Route::apiResource('home', HomeController::class);
+Route::post('course/index', [CourseController::class, 'index']);
+Route::post('course/restore', [CourseController::class, 'restore']);
+Route::delete('course/delete', [CourseController::class, 'destroy']);
+Route::delete('course/force-delete', [CourseController::class, 'forceDelete']);
+Route::post('course/update/{course}', [CourseController::class, 'forceUpdate']);
+Route::put('/course/{id}/{column}', [CourseController::class, 'toggle']);
+Route::apiResource('course', CourseController::class);
 
-//////////////////////////////////////////////////////////home//////////////////////////////////////
+//////////////////////////////////////////////////////////course//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////course-detail//////////////////////////////////////
+
+Route::post('course-detail/index', [CourseDetailController::class, 'index']);
+Route::post('course-detail/restore', [CourseDetailController::class, 'restore']);
+Route::delete('course-detail/delete', [CourseDetailController::class, 'destroy']);
+Route::delete('course-detail/force-delete', [CourseDetailController::class, 'forceDelete']);
+Route::post('course-detail/update/{courseDetail}', [CourseDetailController::class, 'forceUpdate']);
+Route::put('/course-detail/{id}/{column}', [CourseDetailController::class, 'toggle']);
+Route::apiResource('course-detail', CourseDetailController::class);
+
+//////////////////////////////////////////////////////////course-detail//////////////////////////////////////
 
 
 

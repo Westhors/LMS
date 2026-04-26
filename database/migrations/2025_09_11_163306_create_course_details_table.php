@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('course_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
-            $table->string('title')->nullable(); // اسم الحصة أو الملف
-            $table->text('description')->nullable(); // وصف قصير
-            $table->enum('content_type', ['video', 'pdf', 'file','link_video'])->default('video');
+            $table->string('title')->nullable();
+            $table->text('description')->nullable();
+            $table->string('title_ar')->nullable();
+            $table->text('description_ar')->nullable();
             $table->string('content_link')->nullable(); // لو فيديو يوتيوب أو لينك زووم
-            $table->string('file_path')->nullable(); // لو PDF أو ملف مرفوع
-            $table->date('session_date')->nullable(); // يوم الحصة
-            $table->time('session_time')->nullable(); // وقت الحصة
+            $table->date('lession_date')->nullable(); // يوم الحصة
+            $table->time('lession_time')->nullable(); // وقت الحصة
             $table->softDeletes();
             $table->timestamps();
         });

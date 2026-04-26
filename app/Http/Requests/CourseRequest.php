@@ -22,20 +22,21 @@ class CourseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'teacher_id'         => 'nullable|exists:teachers,id',
             'stage_id'         => 'nullable|exists:stages,id',
             'subject_id'       => 'nullable|exists:subjects,id',
-            'country_id'       => 'nullable|exists:countries,id',
-            'title'            => 'required|string|max:255',
+            'title'            => 'nullable|string|max:255',
+            'title_ar'         => 'nullable|string|max:255',
             'description'      => 'nullable|string',
-            'type'             => 'required|in:online,recorded',
-            'course_type'      => 'nullable|in:private,group',
+            'description_ar'   => 'nullable|string',
+            'about'      => 'nullable|string',
+            'about_ar'      => 'nullable|string',
+            'hour_time_course'      => 'nullable|string',
+            'type'             => 'nullable|in:online,center',
             'count_student'    => 'nullable|numeric|min:0',
-            'currency'            => 'nullable|string|max:255',
-            'original_price'            => 'required|numeric|min:0',
-            'discount'         => 'nullable|numeric|min:0|max:100',
-            'what_you_will_learn' => 'nullable|string',
-            'image'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'intro_video_url'  => 'nullable|url',
+            'price'            => 'nullable|string|max:255',
+            'start_date'            => 'nullable',
+            'end_date'         => 'nullable|',
         ];
     }
 }
