@@ -14,6 +14,7 @@ class AssistantTeacherResource extends JsonResource
             'email' => $this->email ?? null,
             'phone' => $this->phone ?? null,
             'active' => $this->active ?? null,
+            'teacher_id' => $this->teacher_id ?? null,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
