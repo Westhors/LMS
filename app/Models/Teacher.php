@@ -30,6 +30,11 @@ class Teacher extends BaseModel
         return $this->hasMany(AssistantTeacher::class);
     }
 
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
     public function home()
     {
         return $this->hasOne(Home::class);
@@ -48,6 +53,11 @@ class Teacher extends BaseModel
     public function footer()
     {
         return $this->hasOne(Footer::class);
+    }
+
+    public function books()
+    {
+        return $this->hasMany(Book::class);
     }
 
 

@@ -23,6 +23,12 @@ class TeacherResource extends JsonResource
                 'about' => new AboutResource($this->whenLoaded('about')),
                 'stages' => StageResource::collection($this->whenLoaded('stages')),
                 'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
+                'courses' => CourseResource::collection(
+                    $this->whenLoaded('courses')
+                ),
+                'books' => BookResource::collection(
+                    $this->whenLoaded('books')
+                ),
                 'footer' => new FooterResource($this->whenLoaded('footer')),
             ],
 

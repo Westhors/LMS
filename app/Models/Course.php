@@ -36,6 +36,10 @@ class Course extends BaseModel
     {
         return $this->belongsTo(Subject::class);
     }
-
+    
+    public function details()
+    {
+        return $this->hasMany(CourseDetail::class);
+    }
 
 }

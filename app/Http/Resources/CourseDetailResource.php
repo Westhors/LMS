@@ -20,6 +20,13 @@ class CourseDetailResource extends JsonResource
             'lession_date' => $this->lession_date,
             'lession_time' => $this->lession_time,
             'link_video' => $this->link_video,
+            'exams' => ExamResource::collection(
+                $this->whenLoaded('exams')
+            ),
+
+            'assignments' => ExamResource::collection(
+                $this->whenLoaded('assignments')
+            ),
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }

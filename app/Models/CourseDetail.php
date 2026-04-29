@@ -24,5 +24,17 @@ class CourseDetail extends BaseModel
         return $this->belongsTo(Course::class);
     }
 
+    public function exams()
+    {
+        return $this->hasMany(Exam::class)
+            ->where('type', 'exam');
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Exam::class)
+            ->where('type', 'assignment');
+    }
+
 
 }

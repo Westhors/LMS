@@ -25,7 +25,8 @@ class ExamResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
 
             'active' => $this->active,
-
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

@@ -16,6 +16,9 @@ class CourseResource extends JsonResource
             'stage' => new StageResource($this->whenLoaded('stage')),
             'subject_id' => $this->subject_id,
             'subject' => new SubjectResource($this->whenLoaded('subject')),
+            'details' => CourseDetailResource::collection(
+                $this->whenLoaded('details')
+            ),
             'title' => $this->title,
             'title_ar' => $this->title_ar,
             'description' => $this->description,

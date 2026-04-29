@@ -88,6 +88,13 @@ class TeacherController extends BaseController
                 'features',
                 'about',
                 'footer',
+
+                // books
+                'books',
+
+                // courses
+                'courses.details.exams.questions.options',
+                'courses.details.assignments.questions.options',
             ]);
 
             $teacher->stages->each(function ($stage) use ($teacher) {
@@ -109,6 +116,7 @@ class TeacherController extends BaseController
             return JsonResponse::respondError($e->getMessage());
         }
     }
+
 
     public function update(TeacherUpdateRequest $request, Teacher $teacher)
     {
