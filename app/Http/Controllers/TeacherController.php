@@ -118,6 +118,48 @@ class TeacherController extends BaseController
     }
 
 
+    public function subDomain(Teacher $teacher): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $teacher->load([
+                'stages',
+                'subjects',
+                'teacherImage',
+                'assistantTeachers',
+                'home',
+                'features',
+                'about',
+                'footer',
+
+                // books
+                'books',
+
+                // courses
+                'courses.details.exams.questions.options',
+                'courses.details.assignments.questions.options',
+            ]);
+
+            $teacher->stages->each(function ($stage) use ($teacher) {
+                $stage->teacher_image = \DB::table('mediable')
+                    ->join('media', 'media.id', '=', 'mediable.media_id')
+                    ->where('mediable.teacher_id', $teacher->id)
+                    ->where('mediable.model_type', \App\Models\Stage::class)
+                    ->where('mediable.model_id', $stage->id)
+                    ->where('mediable.collection', 'stage_image')
+                    ->first();
+            });
+
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new TeacherResource($teacher)
+            );
+
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+
     public function update(TeacherUpdateRequest $request, Teacher $teacher)
     {
         try {
