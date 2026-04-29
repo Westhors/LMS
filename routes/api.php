@@ -3,8 +3,10 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssistantTeacherController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseDetailController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
@@ -120,6 +122,38 @@ Route::put('/course-detail/{id}/{column}', [CourseDetailController::class, 'togg
 Route::apiResource('course-detail', CourseDetailController::class);
 
 //////////////////////////////////////////////////////////course-detail//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////book//////////////////////////////////////
+
+Route::post('book/index', [BookController::class, 'index']);
+Route::post('book/restore', [BookController::class, 'restore']);
+Route::delete('book/delete', [BookController::class, 'destroy']);
+Route::delete('book/force-delete', [BookController::class, 'forceDelete']);
+Route::post('book/update/{book}', [BookController::class, 'forceUpdate']);
+Route::put('/book/{id}/{column}', [BookController::class, 'toggle']);
+Route::apiResource('book', BookController::class);
+
+//////////////////////////////////////////////////////////book//////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////exam//////////////////////////////////////
+
+Route::post('exam/index', [ExamController::class, 'index']);
+Route::post('exam/restore', [ExamController::class, 'restore']);
+Route::delete('exam/delete', [ExamController::class, 'destroy']);
+Route::delete('exam/force-delete', [ExamController::class, 'forceDelete']);
+Route::post('exam/update/{exam}', [ExamController::class, 'forceUpdate']);
+Route::put('/exam/{id}/{column}', [ExamController::class, 'toggle']);
+Route::apiResource('exam', ExamController::class);
+
+Route::post('exam/add-questions', [ExamController::class, 'addQuestions']); // New route for
+Route::post('exam/submit', [ExamController::class, 'submitExam']); // New route for submitting exam answers
+Route::post('exam/grade-essay', [ExamController::class, 'gradeEssay']); // New route for grading essay answers
+Route::get('exam/result/{examId}/{studentId}', [ExamController::class, 'result']);
+Route::get('/exams/{examId}/questions', [ExamController::class, 'getQuestions']);
+//////////////////////////////////////////////////////////exam//////////////////////////////////////
 
 
 

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('content_link')->nullable(); // لو فيديو يوتيوب أو لينك زووم
             $table->date('lession_date')->nullable(); // يوم الحصة
             $table->time('lession_time')->nullable(); // وقت الحصة
+            $table->string('link_video')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

@@ -22,6 +22,7 @@ class CourseDetailRequest extends FormRequest
             'content_link' => 'nullable|url',
             'lession_date' => 'nullable|date',
             'lession_time' => 'nullable|date_format:H:i',
+            'link_video' => 'nullable|url',
         ];
     }
 

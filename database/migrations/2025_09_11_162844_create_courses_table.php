@@ -29,6 +29,7 @@ return new class extends Migration
             $table->boolean('active')->default(1);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
+            $table->string('link_video')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

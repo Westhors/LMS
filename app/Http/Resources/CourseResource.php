@@ -29,6 +29,7 @@ class CourseResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'active' => $this->active ?? null,
+            'link_video' => $this->link_video,
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
             'createdAt' => $this->created_at->format('d F, Y'),

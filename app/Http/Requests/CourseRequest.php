@@ -29,6 +29,7 @@ class CourseRequest extends FormRequest
             'title_ar'         => 'nullable|string|max:255',
             'description'      => 'nullable|string',
             'description_ar'   => 'nullable|string',
+            'link_video'      => 'nullable|url',
             'about'      => 'nullable|string',
             'about_ar'      => 'nullable|string',
             'hour_time_course'      => 'nullable|string',

@@ -19,6 +19,7 @@ class CourseDetailResource extends JsonResource
             'content_link' => $this->content_link,
             'lession_date' => $this->lession_date,
             'lession_time' => $this->lession_time,
+            'link_video' => $this->link_video,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
