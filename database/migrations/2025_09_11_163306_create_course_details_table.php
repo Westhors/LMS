@@ -23,7 +23,6 @@ return new class extends Migration
             $table->time('lession_time')->nullable(); // وقت الحصة
             $table->string('link_video')->nullable();
             $table->decimal('price', 10, 2)->default(0);
-            $table->decimal('price', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
