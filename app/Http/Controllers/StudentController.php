@@ -2,9 +2,189 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\JsonResponse;
+use App\Http\Requests\StudentRequest;
+use App\Http\Resources\StudentResource;
+use App\Interfaces\StudentRepositoryInterface;
+use App\Models\Student;
+use App\Traits\HttpResponses;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
-class StudentController extends Controller
+class StudentController extends BaseController
 {
-    //
+    use HttpResponses;
+
+    protected mixed $crudRepository;
+
+    public function __construct(StudentRepositoryInterface $pattern)
+    {
+        $this->crudRepository = $pattern;
+    }
+
+    public function index()
+    {
+        try {
+            $Students = StudentResource::collection($this->crudRepository->all(['teacher', 'stage'], [], ['*']));
+            return $Students->additional(JsonResponse::success());
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+    public function store(StudentRequest $request)
+    {
+        try {
+           $student = $this->crudRepository->create($request->validated());
+            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function applicationForm(StudentRequest $request)
+    {
+        $student = Student::create([
+            ...$request->validated(),
+            'password' => Hash::make($request->password),
+        ]);
+
+        // 👇 لازم save
+        $student->code_parent = rand(1000, 9999) . $student->id;
+        $student->save();
+
+        $token = $student->createToken('student_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Student registered successfully',
+            'token' => $token,
+            'data' => new StudentResource($student)
+        ]);
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:student,parent',
+            'phone' => 'required',
+            'password' => 'required',
+        ]);
+
+        if ($request->type === 'student') {
+
+            $student = Student::where('phone', $request->phone)
+                ->where('active', true)
+                ->first();
+
+            if (!$student || !Hash::check($request->password, $student->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials or inactive account'
+                ], 401);
+            }
+
+        } else {
+            $student = Student::where('phone_parent', $request->phone)
+             ->where('code_parent', $request->password)
+             ->where('active', true)
+            ->first();
+
+            if (!$student) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials or inactive account'
+                ], 401);
+            }
+        }
+
+        // 🔥 مهم: امسح التوكنات القديمة (اختياري)
+        $student->tokens()->delete();
+
+        $token = $student->createToken('token', [$request->type])->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Login successful',
+            'token' => $token,
+            'type'  => $request->type,
+            'data'  => new StudentResource($student)
+        ]);
+    }
+
+    public function checkAuth(Request $request)
+    {
+        return response()->json([
+            'status' => true,
+            'data' => new StudentResource($request->user())
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
+
+    public function show(Student $student): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            $student->load(['teacher', 'stage']);
+            return JsonResponse::respondSuccess('Item Fetched Successfully', new StudentResource($student));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+
+    public function update(StudentRequest $request, Student $student): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $this->crudRepository->update($request->validated(), $student->id);
+            activity()->performedOn($student)->withProperties(['attributes' => $student])->log('update');
+            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            $this->crudRepository->deleteRecords('students', $request['items']);
+            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function restore(Request $request): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            $this->crudRepository->restoreItem(Student::class, $request['items']);
+            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_RESTORED_SUCCESSFULLY));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function forceDelete(Request $request): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            $exists = Student::whereIn('id', $request['items'])->exists();
+            if (!$exists) {
+                return JsonResponse::respondError("One or more records do not exist. Please refresh the page.");
+            }
+            $this->crudRepository->deleteRecordsFinial(Student::class, $request['items']);
+            return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
 }
+

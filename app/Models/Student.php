@@ -2,16 +2,13 @@
 
 namespace App\Models;
 
-use App\Traits\HasMedia;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Student extends BaseModel
 {
-    use HasMedia;
-
-    protected $with = [
-        'media',
-    ];
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $guarded = ['id'];
 
@@ -22,6 +19,11 @@ class Student extends BaseModel
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
+    }
+
+    public function stage()
+    {
+        return $this->belongsTo(Stage::class);
     }
 
     public function answers()

@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->string('email')->unique()->nullable();
+            $table->string('phone')->unique()->nullable();
             $table->string('password')->nullable();
             $table->string('code_parent')->nullable();
             $table->string('phone_parent')->nullable();
+            $table->enum('type_of_attendance', ['center', 'online'])->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
             $table->foreignId('teacher_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();

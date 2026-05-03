@@ -12,6 +12,7 @@ use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\StageController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Http\Request;
@@ -213,5 +214,30 @@ Route::get('/get-media/{media}', [MediaController::class, 'show']);
 Route::post('/media-array', [MediaController::class, 'showMedia']);
 Route::post('/media-upload-many', [MediaController::class, 'storeMany']);
 //////////////////////////////////////// media ////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Route::post('student/login', [StudentController::class, 'login']);
+Route::post('student/application-form', [StudentController::class, 'applicationForm']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('student/logout', [StudentController::class, 'logout']);
+    Route::get('student/check-auth', [StudentController::class, 'checkAuth']);
+});
+
+
+//////////////////////////////////////////////////////////student //////////////////////////////////////
+
+Route::post('student/index', [StudentController::class, 'index']);
+Route::post('student/restore', [StudentController::class, 'restore']);
+Route::delete('student/delete', [StudentController::class, 'destroy']);
+Route::delete('student/force-delete', [StudentController::class, 'forceDelete']);
+Route::post('student/update/{student}', [StudentController::class, 'forceUpdate']);
+Route::put('/student/{id}/{column}', [StudentController::class, 'toggle']);
+Route::apiResource('student', StudentController::class);
+
+//////////////////////////////////////////////////////////Student//////////////////////////////////////
 
 

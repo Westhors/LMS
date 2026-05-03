@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
+use App\Models\Semester;
 use App\Models\Stage;
 use App\Models\Student;
 use App\Models\Subject;
@@ -33,6 +34,19 @@ class AdminSeeder extends Seeder
             'active' => true,
         ]);
 
+
+        Semester::create([
+            'name' => 'First Semester',
+            'name_ar' => 'الترم الأول',
+            'active' => true,
+        ]);
+
+        Semester::create([
+            'name' => 'Second Semester',
+            'name_ar' => 'الترم الثاني',
+            'active' => true,
+        ]);
+
         Teacher::create([
             'name' => 'Teacher',
             'sub_domain' => 'teacher',
@@ -42,7 +56,7 @@ class AdminSeeder extends Seeder
         ]);
         Student::create([
             'name' => 'Student',
-            'email' => 'student@student.com',
+            'phone' => '12345678',
             'password' => Hash::make('12345678'),
             'code_parent' => 'P001',
             'phone_parent' => '987654321',
