@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name_ar')->nullable();
             $table->boolean('active')->default(true);
             $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

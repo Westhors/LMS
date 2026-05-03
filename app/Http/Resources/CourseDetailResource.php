@@ -23,6 +23,7 @@ class CourseDetailResource extends JsonResource
             'exams' => ExamResource::collection(
                 $this->whenLoaded('exams')
             ),
+            'discount' => $this->discount ?? null,
 
             'assignments' => ExamResource::collection(
                 $this->whenLoaded('assignments')

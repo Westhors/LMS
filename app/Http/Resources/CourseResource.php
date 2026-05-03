@@ -18,6 +18,7 @@ class CourseResource extends JsonResource
             'subject' => new SubjectResource($this->whenLoaded('subject')),
             'semester_id' => $this->semester_id,
             'semester' => new SemesterResource($this->semester),
+            'discount' => $this->discount ?? null,
 
             'details' => CourseDetailResource::collection(
                 $this->whenLoaded('details')

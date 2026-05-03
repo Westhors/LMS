@@ -31,6 +31,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->string('link_video')->nullable();
             $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

@@ -29,7 +29,8 @@ class CourseRequest extends FormRequest
             'title'            => 'nullable|string|max:255',
             'title_ar'         => 'nullable|string|max:255',
             'description'      => 'nullable|string',
-            'price'            => 'nullable|string|max:255',
+            'price'         => 'nullable',
+            'discount'         => 'nullable|numeric|min:0|max:100',
             'description_ar'   => 'nullable|string',
             'link_video'      => 'nullable|url',
             'about'      => 'nullable|string',
@@ -37,7 +38,6 @@ class CourseRequest extends FormRequest
             'hour_time_course'      => 'nullable|string',
             'type'             => 'nullable|in:online,center',
             'count_student'    => 'nullable|numeric|min:0',
-            'price'            => 'nullable|string|max:255',
             'start_date'            => 'nullable',
             'end_date'         => 'nullable|',
         ];
