@@ -3,24 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
-use App\Http\Requests\CourseRequest;
-use App\Http\Requests\StageRequest;
-use App\Http\Resources\CourseResource;
-use App\Http\Resources\StageResource;
-use App\Interfaces\CourseRepositoryInterface;
-use App\Models\Course;
-use App\Models\Stage;
+use App\Http\Requests\PaymentCodeRequest;
+use App\Http\Resources\PaymentCodeResource;
+use App\Interfaces\PaymentCodeRepositoryInterface;
+use App\Models\PaymentCode;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 
-class CourseController extends BaseController
+class PaymentCodeController extends BaseController
 {
     use HttpResponses;
 
     protected mixed $crudRepository;
 
-    public function __construct(CourseRepositoryInterface $pattern)
+    public function __construct(PaymentCodeRepositoryInterface $pattern)
     {
         $this->crudRepository = $pattern;
     }
@@ -28,19 +25,16 @@ class CourseController extends BaseController
     public function index()
     {
         try {
-            $Courses = CourseResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject' , 'semester' , 'details'], [], ['*']));
-            return $Courses->additional(JsonResponse::success());
+            $PaymentCodes = PaymentCodeResource::collection($this->crudRepository->all(['teacher', 'student'], [], ['*']));
+            return $PaymentCodes->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
-    public function store(CourseRequest $request)
+    public function store(PaymentCodeRequest $request)
     {
         try {
            $course = $this->crudRepository->create($request->validated());
-           if (request('image') !== null) {
-                $this->crudRepository->AddMediaCollection('image', $course);
-           }
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -48,26 +42,22 @@ class CourseController extends BaseController
     }
 
 
-    public function show(Course $course): ?\Illuminate\Http\JsonResponse
+    public function show(PaymentCode $payment_code): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $course->load(['teacher', 'stage', 'subject' , 'semester' , 'details']);
-            return JsonResponse::respondSuccess('Item Fetched Successfully', new CourseResource($course));
+            $payment_code->load(['teacher', 'student']);
+            return JsonResponse::respondSuccess('Item Fetched Successfully', new PaymentCodeResource($payment_code));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
 
-    public function update(CourseRequest $request, Course $course): \Illuminate\Http\JsonResponse
+    public function update(PaymentCodeRequest $request, PaymentCode $payment_code): \Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->update($request->validated(), $course->id);
-            if ($request->filled('image')) {
-                $course = Course::find($course->id);
-                $this->crudRepository->AddMediaCollection('image', $course);
-            }
-            activity()->performedOn($course)->withProperties(['attributes' => $course])->log('update');
+            $this->crudRepository->update($request->validated(), $payment_code->id);
+            activity()->performedOn($payment_code)->withProperties(['attributes' => $payment_code])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -77,7 +67,7 @@ class CourseController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->deleteRecords('courses', $request['items']);
+            $this->crudRepository->deleteRecords('payment_codes', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -87,7 +77,7 @@ class CourseController extends BaseController
     public function restore(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->restoreItem(Course::class, $request['items']);
+            $this->crudRepository->restoreItem(PaymentCode::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_RESTORED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -97,11 +87,11 @@ class CourseController extends BaseController
     public function forceDelete(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exists = Course::whereIn('id', $request['items'])->exists();
+            $exists = PaymentCode::whereIn('id', $request['items'])->exists();
             if (!$exists) {
                 return JsonResponse::respondError("One or more records do not exist. Please refresh the page.");
             }
-            $this->crudRepository->deleteRecordsFinial(Course::class, $request['items']);
+            $this->crudRepository->deleteRecordsFinial(PaymentCode::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

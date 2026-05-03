@@ -5,12 +5,15 @@ namespace App\Providers;
 use App\Interfaces\AboutRepositoryInterface;
 use App\Interfaces\AssistantTeacherRepositoryInterface;
 use App\Interfaces\BookRepositoryInterface;
+use App\Interfaces\CenterHourRepositoryInterface;
 use App\Interfaces\CourseDetailRepositoryInterface;
 use App\Interfaces\CourseRepositoryInterface;
 use App\Interfaces\ExamRepositoryInterface;
 use App\Interfaces\FeatureRepositoryInterface;
 use App\Interfaces\FooterRepositoryInterface;
 use App\Interfaces\HomeRepositoryInterface;
+use App\Interfaces\PaymentCodeRepositoryInterface;
+use App\Interfaces\SemesterRepositoryInterface;
 use App\Interfaces\StageRepositoryInterface;
 use App\Interfaces\StudentRepositoryInterface;
 use App\Interfaces\SubjectRepositoryInterface;
@@ -20,12 +23,15 @@ use App\Interfaces\UserRepositoryInterface;
 use App\Repositories\AboutRepository;
 use App\Repositories\AssistantTeacherRepository;
 use App\Repositories\BookRepository;
+use App\Repositories\CenterHourRepository;
 use App\Repositories\CourseDetailRepository;
 use App\Repositories\CourseRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\FeatureRepository;
 use App\Repositories\FooterRepository;
 use App\Repositories\HomeRepository;
+use App\Repositories\PaymentCodeRepository;
+use App\Repositories\SemesterRepository;
 use App\Repositories\StageRepository;
 use App\Repositories\StudentRepository;
 use App\Repositories\SubjectRepository;
@@ -53,6 +59,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(BookRepositoryInterface::class, BookRepository::class);
         $this->app->bind(CourseDetailRepositoryInterface::class, CourseDetailRepository::class);
         $this->app->bind(ExamRepositoryInterface::class, ExamRepository::class);
+        $this->app->bind(CenterHourRepositoryInterface::class, CenterHourRepository::class);
+        $this->app->bind(PaymentCodeRepositoryInterface::class, PaymentCodeRepository::class);
+        $this->app->bind(SemesterRepositoryInterface::class, SemesterRepository::class);
     }
 
     /**

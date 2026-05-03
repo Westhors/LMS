@@ -26,11 +26,11 @@ return new class extends Migration
             $table->string('hour_time_course')->nullable();
             $table->enum('type', ['online', 'center'])->default('center');
             $table->integer('count_student')->nullable();
-            $table->decimal('price', 10, 2)->default(0);
             $table->boolean('active')->default(1);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('link_video')->nullable();
+            $table->decimal('price', 10, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

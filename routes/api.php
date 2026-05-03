@@ -4,6 +4,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssistantTeacherController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CenterHourController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseDetailController;
 use App\Http\Controllers\ExamController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\PaymentCodeController;
 use App\Http\Controllers\StageController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -199,6 +201,31 @@ Route::apiResource('footer', FooterController::class);
 
 //////////////////////////////////////////////////////////Footer//////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////CenterHour//////////////////////////////////////
+
+Route::post('center-hour/index', [CenterHourController::class, 'index']);
+Route::post('center-hour/restore', [CenterHourController::class, 'restore']);
+Route::delete('center-hour/delete', [CenterHourController::class, 'destroy']);
+Route::delete('center-hour/force-delete', [CenterHourController::class, 'forceDelete']);
+Route::post('center-hour/update/{centerHour}', [CenterHourController::class, 'forceUpdate']);
+Route::put('/center-hour/{id}/{column}', [CenterHourController::class, 'toggle']);
+Route::apiResource('center-hour', CenterHourController::class);
+
+//////////////////////////////////////////////////////////CenterHour//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////PaymentCode//////////////////////////////////////
+
+Route::post('payment-code/index', [PaymentCodeController::class, 'index']);
+Route::post('payment-code/restore', [PaymentCodeController::class, 'restore']);
+Route::delete('payment-code/delete', [PaymentCodeController::class, 'destroy']);
+Route::delete('payment-code/force-delete', [PaymentCodeController::class, 'forceDelete']);
+Route::post('payment-code/update/{paymentCode}', [PaymentCodeController::class, 'forceUpdate']);
+Route::put('/payment-code/{id}/{column}', [PaymentCodeController::class, 'toggle']);
+Route::apiResource('payment-code', PaymentCodeController::class);
+
+//////////////////////////////////////////////////////////PaymentCode//////////////////////////////////////
 
 
 ////////////////////////////////////////// media ////////////////////////////////

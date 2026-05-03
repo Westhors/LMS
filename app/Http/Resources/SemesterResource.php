@@ -13,6 +13,7 @@ class SemesterResource extends JsonResource
             'name' => $this->name ?? null,
             'name_ar' => $this->name_ar ?? null,
             'active' => $this->active ?? null,
+            'price' => $this->price ?? null,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }

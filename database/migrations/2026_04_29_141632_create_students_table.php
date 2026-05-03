@@ -27,6 +27,7 @@ return new class extends Migration
                 ->constrained()
                 ->nullOnDelete();
             $table->boolean('active')->default(true);
+            $table->decimal('balance', 10, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

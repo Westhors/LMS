@@ -3,24 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
-use App\Http\Requests\CourseRequest;
-use App\Http\Requests\StageRequest;
-use App\Http\Resources\CourseResource;
-use App\Http\Resources\StageResource;
-use App\Interfaces\CourseRepositoryInterface;
-use App\Models\Course;
-use App\Models\Stage;
+use App\Http\Requests\CenterHourRequest;
+use App\Http\Resources\CenterHourResource;
+use App\Interfaces\CenterHourRepositoryInterface;
+use App\Models\CenterHour;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 
-class CourseController extends BaseController
+class CenterHourController extends BaseController
 {
     use HttpResponses;
 
     protected mixed $crudRepository;
 
-    public function __construct(CourseRepositoryInterface $pattern)
+    public function __construct(CenterHourRepositoryInterface $pattern)
     {
         $this->crudRepository = $pattern;
     }
@@ -28,19 +25,16 @@ class CourseController extends BaseController
     public function index()
     {
         try {
-            $Courses = CourseResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject' , 'semester' , 'details'], [], ['*']));
-            return $Courses->additional(JsonResponse::success());
+            $CenterHours = CenterHourResource::collection($this->crudRepository->all(['teacher'], [], ['*']));
+            return $CenterHours->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
-    public function store(CourseRequest $request)
+    public function store(CenterHourRequest $request)
     {
         try {
-           $course = $this->crudRepository->create($request->validated());
-           if (request('image') !== null) {
-                $this->crudRepository->AddMediaCollection('image', $course);
-           }
+           $CenterHour = $this->crudRepository->create($request->validated());
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -48,26 +42,22 @@ class CourseController extends BaseController
     }
 
 
-    public function show(Course $course): ?\Illuminate\Http\JsonResponse
+    public function show(CenterHour $center_hour): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $course->load(['teacher', 'stage', 'subject' , 'semester' , 'details']);
-            return JsonResponse::respondSuccess('Item Fetched Successfully', new CourseResource($course));
+            $center_hour->load(['teacher']);
+            return JsonResponse::respondSuccess('Item Fetched Successfully', new CenterHourResource($center_hour));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
     }
 
 
-    public function update(CourseRequest $request, Course $course): \Illuminate\Http\JsonResponse
+    public function update(CenterHourRequest $request, CenterHour $center_hour): \Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->update($request->validated(), $course->id);
-            if ($request->filled('image')) {
-                $course = Course::find($course->id);
-                $this->crudRepository->AddMediaCollection('image', $course);
-            }
-            activity()->performedOn($course)->withProperties(['attributes' => $course])->log('update');
+            $this->crudRepository->update($request->validated(), $center_hour->id);
+            activity()->performedOn($center_hour)->withProperties(['attributes' => $center_hour])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -77,7 +67,7 @@ class CourseController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->deleteRecords('courses', $request['items']);
+            $this->crudRepository->deleteRecords('center_hours', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -87,7 +77,7 @@ class CourseController extends BaseController
     public function restore(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $this->crudRepository->restoreItem(Course::class, $request['items']);
+            $this->crudRepository->restoreItem(CenterHour::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_RESTORED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -97,11 +87,11 @@ class CourseController extends BaseController
     public function forceDelete(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exists = Course::whereIn('id', $request['items'])->exists();
+            $exists = CenterHour::whereIn('id', $request['items'])->exists();
             if (!$exists) {
                 return JsonResponse::respondError("One or more records do not exist. Please refresh the page.");
             }
-            $this->crudRepository->deleteRecordsFinial(Course::class, $request['items']);
+            $this->crudRepository->deleteRecordsFinial(CenterHour::class, $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

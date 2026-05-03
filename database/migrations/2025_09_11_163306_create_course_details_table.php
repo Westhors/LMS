@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('lession_date')->nullable(); // يوم الحصة
             $table->time('lession_time')->nullable(); // وقت الحصة
             $table->string('link_video')->nullable();
+            $table->decimal('price', 10, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
         });
