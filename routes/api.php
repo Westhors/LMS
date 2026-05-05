@@ -7,6 +7,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CenterHourController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseDetailController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
@@ -215,17 +216,15 @@ Route::apiResource('center-hour', CenterHourController::class);
 //////////////////////////////////////////////////////////CenterHour//////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////PaymentCode//////////////////////////////////////
+//////////////////////////////////////////////////////////Payment Code//////////////////////////////////////
 
-Route::post('payment-code/index', [PaymentCodeController::class, 'index']);
-Route::post('payment-code/restore', [PaymentCodeController::class, 'restore']);
-Route::delete('payment-code/delete', [PaymentCodeController::class, 'destroy']);
-Route::delete('payment-code/force-delete', [PaymentCodeController::class, 'forceDelete']);
-Route::post('payment-code/update/{paymentCode}', [PaymentCodeController::class, 'forceUpdate']);
-Route::put('/payment-code/{id}/{column}', [PaymentCodeController::class, 'toggle']);
-Route::apiResource('payment-code', PaymentCodeController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('generate-codes', [PaymentCodeController::class, 'generateCodes']);
+    Route::post('payment-code/index', [PaymentCodeController::class, 'index']);
+});
 
-//////////////////////////////////////////////////////////PaymentCode//////////////////////////////////////
+
+//////////////////////////////////////////////////////////Payment Code//////////////////////////////////////
 
 
 ////////////////////////////////////////// media ////////////////////////////////
@@ -268,3 +267,21 @@ Route::apiResource('student', StudentController::class);
 //////////////////////////////////////////////////////////Student//////////////////////////////////////
 
 
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    // 🎓 الطالب يطلب شراء / أو شراء مباشر
+    Route::post('/enroll/request', [EnrollmentController::class, 'requestEnroll']);
+
+    // 🎟️ الطالب يستخدم كود
+    Route::post('/enroll/redeem-code', [EnrollmentController::class, 'redeemCode']);
+
+    // 💰 الطالب يستخدم كود wallet
+    Route::post('/wallet/redeem', [EnrollmentController::class, 'redeemWallet']);
+
+    // 🧑‍🏫 المدرس يشوف الطلبات
+    Route::get('/requests-redeem/teacher', [EnrollmentController::class, 'teacherRequests']);
+
+    // ❌ رفض طلب
+    Route::post('/request/teacher/{id}/reject', [EnrollmentController::class, 'reject']);
+});

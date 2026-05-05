@@ -13,17 +13,31 @@ return new class extends Migration
     {
         Schema::create('payment_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique()->nullable();
+
+            $table->string('code')->unique();
+
+            // نوع الكود
+            $table->enum('type', ['wallet', 'course', 'semester', 'lesson']);
+
+            // علاقات مباشرة
+            $table->foreignId('course_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('course_detail_id')->nullable()->constrained()->cascadeOnDelete();
+
+            // لو Wallet
             $table->decimal('amount', 10, 2)->nullable();
+
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+
             $table->boolean('is_used')->default(false);
             $table->foreignId('student_id')->nullable()->constrained()->nullOnDelete();
+
             $table->timestamp('used_at')->nullable();
             $table->timestamp('expires_at')->nullable();
+
             $table->boolean('active')->default(true);
-            $table->text('note')->nullable();
+
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
