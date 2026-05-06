@@ -14,6 +14,7 @@ use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PaymentCodeController;
+use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StageController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -216,6 +217,22 @@ Route::apiResource('center-hour', CenterHourController::class);
 //////////////////////////////////////////////////////////CenterHour//////////////////////////////////////
 
 
+
+
+//////////////////////////////////////////////////////////Semester//////////////////////////////////////
+
+Route::post('semesters/index', [SemesterController::class, 'index']);
+Route::post('semesters/restore', [SemesterController::class, 'restore']);
+Route::delete('semesters/delete', [SemesterController::class, 'destroy']);
+Route::delete('semesters/force-delete', [SemesterController::class, 'forceDelete']);
+Route::post('semesters/update/{semester}', [SemesterController::class, 'forceUpdate']);
+Route::put('/semesters/{id}/{column}', [SemesterController::class, 'toggle']);
+Route::apiResource('semesters', SemesterController::class);
+
+//////////////////////////////////////////////////////////Semester//////////////////////////////////////
+
+
+
 //////////////////////////////////////////////////////////Payment Code//////////////////////////////////////
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -285,3 +302,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // ❌ رفض طلب
     Route::post('/request/teacher/{id}/reject', [EnrollmentController::class, 'reject']);
 });
+
+
+
+Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
+    ->middleware('auth:sanctum');

@@ -15,7 +15,14 @@ class SemesterResource extends JsonResource
             'active' => $this->active ?? null,
             'price' => $this->price ?? null,
             'discount' => $this->discount ?? null,
-            'createdAt' => $this->created_at->format('d F, Y'),
+            'teacher_id' => $this->teacher_id ?? null,
+
+            // 📚 Courses داخل الترم
+            'courses' => CourseResource::collection(
+                $this->whenLoaded('courses')
+            ),
+
+            'createdAt' => $this->created_at?->format('d F, Y'),
         ];
     }
 }

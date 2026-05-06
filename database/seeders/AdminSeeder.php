@@ -35,17 +35,6 @@ class AdminSeeder extends Seeder
         ]);
 
 
-        Semester::create([
-            'name' => 'First Semester',
-            'name_ar' => 'الترم الأول',
-            'active' => true,
-        ]);
-
-        Semester::create([
-            'name' => 'Second Semester',
-            'name_ar' => 'الترم الثاني',
-            'active' => true,
-        ]);
 
         Teacher::create([
             'name' => 'Teacher',
@@ -53,7 +42,20 @@ class AdminSeeder extends Seeder
             'email' => 'teacher@teacher.com',
             'phone' => '123456789',
             'password' => Hash::make('12345678'),
-        ]);
+            ]);
+            Semester::create([
+                'name' => 'First Semester',
+                'name_ar' => 'الترم الأول',
+                'teacher_id' => 1,
+                'active' => true,
+            ]);
+
+            Semester::create([
+                'name' => 'Second Semester',
+                'name_ar' => 'الترم الثاني',
+                'teacher_id' => 1,
+                'active' => true,
+            ]);
         Student::create([
             'name' => 'Student',
             'phone' => '12345678',

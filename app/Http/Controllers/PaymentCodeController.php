@@ -57,91 +57,91 @@ class PaymentCodeController extends BaseController
         ]);
     }
 
-public function index(Request $request)
-{
-    $query = PaymentCode::query();
+    public function index(Request $request)
+    {
+        $query = PaymentCode::query();
 
-    // 🎯 المدرس (أفضل من body security-wise)
-    $query->when(auth()->check(), function ($q) {
-        $q->where('teacher_id', auth()->id());
-    });
+        // 🎯 المدرس (أفضل من body security-wise)
+        $query->when(auth()->check(), function ($q) {
+            $q->where('teacher_id', auth()->id());
+        });
 
-    // 🔍 Filters
-    $filters = $request->input('filters', []);
+        // 🔍 Filters
+        $filters = $request->input('filters', []);
 
-    $query->when($filters['amount'] ?? null, function ($q, $value) {
-        $q->where('amount', $value);
-    });
+        $query->when($filters['amount'] ?? null, function ($q, $value) {
+            $q->where('amount', $value);
+        });
 
-    $query->when($filters['course_id'] ?? null, function ($q, $value) {
-        $q->where('course_id', $value);
-    });
+        $query->when($filters['course_id'] ?? null, function ($q, $value) {
+            $q->where('course_id', $value);
+        });
 
-    $query->when($filters['semester_id'] ?? null, function ($q, $value) {
-        $q->where('semester_id', $value);
-    });
+        $query->when($filters['semester_id'] ?? null, function ($q, $value) {
+            $q->where('semester_id', $value);
+        });
 
-    $query->when($filters['course_detail_id'] ?? null, function ($q, $value) {
-        $q->where('course_detail_id', $value);
-    });
+        $query->when($filters['course_detail_id'] ?? null, function ($q, $value) {
+            $q->where('course_detail_id', $value);
+        });
 
-    // 🔎 Search by code
-    if ($request->filled('search')) {
-        $query->where('code', 'like', '%' . $request->search . '%');
+        // 🔎 Search by code
+        if ($request->filled('search')) {
+            $query->where('code', 'like', '%' . $request->search . '%');
+        }
+
+        $codes = $query->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+
+                // 💰 Wallet
+                'wallet' => $codes->where('type', 'wallet')
+                    ->groupBy('amount')
+                    ->map(function ($items, $amount) {
+                        return [
+                            'amount' => (float) $amount,
+                            'count' => $items->count(),
+                            'codes' => $items->values(),
+                        ];
+                    })->values(),
+
+                // 🎓 Courses
+                'courses' => $codes->where('type', 'course')
+                    ->groupBy('course_id')
+                    ->map(function ($items, $courseId) {
+                        return [
+                            'course_id' => $courseId,
+                            'count' => $items->count(),
+                            'codes' => $items->values(),
+                        ];
+                    })->values(),
+
+                // 📚 Semesters
+                'semesters' => $codes->where('type', 'semester')
+                    ->groupBy('semester_id')
+                    ->map(function ($items, $semesterId) {
+                        return [
+                            'semester_id' => $semesterId,
+                            'count' => $items->count(),
+                            'codes' => $items->values(),
+                        ];
+                    })->values(),
+
+                // 📖 Lessons
+                'lessons' => $codes->where('type', 'lesson')
+                    ->groupBy('course_detail_id')
+                    ->map(function ($items, $lessonId) {
+                        return [
+                            'course_detail_id' => $lessonId,
+                            'count' => $items->count(),
+                            'codes' => $items->values(),
+                        ];
+                    })->values(),
+            ]
+        ]);
     }
-
-    $codes = $query->get();
-
-    return response()->json([
-        'status' => true,
-        'data' => [
-
-            // 💰 Wallet
-            'wallet' => $codes->where('type', 'wallet')
-                ->groupBy('amount')
-                ->map(function ($items, $amount) {
-                    return [
-                        'amount' => (float) $amount,
-                        'count' => $items->count(),
-                        'codes' => $items->values(),
-                    ];
-                })->values(),
-
-            // 🎓 Courses
-            'courses' => $codes->where('type', 'course')
-                ->groupBy('course_id')
-                ->map(function ($items, $courseId) {
-                    return [
-                        'course_id' => $courseId,
-                        'count' => $items->count(),
-                        'codes' => $items->values(),
-                    ];
-                })->values(),
-
-            // 📚 Semesters
-            'semesters' => $codes->where('type', 'semester')
-                ->groupBy('semester_id')
-                ->map(function ($items, $semesterId) {
-                    return [
-                        'semester_id' => $semesterId,
-                        'count' => $items->count(),
-                        'codes' => $items->values(),
-                    ];
-                })->values(),
-
-            // 📖 Lessons
-            'lessons' => $codes->where('type', 'lesson')
-                ->groupBy('course_detail_id')
-                ->map(function ($items, $lessonId) {
-                    return [
-                        'course_detail_id' => $lessonId,
-                        'count' => $items->count(),
-                        'codes' => $items->values(),
-                    ];
-                })->values(),
-        ]
-    ]);
-}
 
 }
 

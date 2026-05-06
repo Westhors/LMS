@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable; // 🔥 مهم
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Student extends BaseModel
+class Student extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
