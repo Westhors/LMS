@@ -25,7 +25,7 @@ class BookController extends BaseController
     public function index()
     {
         try {
-            $Books = BookResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject'], [], ['*']));
+            $Books = BookResource::collection($this->crudRepository->all(['teacher'], [], ['*']));
             return $Books->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
