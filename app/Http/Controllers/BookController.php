@@ -31,6 +31,8 @@ class BookController extends BaseController
             return JsonResponse::respondError($e->getMessage());
         }
     }
+
+
     public function store(BookRequest $request)
     {
         try {
@@ -56,6 +58,7 @@ class BookController extends BaseController
     }
 
 
+    
     public function update(BookRequest $request, Book $book): \Illuminate\Http\JsonResponse
     {
         try {

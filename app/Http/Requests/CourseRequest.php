@@ -29,8 +29,8 @@ class CourseRequest extends FormRequest
             'title'            => 'nullable|string|max:255',
             'title_ar'         => 'nullable|string|max:255',
             'description'      => 'nullable|string',
-            'price'         => 'nullable',
-            'discount'         => 'nullable|numeric|min:0|max:100',
+            'price'         => 'nullable|numeric|min:0',
+            'discount'         => 'nullable|numeric|min:0',
             'description_ar'   => 'nullable|string',
             'link_video'      => 'nullable|url',
             'about'      => 'nullable|string',
@@ -38,8 +38,8 @@ class CourseRequest extends FormRequest
             'hour_time_course'      => 'nullable|string',
             'type'             => 'nullable|in:online,center',
             'count_student'    => 'nullable|numeric|min:0',
-            'start_date'            => 'nullable',
-            'end_date'         => 'nullable|',
+            'start_date'            => 'nullable|date',
+            'end_date'         => 'nullable|date',
         ];
     }
 }

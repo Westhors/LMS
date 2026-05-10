@@ -25,7 +25,7 @@ class SemesterRequest extends FormRequest
             'name'         => 'nullable|string|max:255',
             'name_ar'         => 'nullable|string|max:255',
             'discount'         => 'nullable|numeric|min:0|max:100',
-            'price'         => 'nullable|numeric|min:0|max:100',
+            'price'         => 'nullable|numeric|min:0',
             'teacher_id'         => 'nullable|exists:teachers,id',
         ];
     }

@@ -23,8 +23,8 @@ class CourseDetailRequest extends FormRequest
             'lession_date' => 'nullable|date',
             'lession_time' => 'nullable|date_format:H:i',
             'link_video' => 'nullable|url',
-            'price'         => 'nullable',
-            'discount'         => 'nullable|numeric|min:0|max:100',
+            'price'         => 'nullable|numeric|min:0',
+            'discount'         => 'nullable|numeric|min:0',
         ];
     }
 
