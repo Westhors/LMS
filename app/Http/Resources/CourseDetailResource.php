@@ -28,6 +28,10 @@ class CourseDetailResource extends JsonResource
             'assignments' => ExamResource::collection(
                 $this->whenLoaded('assignments')
             ),
+
+            'students' => StudentResource::collection(
+                $this->whenLoaded('students')
+            ),
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }

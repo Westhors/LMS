@@ -48,9 +48,22 @@ class CourseDetailController extends BaseController
     public function show(CourseDetail $courseDetail): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $courseDetail->load(['course']);
-            return JsonResponse::respondSuccess('Item Fetched Successfully', new CourseDetailResource($courseDetail));
+
+            $courseDetail->load([
+                'course',
+                'exams',
+                'assignments',
+                'students.stage',
+                'students.teacher'
+            ]);
+
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new CourseDetailResource($courseDetail)
+            );
+
         } catch (Exception $e) {
+
             return JsonResponse::respondError($e->getMessage());
         }
     }

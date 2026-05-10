@@ -22,6 +22,10 @@ class SemesterResource extends JsonResource
                 $this->whenLoaded('courses')
             ),
 
+            'students' => StudentResource::collection(
+                $this->whenLoaded('students')
+            ),
+
             'createdAt' => $this->created_at?->format('d F, Y'),
         ];
     }

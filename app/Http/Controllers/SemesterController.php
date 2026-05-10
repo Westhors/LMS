@@ -52,9 +52,21 @@ class SemesterController extends BaseController
     public function show(Semester $semester): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $semester->load(['teacher', 'courses']);
-            return JsonResponse::respondSuccess('Item Fetched Successfully', new SemesterResource($semester));
+
+            $semester->load([
+                'teacher',
+                'courses.details',
+                'students.stage',
+                'students.teacher'
+            ]);
+
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new SemesterResource($semester)
+            );
+
         } catch (Exception $e) {
+
             return JsonResponse::respondError($e->getMessage());
         }
     }

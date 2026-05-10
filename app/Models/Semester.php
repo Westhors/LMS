@@ -14,9 +14,20 @@ class Semester extends BaseModel
     {
         return $this->hasMany(Course::class);
     }
-    
+
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'enrollments',
+            'semester_id',
+            'student_id'
+        )
+        ->where('type', 'semester');
     }
 }

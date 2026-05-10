@@ -36,5 +36,16 @@ class CourseDetail extends BaseModel
             ->where('type', 'assignment');
     }
 
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'enrollments',
+            'course_detail_id',
+            'student_id'
+        )
+        ->where('type', 'lesson');
+    }
+
 
 }

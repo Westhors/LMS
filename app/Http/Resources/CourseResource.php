@@ -39,6 +39,9 @@ class CourseResource extends JsonResource
             'link_video' => $this->link_video,
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
+            'students' => StudentResource::collection(
+                $this->whenLoaded('students')
+            ),
             'createdAt' => optional($this->created_at)->format('d F, Y'),
         ];
     }

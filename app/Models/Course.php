@@ -47,4 +47,18 @@ class Course extends BaseModel
         return $this->hasMany(CourseDetail::class);
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+    
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'enrollments',
+            'course_id',
+            'student_id'
+        )->wherePivot('type', 'course');
+    }
 }
