@@ -90,7 +90,7 @@ class EnrollmentController extends Controller
         ->get();
     }
 
-    public function reject($id)
+    public function status($id)
     {
         $request = EnrollmentRequest::findOrFail($id);
 
