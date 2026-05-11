@@ -84,10 +84,11 @@ class EnrollmentController extends Controller
 
     public function teacherRequests()
     {
-       return EnrollmentRequest::where('teacher_id', auth()->id())
-        ->with(['student:id,name,phone'])
-        ->latest()
-        ->get();
+        return EnrollmentRequest::where('teacher_id', auth()->id())
+            ->where('status', 'pending')
+            ->with(['student:id,name,phone'])
+            ->latest()
+            ->get();
     }
 
     public function status($id)
