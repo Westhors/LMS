@@ -15,6 +15,7 @@ class SubjectResource extends JsonResource
             'position' => $this->position ?? null,
             'active' => $this->active ?? null,
             'stage' => new StageResource($this->stage),
+            'stage_id' => $this->stage_id,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
