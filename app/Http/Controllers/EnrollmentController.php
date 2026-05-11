@@ -100,7 +100,7 @@ class EnrollmentController extends Controller
 
          return response()->json([
             'status' => true,
-             'message' => 'Rejected'
+             'message' => 'Status updated'
         ]);
     }
 
