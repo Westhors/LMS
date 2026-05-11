@@ -18,5 +18,10 @@ class Subject extends BaseModel
         return $this->belongsToMany(Teacher::class);
     }
 
+    public function stage()
+    {
+        return $this->belongsTo(Stage::class);
+    }
+
 }
 
