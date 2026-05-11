@@ -22,11 +22,11 @@ class SubjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'name_ar' => 'required|string',
+            'name' => 'nullable|string',
+            'name_ar' => 'nullable|string',
             'position' => 'nullable',
             'active' => 'boolean',
-            'stage_id' => 'required|exists:stages,id',
+            'stage_id' => 'nullable|exists:stages,id',
         ];
     }
 }
