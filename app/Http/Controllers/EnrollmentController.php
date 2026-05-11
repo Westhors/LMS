@@ -13,6 +13,7 @@ use App\Models\Enrollment;
 use App\Models\EnrollmentRequest;
 use App\Models\PaymentCode;
 use App\Models\Semester;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -94,7 +95,7 @@ class EnrollmentController extends Controller
         $request = EnrollmentRequest::findOrFail($id);
 
         $request->update([
-           'status' => 'rejected'
+           'status' => $request->status
         ]);
 
          return response()->json([
@@ -227,6 +228,61 @@ class EnrollmentController extends Controller
             'message' => 'Wallet updated'
         ]);
     }
+
+    public function studentLearning($id)
+    {
+        $student = Student::find($id);
+
+        $enrollments = Enrollment::where('student_id', $student->id)->get();
+
+        // 🎓 IDs
+        $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
+        $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
+        $lessonIds   = $enrollments->where('type', 'lesson')->pluck('course_detail_id')->unique()->values();
+
+        // 🎓 Semesters
+        $semesters = Semester::with([
+            'courses.details',
+            'courses.teacher',
+            'courses.subject',
+            'courses.stage',
+            'courses.media',
+            'courses.details.media'
+        ])->whereIn('id', $semesterIds)->get();
+
+        // 📚 Courses
+        $courses = Course::with([
+            'details',
+            'teacher',
+            'subject',
+            'stage',
+            'media',
+            'details.media',
+            'semester'
+        ])->whereIn('id', $courseIds)->get();
+
+        // 📖 Lessons
+        $lessons = CourseDetail::with([
+            'course.teacher',
+            'course.semester',
+            'media'
+        ])->whereIn('id', $lessonIds)->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                // 👤 Student من الريسورس
+                'student' => new StudentMeResource($student),
+
+                // 🎓 Learning Data
+                'semesters' => SemesterResource::collection($semesters),
+                'courses'   => CourseResource::collection($courses),
+                'lessons'   => CourseDetailResource::collection($lessons),
+            ]
+        ]);
+    }
+
+
 
     public function myLearning()
     {

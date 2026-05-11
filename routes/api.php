@@ -300,10 +300,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/requests-redeem/teacher', [EnrollmentController::class, 'teacherRequests']);
 
     // ❌ رفض طلب
-    Route::post('/request/teacher/{id}/reject', [EnrollmentController::class, 'reject']);
+    Route::post('/request/teacher/{id}/status', [EnrollmentController::class, 'status']);
 });
 
 
+
+Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearning']);
 
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
