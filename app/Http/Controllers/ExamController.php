@@ -15,6 +15,7 @@ use App\Models\QuestionOption;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ExamController extends BaseController
 {
@@ -121,46 +122,112 @@ class ExamController extends BaseController
             'questions' => 'required|array'
         ]);
 
-        foreach ($request->questions as $q) {
+        DB::beginTransaction();
 
-            $question = ExamQuestion::create([
-                'exam_id' => $request->exam_id,
-                'question_type' => $q['question_type'],
-                'question' => $q['question'],
-                'mark' => $q['mark'] ?? 1,
-                'correct_answer' => $q['correct_answer'] ?? null,
-            ]);
+        try {
 
-            // MCQ Options
-            if ($q['question_type'] === 'multiple_choice' && isset($q['options'])) {
-                foreach ($q['options'] as $opt) {
-                    QuestionOption::create([
-                        'question_id' => $question->id,
-                        'option_text' => $opt['option_text'],
-                        'is_correct' => $opt['is_correct'] ?? false,
+            foreach ($request->questions as $q) {
+
+                $question = ExamQuestion::create([
+                    'exam_id'        => $request->exam_id,
+                    'question_type'  => $q['question_type'],
+                    'question'       => $q['question'],
+                    'mark'           => $q['mark'] ?? 1,
+                    'correct_answer' => $q['correct_answer'] ?? null,
+                ]);
+
+                // =========================
+                // Save Question Image
+                // =========================
+                if (!empty($q['image'])) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\ExamQuestion::class,
+                        'model_id'   => $question->id,
+                        'media_id'   => $q['image'],
+                        'collection' => 'question_image',
                     ]);
                 }
-            }
-        }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Questions added successfully'
-        ]);
+                // =========================
+                // MCQ Options
+                // =========================
+                if (
+                    $q['question_type'] === 'multiple_choice'
+                    && isset($q['options'])
+                ) {
+
+                    foreach ($q['options'] as $opt) {
+
+                        QuestionOption::create([
+                            'question_id' => $question->id,
+                            'option_text' => $opt['option_text'],
+                            'is_correct'  => $opt['is_correct'] ?? false,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Questions added successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
 //////////////////////////////////////////// submitExam ////////////////////////////////////
     public function getQuestions($examId)
     {
-        $exam = Exam::with('questions.options')
-            ->findOrFail($examId);
+        $exam = Exam::with([
+            'questions.options',
+            'questions.question_image'
+        ])->findOrFail($examId);
 
+        $questions = $exam->questions;
+        /*
+        |--------------------------------------------------------------------------
+        | Random Questions
+        |--------------------------------------------------------------------------
+        */
+        if ($exam->random_questions) {
+            $questions = $questions->shuffle()->values();
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | Random Answers
+        |--------------------------------------------------------------------------
+        */
+        if ($exam->random_answers) {
+
+            $questions->transform(function ($question) {
+                if ($question->relationLoaded('options')) {
+                    $question->setRelation(
+                        'options',
+                        $question->options->shuffle()->values()
+                    );
+                }
+                return $question;
+            });
+        }
         return response()->json([
             'status' => true,
             'exam_id' => $exam->id,
             'exam_title' => $exam->title,
-            'questions_count' => $exam->questions->count(),
-            'data' => QuestionResource::collection($exam->questions)
+            'random_questions' => (bool) $exam->random_questions,
+            'random_answers' => (bool) $exam->random_answers,
+            'questions_count' => $questions->count(),
+            'data' => QuestionResource::collection($questions)
         ]);
     }
 //////////////////////////////////////////// getQuestions ////////////////////////////////////
@@ -238,7 +305,7 @@ class ExamController extends BaseController
 
         return response()->json([
             'status' => true,
-            'auto_score' => $totalScore,
+            // 'auto_score' => $totalScore,
             'message' => 'Exam submitted successfully'
         ]);
     }
@@ -265,22 +332,29 @@ class ExamController extends BaseController
         ]);
     }
 
-/////////////////////////////////////////////////////// result ///////////////////////////////
+/////////////////////////////////////////////////////// result //////////////////////////////////////
 
     public function result($examId, $studentId)
     {
+        $exam = Exam::findOrFail($examId);
+        if (!$exam->show_result) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Result is hidden for this exam.'
+            ], 403);
+        }
         $answers = ExamAnswer::with('question.options')
             ->where('exam_id', $examId)
             ->where('student_id', $studentId)
             ->get();
-
         return response()->json([
             'status' => true,
+            'exam_id' => $exam->id,
+            'exam_title' => $exam->title,
             'total' => $answers->sum('mark'),
             'data' => AnswerResource::collection($answers)
         ]);
     }
-
 
 }
 

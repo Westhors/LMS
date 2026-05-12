@@ -16,6 +16,12 @@ class SemesterResource extends JsonResource
             'price' => $this->price ?? null,
             'discount' => $this->discount ?? null,
             'teacher_id' => $this->teacher_id ?? null,
+            'subject_id' => $this->subject_id ?? null,
+
+             // 🌐 علاقة المادة
+            'subject' => new SubjectResource(
+                $this->whenLoaded('subject')
+            ),
 
             // 📚 Courses داخل الترم
             'courses' => CourseResource::collection(

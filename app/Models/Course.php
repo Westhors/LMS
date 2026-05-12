@@ -51,7 +51,7 @@ class Course extends BaseModel
     {
         return $this->hasMany(Enrollment::class);
     }
-    
+
     public function students()
     {
         return $this->belongsToMany(
@@ -59,6 +59,8 @@ class Course extends BaseModel
             'enrollments',
             'course_id',
             'student_id'
-        )->wherePivot('type', 'course');
+        )
+            ->wherePivot('type', 'course')
+            ->withPivot(['created_at']);
     }
 }

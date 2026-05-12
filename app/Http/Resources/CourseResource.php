@@ -18,7 +18,12 @@ class CourseResource extends JsonResource
             'subject' => new SubjectResource($this->whenLoaded('subject')),
             'semester_id' => $this->semester_id,
             'semester' => new SemesterResource($this->semester),
+            'price' => $this->price ?? null,
             'discount' => $this->discount ?? null,
+
+            'price_before_discount' => $this->discount
+            ? round($this->price / (1 - ($this->discount / 100)), 2)
+            : $this->price,
 
             'details' => CourseDetailResource::collection(
                 $this->whenLoaded('details')
@@ -32,7 +37,6 @@ class CourseResource extends JsonResource
             'hour_time_course' => $this->hour_time_course,
             'type' => $this->type,
             'count_student' => $this->count_student,
-            'price' => $this->price,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'active' => $this->active ?? null,
@@ -42,6 +46,7 @@ class CourseResource extends JsonResource
             'students' => StudentResource::collection(
                 $this->whenLoaded('students')
             ),
+            'time_duration' => $this->time_duration ?? null,
             'createdAt' => optional($this->created_at)->format('d F, Y'),
         ];
     }

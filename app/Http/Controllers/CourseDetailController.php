@@ -7,9 +7,12 @@ use App\Http\Requests\CourseDetailRequest;
 use App\Http\Resources\CourseDetailResource;
 use App\Interfaces\CourseDetailRepositoryInterface;
 use App\Models\CourseDetail;
+use App\Models\CourseDetailAttendance;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CourseDetailController extends BaseController
 {
@@ -22,15 +25,98 @@ class CourseDetailController extends BaseController
         $this->crudRepository = $pattern;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $CourseDetail = CourseDetailResource::collection($this->crudRepository->all(['course'], [], ['*']));
-            return $CourseDetail->additional(JsonResponse::success());
-        } catch (Exception $e) {
+
+            $filters = $request->input('filters', []);
+            $orderBy = $request->input('orderBy', 'id');
+            $orderByDirection = $request->input('orderByDirection', 'asc');
+            $perPage = $request->input('perPage', 10);
+            $paginate = $request->input('paginate', 1);
+            $delete = $request->input('delete', false);
+            /*
+            |--------------------------------------------------------------------------
+            | Query
+            |--------------------------------------------------------------------------
+            */
+            $query = CourseDetail::with(['course','attendances']);
+            /*
+            |--------------------------------------------------------------------------
+            | Filters
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($filters['course_id'])) {
+                $query->where('course_id', $filters['course_id']);
+            }
+            /*
+            |--------------------------------------------------------------------------
+            | Soft Delete
+            |--------------------------------------------------------------------------
+            */
+            if ($delete) {
+                $query->onlyTrashed();
+            }
+            /*
+            |--------------------------------------------------------------------------
+            | Order
+            |--------------------------------------------------------------------------
+            */
+            $query->orderBy($orderBy, $orderByDirection);
+
+            $courseDetails = $query->get();
+
+            if ($courseDetails->isEmpty()) {
+                return JsonResponse::respondError('No course details found');
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            if ($paginate) {
+
+                $currentPage = Paginator::resolveCurrentPage();
+
+                $currentPageItems = $courseDetails->slice(
+                    ($currentPage - 1) * $perPage,
+                    $perPage
+                )->values();
+
+                $paginatedItems = new LengthAwarePaginator(
+                    $currentPageItems,
+                    $courseDetails->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => Paginator::resolveCurrentPath()]
+                );
+
+                return CourseDetailResource::collection($paginatedItems)
+                    ->additional([
+                        'status' => true,
+                        'message' => 'Course details fetched successfully'
+                    ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Without Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            return JsonResponse::respondSuccess(
+                'Course details fetched successfully',
+                CourseDetailResource::collection($courseDetails)
+            );
+
+        } catch (\Exception $e) {
+
             return JsonResponse::respondError($e->getMessage());
         }
     }
+
     public function store(CourseDetailRequest $request)
     {
         try {
@@ -54,7 +140,8 @@ class CourseDetailController extends BaseController
                 'exams',
                 'assignments',
                 'students.stage',
-                'students.teacher'
+                'students.teacher',
+                'attendances'
             ]);
 
             return JsonResponse::respondSuccess(
@@ -68,7 +155,36 @@ class CourseDetailController extends BaseController
         }
     }
 
+    public function markAttendance($lessonId)
+    {
+        try {
 
+            CourseDetailAttendance::updateOrCreate(
+
+                [
+                    'course_detail_id' => $lessonId,
+                    'student_id' => auth()->id(),
+                ],
+
+                [
+                    'attended' => true,
+                    'attended_at' => now(),
+                ]
+            );
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Attendance marked successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
     public function update(CourseDetailRequest $request, CourseDetail $courseDetail): \Illuminate\Http\JsonResponse
     {
         try {

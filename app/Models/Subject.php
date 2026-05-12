@@ -23,5 +23,10 @@ class Subject extends BaseModel
         return $this->belongsTo(Stage::class);
     }
 
+    public function semesters()
+    {
+        return $this->hasMany(Semester::class);
+    }
+
 }
 

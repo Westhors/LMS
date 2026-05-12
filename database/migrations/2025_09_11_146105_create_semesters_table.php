@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('abouts', function (Blueprint $table) {
+        Schema::create('semesters', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->text('description')->nullable();
             $table->string('name_ar')->nullable();
-            $table->text('description_ar')->nullable();
-            $table->text('meta')->nullable();
-            $table->boolean('active')->default(1);
-            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+            $table->boolean('active')->default(true);
+            $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->foreignId('subject_id')->nullable()->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('abouts');
+        Schema::dropIfExists('semesters');
     }
 };

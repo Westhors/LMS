@@ -31,6 +31,7 @@ class StudentRequest extends FormRequest
             'gender' => 'nullable|in:male,female',
             'teacher_id' => 'nullable|exists:teachers,id',
             'stage_id' => 'nullable|exists:stages,id',
+            'center_hour_id' => 'nullable|exists:center_hours,id',
         ];
     }
 }

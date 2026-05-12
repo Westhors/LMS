@@ -14,6 +14,7 @@ class AboutResource extends JsonResource
             'description' => $this->description ?? null,
             'name_ar' => $this->name_ar ?? null,
             'description_ar' => $this->description_ar ?? null,
+            'meta' => $this->meta ?? null,
             'active' => $this->active ?? null,
             'teacher_id' => $this->teacher_id ?? null,
             'imageUrl' => $this->getFirstMediaUrl(),

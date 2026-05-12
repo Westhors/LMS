@@ -23,9 +23,15 @@ return new class extends Migration
             $table->foreignId('teacher_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
+                
             $table->foreignId('stage_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
+
+            $table->foreignId('center_hour_id')->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
             $table->boolean('active')->default(true);
             $table->decimal('balance', 10, 2)->default(0);
             $table->timestamps();

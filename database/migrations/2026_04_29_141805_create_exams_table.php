@@ -31,9 +31,21 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->integer('total_marks')->default(0);
+            $table->integer('total_must_pass_marks')->default(0);
             $table->integer('duration_minutes')->nullable();
 
-            $table->boolean('active')->default(true);
+            // إظهار الأسئلة بشكل عشوائي
+            $table->boolean('random_questions')
+                ->default(false);
+
+            // إظهار الإجابات بشكل عشوائي
+            $table->boolean('random_answers')
+                ->default(false);
+
+            // إظهار النتيجة بعد الانتهاء
+            $table->boolean('show_result')
+                ->default(true);
+
             $table->softDeletes();
             $table->timestamps();
         });

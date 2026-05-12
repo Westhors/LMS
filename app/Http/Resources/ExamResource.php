@@ -22,7 +22,14 @@ class ExamResource extends JsonResource
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'answers' => AnswerResource::collection($this->whenLoaded('answers')),
             'total_marks' => $this->total_marks,
+            'total_must_pass_marks' => $this->total_must_pass_marks,
             'duration_minutes' => $this->duration_minutes,
+
+
+            'random_questions' => (bool) $this->random_questions,
+            'random_answers' => (bool) $this->random_answers,
+            'show_result' => (bool) $this->show_result,
+            // 'must_pass_to_unlock' => (bool) $this->must_pass_to_unlock,
 
             'active' => $this->active,
             'imageUrl' => $this->getFirstMediaUrl(),

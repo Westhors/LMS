@@ -20,6 +20,12 @@ class Semester extends BaseModel
         return $this->belongsTo(Teacher::class);
     }
 
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+
     public function students()
     {
         return $this->belongsToMany(

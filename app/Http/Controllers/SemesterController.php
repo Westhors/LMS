@@ -57,7 +57,8 @@ class SemesterController extends BaseController
                 'teacher',
                 'courses.details',
                 'students.stage',
-                'students.teacher'
+                'students.teacher',
+                'subject'
             ]);
 
             return JsonResponse::respondSuccess(

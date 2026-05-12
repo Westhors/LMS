@@ -40,6 +40,7 @@ class CourseRequest extends FormRequest
             'count_student'    => 'nullable|numeric|min:0',
             'start_date'            => 'nullable|date',
             'end_date'         => 'nullable|date',
+            'time_duration'         => 'nullable|date_format:H:i:s',
         ];
     }
 }

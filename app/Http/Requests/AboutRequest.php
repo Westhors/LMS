@@ -26,6 +26,7 @@ class AboutRequest extends FormRequest
             'description' => 'required|string',
             'name_ar' => 'required|string',
             'description_ar' => 'required|string',
+            'meta' => 'nullable|string',
             'teacher_id' => 'required|exists:teachers,id',
         ];
     }

@@ -27,8 +27,21 @@ class Student extends Authenticatable
         return $this->belongsTo(Stage::class);
     }
 
+
+    public function centerHour()
+    {
+        return $this->belongsTo(CenterHour::class);
+    }
+
     public function answers()
     {
         return $this->hasMany(ExamAnswer::class);
+    }
+
+    public function lessonAttendances()
+    {
+        return $this->hasMany(
+            CourseDetailAttendance::class
+        );
     }
 }

@@ -120,15 +120,15 @@ Route::apiResource('course', CourseController::class);
 
 
 //////////////////////////////////////////////////////////course-detail//////////////////////////////////////
-
-Route::post('course-detail/index', [CourseDetailController::class, 'index']);
-Route::post('course-detail/restore', [CourseDetailController::class, 'restore']);
-Route::delete('course-detail/delete', [CourseDetailController::class, 'destroy']);
-Route::delete('course-detail/force-delete', [CourseDetailController::class, 'forceDelete']);
-Route::post('course-detail/update/{courseDetail}', [CourseDetailController::class, 'forceUpdate']);
-Route::put('/course-detail/{id}/{column}', [CourseDetailController::class, 'toggle']);
-Route::apiResource('course-detail', CourseDetailController::class);
-
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('course-detail/index', [CourseDetailController::class, 'index']);
+    Route::post('course-detail/restore', [CourseDetailController::class, 'restore']);
+    Route::delete('course-detail/delete', [CourseDetailController::class, 'destroy']);
+    Route::delete('course-detail/force-delete', [CourseDetailController::class, 'forceDelete']);
+    Route::post('course-detail/update/{courseDetail}', [CourseDetailController::class, 'forceUpdate']);
+    Route::put('/course-detail/{id}/{column}', [CourseDetailController::class, 'toggle']);
+    Route::apiResource('course-detail', CourseDetailController::class);
+});
 //////////////////////////////////////////////////////////course-detail//////////////////////////////////////
 
 
@@ -301,6 +301,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ❌ رفض طلب
     Route::post('/request/teacher/{id}/status', [EnrollmentController::class, 'status']);
+
+    Route::post('lessons/{lessonId}/attendance',[CourseDetailController::class, 'markAttendance']);
 });
 
 

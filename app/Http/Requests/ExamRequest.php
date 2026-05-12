@@ -25,6 +25,7 @@ class ExamRequest extends FormRequest
             'teacher_id' => 'nullable|exists:teachers,id',
 
             'total_marks' => 'nullable|numeric|min:0',
+            'total_must_pass_marks' => 'nullable|numeric|min:0',
             'duration_minutes' => 'nullable|integer|min:1',
 
             'active' => 'nullable|boolean',

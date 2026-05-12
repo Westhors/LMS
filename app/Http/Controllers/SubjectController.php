@@ -47,6 +47,11 @@ class SubjectController extends BaseController
     public function show(Subject $subject): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $subject->load([
+                'stage',
+                'semesters.teacher',
+                'semesters.courses.details',
+            ]);
             return JsonResponse::respondSuccess('Item Fetched Successfully', new SubjectResource($subject));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

@@ -24,6 +24,13 @@ return new class extends Migration
             $table->string('link_video')->nullable();
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
+            // لازم ينجح عشان يفتح الحصة التالية
+            $table->boolean('must_pass_to_unlock')
+                ->default(false);
+
+            $table->boolean('must_pass_to_unlock')
+                ->default(false);
+                
             $table->softDeletes();
             $table->timestamps();
         });

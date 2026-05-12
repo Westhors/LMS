@@ -15,5 +15,11 @@ class CenterHour extends BaseModel
     {
         return $this->belongsTo(Teacher::class);
     }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
 }
 

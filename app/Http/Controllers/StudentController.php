@@ -6,6 +6,7 @@ use App\Helpers\JsonResponse;
 use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Interfaces\StudentRepositoryInterface;
+use App\Models\CourseDetailAttendance;
 use App\Models\Student;
 use App\Traits\HttpResponses;
 use Exception;
@@ -184,6 +185,38 @@ class StudentController extends BaseController
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_FORCE_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+
+    public function markAttendance($lessonId, $studentId)
+    {
+        try {
+
+            CourseDetailAttendance::updateOrCreate(
+
+                [
+                    'course_detail_id' => $lessonId,
+                    'student_id' => $studentId,
+                ],
+
+                [
+                    'attended' => true,
+                    'attended_at' => now(),
+                ]
+            );
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Attendance marked successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

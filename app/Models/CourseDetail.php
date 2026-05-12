@@ -47,5 +47,46 @@ class CourseDetail extends BaseModel
         ->where('type', 'lesson');
     }
 
+    public function checkStudentPassedExam()
+    {
+     $user = auth()->user();
+
+
+
+    if (!$user) {
+        return false;
+    }
+
+
+    if ($user instanceof Teacher) {
+        return true;
+    }
+
+    if (!($user instanceof Student)) {
+        return false;
+    }
+
+    $exam = $this->exams()->first();
+
+    if (!$exam) {
+        return true;
+    }
+
+
+
+    $studentTotal = ExamAnswer::where('exam_id', $exam->id)
+        ->where('student_id', $user->id)
+        ->sum('mark');
+
+    return $studentTotal >= $exam->total_must_pass_marks;
+}
+
+
+    public function attendances()
+    {
+        return $this->hasMany(
+            CourseDetailAttendance::class
+        );
+    }
 
 }

@@ -21,7 +21,9 @@ class StudentResource extends JsonResource
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
             'stage' => $this->whenLoaded('stage'),
-
+            'center_hour_id' => $this->center_hour_id,
+            'joined_at' => optional($this->pivot?->created_at)
+                ->format('d F, Y h:i A') ?? null,
             'created_at' => $this->created_at,
         ];
     }
