@@ -18,6 +18,10 @@ return new class extends Migration
                 ->constrained('exam_questions')
                 ->cascadeOnDelete();
 
+            $table->foreignId('question_bank_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->string('option_text');
             $table->boolean('is_correct')->default(false);
             $table->softDeletes();

@@ -6,17 +6,21 @@ use App\Helpers\JsonResponse;
 use App\Http\Requests\ExamRequest;
 use App\Http\Resources\AnswerResource;
 use App\Http\Resources\ExamResource;
+use App\Http\Resources\QuestionBankResource;
 use App\Http\Resources\QuestionResource;
 use App\Interfaces\ExamRepositoryInterface;
 use App\Models\Exam;
 use App\Models\ExamAnswer;
 use App\Models\ExamQuestion;
+use App\Models\QuestionBank;
+use App\Models\QuestionBankOption;
 use App\Models\QuestionOption;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 class ExamController extends BaseController
 {
     use HttpResponses;
@@ -114,77 +118,145 @@ class ExamController extends BaseController
 
 
 
-    /////////////////////////////////////////// addQuestions //////////////////////////////////////////////
-    public function addQuestions(Request $request)
-    {
-        $request->validate([
-            'exam_id' => 'required|exists:exams,id',
-            'questions' => 'required|array'
-        ]);
+/////////////////////////////////////////// addQuestions //////////////////////////////////////////////
+public function addQuestions(Request $request)
+{
+    $request->validate([
+        'exam_id' => 'required|exists:exams,id',
+        'questions' => 'required|array'
+    ]);
 
-        DB::beginTransaction();
+    DB::beginTransaction();
 
-        try {
+    try {
 
-            foreach ($request->questions as $q) {
+        $exam = Exam::findOrFail($request->exam_id);
 
-                $question = ExamQuestion::create([
-                    'exam_id'        => $request->exam_id,
-                    'question_type'  => $q['question_type'],
-                    'question'       => $q['question'],
-                    'mark'           => $q['mark'] ?? 1,
-                    'correct_answer' => $q['correct_answer'] ?? null,
+        foreach ($request->questions as $q) {
+            /*
+            |--------------------------------------------------------------------------
+            | Create Exam Question
+            |--------------------------------------------------------------------------
+            */
+            $question = ExamQuestion::create([
+                'exam_id'        => $request->exam_id,
+                'question_type'  => $q['question_type'],
+                'question'       => $q['question'],
+                'mark'           => $q['mark'] ?? 1,
+                'correct_answer' => $q['correct_answer'] ?? null,
+            ]);
+            /*
+            |--------------------------------------------------------------------------
+            | Save Question Image
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($q['image'])) {
+                DB::table('mediable')->insert([
+                    'model_type' => \App\Models\ExamQuestion::class,
+                    'model_id'   => $question->id,
+                    'media_id'   => $q['image'],
+                    'collection' => 'question_image',
                 ]);
-
-                // =========================
-                // Save Question Image
-                // =========================
-                if (!empty($q['image'])) {
-
-                    DB::table('mediable')->insert([
-                        'model_type' => \App\Models\ExamQuestion::class,
-                        'model_id'   => $question->id,
-                        'media_id'   => $q['image'],
-                        'collection' => 'question_image',
+            }
+            /*
+            |--------------------------------------------------------------------------
+            | Save MCQ Options
+            |--------------------------------------------------------------------------
+            */
+            if (
+                $q['question_type'] === 'multiple_choice'
+                && isset($q['options'])
+            ) {
+                foreach ($q['options'] as $opt) {
+                    QuestionOption::create([
+                        'question_id' => $question->id,
+                        'option_text' => $opt['option_text'],
+                        'is_correct'  => $opt['is_correct'] ?? false,
                     ]);
                 }
-
-                // =========================
-                // MCQ Options
-                // =========================
-                if (
-                    $q['question_type'] === 'multiple_choice'
-                    && isset($q['options'])
-                ) {
-
-                    foreach ($q['options'] as $opt) {
-
-                        QuestionOption::create([
-                            'question_id' => $question->id,
-                            'option_text' => $opt['option_text'],
-                            'is_correct'  => $opt['is_correct'] ?? false,
-                        ]);
-                    }
-                }
             }
-
-            DB::commit();
-
-            return response()->json([
-                'status'  => true,
-                'message' => 'Questions added successfully'
+            /*
+            |--------------------------------------------------------------------------
+            | Save To Question Bank
+            |--------------------------------------------------------------------------
+            */
+            $bankQuestion = QuestionBank::create([
+                'teacher_id' => $exam->teacher_id,
+                'stage_id' => $exam->stage_id,
+                'subject_id' => $exam->courseDetail?->course?->subject_id,
+                'question_type' => $q['question_type'],
+                'question' => $q['question'],
+                'mark' => $q['mark'] ?? 1,
+                'correct_answer' => $q['correct_answer'] ?? null,
             ]);
 
-        } catch (\Exception $e) {
+            /*
+            |--------------------------------------------------------------------------
+            | Save Bank Question Image
+            |--------------------------------------------------------------------------
+            */
 
-            DB::rollBack();
+            if (!empty($q['image'])) {
 
-            return response()->json([
-                'status'  => false,
-                'message' => $e->getMessage()
-            ], 500);
+                DB::table('mediable')->insert([
+
+                    'model_type' => \App\Models\QuestionBank::class,
+
+                    'model_id'   => $bankQuestion->id,
+
+                    'media_id'   => $q['image'],
+
+                    'collection' => 'question_bank_image',
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Question Bank Options
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $q['question_type'] === 'multiple_choice'
+                && isset($q['options'])
+            ) {
+
+                foreach ($q['options'] as $opt) {
+
+                    QuestionBankOption::create([
+
+                        'question_bank_id' => $bankQuestion->id,
+
+                        'option_text' => $opt['option_text'],
+
+                        'is_correct' => $opt['is_correct'] ?? false,
+                    ]);
+                }
+            }
         }
+
+        DB::commit();
+
+        return response()->json([
+
+            'status' => true,
+
+            'message' => 'Questions added successfully and saved to question bank'
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+
+            'status' => false,
+
+            'message' => $e->getMessage()
+
+        ], 500);
     }
+}
 
 //////////////////////////////////////////// submitExam ////////////////////////////////////
     public function getQuestions($examId)
@@ -354,6 +426,88 @@ class ExamController extends BaseController
             'total' => $answers->sum('mark'),
             'data' => AnswerResource::collection($answers)
         ]);
+    }
+
+
+    public function bankIndex(Request $request)
+    {
+        try {
+            $filters = $request->input('filters', []);
+            $orderBy = $request->input('orderBy', 'id');
+            $orderByDirection = $request->input('orderByDirection', 'desc');
+            $perPage = $request->input('perPage', 10);
+            $paginate = $request->input('paginate', 1);
+            $delete = $request->input('delete', false);
+            $query = QuestionBank::with([
+                'options',
+                'teacher',
+                'stage',
+                'subject',
+                'question_image'
+            ]);
+            if (!empty($filters['teacher_id'])) {
+                $query->where('teacher_id', $filters['teacher_id']);
+            }
+
+            if (!empty($filters['stage_id'])) {
+                $query->where('stage_id', $filters['stage_id']);
+            }
+
+            if (!empty($filters['subject_id'])) {
+                $query->where('subject_id', $filters['subject_id']);
+            }
+
+            if (!empty($filters['question_type'])) {
+                $query->where(
+                    'question_type',
+                    $filters['question_type']
+                );
+            }
+            if ($delete) {
+                $query->onlyTrashed();
+            }
+            $query->orderBy($orderBy, $orderByDirection);
+            $questions = $query->get();
+            if ($questions->isEmpty()) {
+                return JsonResponse::respondError(
+                    'No questions found in question bank'
+                );
+            }
+            if ($paginate) {
+                $currentPage = Paginator::resolveCurrentPage();
+                $currentPageItems = $questions->slice(
+                    ($currentPage - 1) * $perPage,
+                    $perPage
+                )->values();
+                $paginatedItems = new LengthAwarePaginator(
+                    $currentPageItems,
+                    $questions->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => Paginator::resolveCurrentPath()]
+                );
+                return QuestionBankResource::collection($paginatedItems)
+                    ->additional([
+                        'status' => true,
+                        'message' => 'Question bank fetched successfully'
+                    ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Without Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            return JsonResponse::respondSuccess(
+                'Question bank fetched successfully',
+                QuestionBankResource::collection($questions)
+            );
+
+        } catch (\Exception $e) {
+
+            return JsonResponse::respondError($e->getMessage());
+        }
     }
 
 }
