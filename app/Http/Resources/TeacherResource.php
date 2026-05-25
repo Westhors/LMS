@@ -29,6 +29,10 @@ class TeacherResource extends JsonResource
                 'books' => BookResource::collection(
                     $this->whenLoaded('books')
                 ),
+
+                'centerHours' => CenterHourResource::collection(
+                    $this->whenLoaded('centerHours')
+                ),
                 'footer' => new FooterResource($this->whenLoaded('footer')),
             ],
 

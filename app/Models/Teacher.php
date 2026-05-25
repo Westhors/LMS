@@ -60,6 +60,11 @@ class Teacher extends BaseModel
         return $this->hasMany(Book::class);
     }
 
+    public function centerHours()
+    {
+        return $this->hasMany(CenterHour::class);
+    }
+
 
     public function teacherImage()
     {

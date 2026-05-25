@@ -133,6 +133,7 @@ class TeacherController extends BaseController
 
                 // books
                 'books',
+                'centerHours',
 
                 // courses
                 'courses.details.exams.questions.options',
