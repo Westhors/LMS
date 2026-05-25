@@ -25,6 +25,7 @@ class AboutUpdateRequest extends FormRequest
             'name' => 'nullable|string',
             'description' => 'nullable|string',
             'name_ar' => 'nullable|string',
+            'meta' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'teacher_id' => 'nullable|exists:teachers,id',
         ];
