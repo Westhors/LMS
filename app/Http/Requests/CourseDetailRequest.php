@@ -21,7 +21,7 @@ class CourseDetailRequest extends FormRequest
             'title_ar' => 'nullable|string|max:255',
             'content_link' => 'nullable|url',
             'lession_date' => 'nullable|date',
-            'lession_time' => 'nullable|date_format:H:i',
+            'lession_time' => 'nullable',
             'link_video' => 'nullable|url',
             'price'         => 'nullable|numeric|min:0',
             'discount'         => 'nullable|numeric|min:0',
