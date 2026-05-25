@@ -17,6 +17,7 @@ class StudentResource extends JsonResource
             'type_of_attendance' => $this->type_of_attendance,
             'gender' => $this->gender,
             'active' => $this->active,
+            'balance' => $this->balance ?? 0,
 
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
