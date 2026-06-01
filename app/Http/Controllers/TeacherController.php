@@ -23,7 +23,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use PDF;
+use Carbon\Carbon;
 class TeacherController extends BaseController
 {
     use HttpResponses;
@@ -464,5 +465,98 @@ class TeacherController extends BaseController
         ]);
     }
 
+
+public function teacherPdfReport(Request $request, $teacherId)
+{
+    $teacher = Teacher::findOrFail($teacherId);
+
+    $from = $request->from ? Carbon::parse($request->from) : null;
+    $to   = $request->to ? Carbon::parse($request->to) : null;
+
+    // =========================
+    // APPROVED REQUESTS ONLY (MASTER SOURCE)
+    // =========================
+    $approvedRequests = EnrollmentRequest::where('teacher_id', $teacherId)
+        ->where('status', 'approved')
+        ->when($from && $to, fn($q) => $q->whereBetween('created_at', [$from, $to]))
+        ->get();
+
+    // =========================
+    // COURSES
+    // =========================
+    $courses = Course::where('teacher_id', $teacherId)->get();
+
+    $onlineCourses = $courses->where('type', 'online')->count();
+    $centerCourses = $courses->where('type', 'center')->count();
+
+    $coursesData = $courses->map(function ($course) use ($approvedRequests) {
+
+        $req = $approvedRequests->where('course_id', $course->id);
+
+        return [
+            'id' => $course->id,
+            'title' => $course->title,
+            'type' => $course->type,
+            'students' => $req->pluck('student_id')->unique()->count(),
+            'profit' => $req->sum('price'),
+        ];
+    });
+
+    // =========================
+    // SEMESTERS
+    // =========================
+    $semesters = Semester::where('teacher_id', $teacherId)->get();
+
+    $semesterData = $semesters->map(function ($s) use ($approvedRequests) {
+
+        $req = $approvedRequests->where('semester_id', $s->id);
+
+        return [
+            'name' => $s->name,
+            'students' => $req->pluck('student_id')->unique()->count(),
+            'profit' => $req->sum('price'),
+        ];
+    });
+
+    // =========================
+    // LESSONS
+    // =========================
+    $lessons = CourseDetail::whereHas('course', function ($q) use ($teacherId) {
+        $q->where('teacher_id', $teacherId);
+    })->get();
+
+    $lessonData = $lessons->map(function ($l) use ($approvedRequests) {
+
+        $req = $approvedRequests->where('course_detail_id', $l->id);
+
+        return [
+            'title' => $l->title ?? 'Lesson',
+            'students' => $req->pluck('student_id')->unique()->count(),
+            'profit' => $req->sum('price'),
+        ];
+    });
+
+    // =========================
+    // TOTAL PROFIT
+    // =========================
+    $totalProfit = $approvedRequests->sum('price');
+
+    // =========================
+    // PDF GENERATION
+    // =========================
+    $pdf = PDF::loadView('reports.teacher_dashboard', [
+        'teacher' => $teacher,
+        'onlineCourses' => $onlineCourses,
+        'centerCourses' => $centerCourses,
+        'coursesData' => $coursesData,
+        'semesterData' => $semesterData,
+        'lessonData' => $lessonData,
+        'totalProfit' => $totalProfit,
+        'from' => $from,
+        'to' => $to,
+    ]);
+
+    return $pdf->stream('teacher-report.pdf');
+}
 }
 
