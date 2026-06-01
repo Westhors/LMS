@@ -59,7 +59,8 @@ class StudentMeResource extends JsonResource
                         $studentAnswer = $answers->where('question_id', $q->id)->first();
 
                         return [
-                            'id' => $q->id,
+                            'id' => $studentAnswer?->id,
+                            'question_id' => $q->id,
                             'question' => $q->question,
                             'mark' => $q->mark,
                             'question_type' => $q->question_type,
