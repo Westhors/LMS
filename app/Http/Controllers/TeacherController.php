@@ -419,5 +419,50 @@ class TeacherController extends BaseController
         ]);
     }
 
+
+    public function adminReport()
+    {
+        $onlineCourses = Course::where('type', 'online')->count();
+
+        $centerCourses = Course::where('type', 'center')->count();
+
+        $studentsCount = Enrollment::distinct('student_id')
+            ->count('student_id');
+
+        $profits = EnrollmentRequest::where('status', 'approved')
+            ->sum('price');
+
+        $usedCoupons = PaymentCode::where('is_used', true)
+            ->count();
+
+        $examsCount = Exam::where('type', 'exam')->count();
+
+        $assignmentsCount = Exam::where('type', 'assignment')->count();
+
+        $semestersCount = Semester::count();
+
+        $requestsCount = EnrollmentRequest::count();
+
+        $booksCount = Book::count();
+
+        $teachersCount = Teacher::count();
+
+        return response()->json([
+            'data' => [
+                'teachers_count'    => $teachersCount,
+                'online_courses'    => $onlineCourses,
+                'center_courses'    => $centerCourses,
+                'students_count'    => $studentsCount,
+                'profits'           => $profits,
+                'used_coupons'      => $usedCoupons,
+                'exams_count'       => $examsCount,
+                'assignments_count' => $assignmentsCount,
+                'semesters_count'   => $semestersCount,
+                'requests_count'    => $requestsCount,
+                'books_count'       => $booksCount,
+            ]
+        ]);
+    }
+
 }
 
