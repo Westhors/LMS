@@ -12,6 +12,7 @@ use App\Interfaces\ExamRepositoryInterface;
 use App\Interfaces\FeatureRepositoryInterface;
 use App\Interfaces\FooterRepositoryInterface;
 use App\Interfaces\HomeRepositoryInterface;
+use App\Interfaces\OfferRepositoryInterface;
 use App\Interfaces\PaymentCodeRepositoryInterface;
 use App\Interfaces\SemesterRepositoryInterface;
 use App\Interfaces\StageRepositoryInterface;
@@ -30,6 +31,7 @@ use App\Repositories\ExamRepository;
 use App\Repositories\FeatureRepository;
 use App\Repositories\FooterRepository;
 use App\Repositories\HomeRepository;
+use App\Repositories\OfferRepository;
 use App\Repositories\PaymentCodeRepository;
 use App\Repositories\SemesterRepository;
 use App\Repositories\StageRepository;
@@ -62,6 +64,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CenterHourRepositoryInterface::class, CenterHourRepository::class);
         $this->app->bind(PaymentCodeRepositoryInterface::class, PaymentCodeRepository::class);
         $this->app->bind(SemesterRepositoryInterface::class, SemesterRepository::class);
+        $this->app->bind(OfferRepositoryInterface::class, OfferRepository::class);
     }
 
     /**

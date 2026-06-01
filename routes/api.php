@@ -13,6 +13,7 @@ use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PaymentCodeController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StageController;
@@ -285,6 +286,18 @@ Route::apiResource('student', StudentController::class);
 //////////////////////////////////////////////////////////Student//////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////offer //////////////////////////////////////
+
+Route::post('offer/index', [OfferController::class, 'index']);
+Route::post('offer/restore', [OfferController::class, 'restore']);
+Route::delete('offer/delete', [OfferController::class, 'destroy']);
+Route::delete('offer/force-delete', [OfferController::class, 'forceDelete']);
+Route::post('offer/update/{offer}', [OfferController::class, 'forceUpdate']);
+Route::put('/offer/{id}/{column}', [OfferController::class, 'toggle']);
+Route::apiResource('offer', OfferController::class);
+
+//////////////////////////////////////////////////////////Offer//////////////////////////////////////
+
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -315,3 +328,4 @@ Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
 Route::post('/activate/theme', [TeacherController::class, 'activateTheme']);
 Route::get('teachers/{teacher}/report', [TeacherController::class, 'teacherReport']);
 Route::get('admin/report', [TeacherController::class, 'adminReport']);
+Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherPdfReport']);

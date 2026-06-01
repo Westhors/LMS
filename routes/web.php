@@ -9,4 +9,3 @@ Route::get('/', function () {
 });
 
 
-Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherPdfReport']);
