@@ -306,9 +306,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('lessons/{lessonId}/attendance',[CourseDetailController::class, 'markAttendance']);
 });
 
-
-
 Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearning']);
-
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
+
+
+
+Route::post('/activate/theme', [TeacherController::class, 'activateTheme']);

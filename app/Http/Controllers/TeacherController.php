@@ -309,5 +309,26 @@ class TeacherController extends BaseController
         }
     }
 
+
+    public function activateTheme(Request $request)
+    {
+        $request->validate([
+            'theme' => 'required|in:theme1,theme2',
+        ]);
+
+        return response()->json([
+            'themes' => [
+                [
+                    'name' => 'theme1',
+                    'active' => $request->theme === 'theme1',
+                ],
+                [
+                    'name' => 'theme2',
+                    'active' => $request->theme === 'theme2',
+                ],
+            ],
+        ]);
+    }
+
 }
 
