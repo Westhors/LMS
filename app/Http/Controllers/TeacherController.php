@@ -465,7 +465,35 @@ class TeacherController extends BaseController
         ]);
     }
 
+public function monthlyProfitReport()
+{
+    $profits = EnrollmentRequest::where('status', 'approved')
+        ->select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(price) as total_profit')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
 
+    $data = $profits->map(function ($item) {
+
+        $monthName = Carbon::create()
+            ->month($item->month)
+            ->format('F');
+
+        return [
+            'month' => $monthName . ' ' . $item->year,
+            'profit' => (float) $item->total_profit,
+        ];
+    });
+
+    return response()->json([
+        'data' => $data
+    ]);
+}
 public function teacherPdfReport(Request $request, $teacherId)
 {
     $teacher = Teacher::findOrFail($teacherId);
