@@ -62,6 +62,7 @@ class StudentMeResource extends JsonResource
                             'id' => $q->id,
                             'question' => $q->question,
                             'mark' => $q->mark,
+                            'question_type' => $q->question_type,
                             'correct_answer' => $q->correct_answer,
 
                             'student_answer' => $studentAnswer?->answer,
