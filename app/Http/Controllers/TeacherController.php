@@ -8,6 +8,14 @@ use App\Http\Requests\TeacherRequest;
 use App\Http\Requests\TeacherUpdateRequest;
 use App\Http\Resources\TeacherResource;
 use App\Interfaces\TeacherRepositoryInterface;
+use App\Models\Book;
+use App\Models\Course;
+use App\Models\CourseDetail;
+use App\Models\Enrollment;
+use App\Models\EnrollmentRequest;
+use App\Models\Exam;
+use App\Models\PaymentCode;
+use App\Models\Semester;
 use App\Models\Teacher;
 use App\Traits\HttpResponses;
 use Exception;
@@ -327,6 +335,87 @@ class TeacherController extends BaseController
                     'active' => $request->theme === 'theme2',
                 ],
             ],
+        ]);
+    }
+
+
+    public function teacherReport($teacherId)
+    {
+        $teacher = Teacher::findOrFail($teacherId);
+
+        // الكورسات
+        $onlineCourses = Course::where('teacher_id', $teacherId)
+            ->where('type', 'online')
+            ->count();
+
+        $centerCourses = Course::where('teacher_id', $teacherId)
+            ->where('type', 'center')
+            ->count();
+
+        // عدد الطلاب المشتركين
+        $studentsCount = Enrollment::query()
+            ->where(function ($q) use ($teacherId) {
+
+                $q->whereIn('course_id',
+                    Course::where('teacher_id', $teacherId)->pluck('id')
+                );
+
+                $q->orWhereIn('semester_id',
+                    Semester::where('teacher_id', $teacherId)->pluck('id')
+                );
+
+                $q->orWhereIn('course_detail_id',
+                    CourseDetail::whereHas('course', function ($q) use ($teacherId) {
+                        $q->where('teacher_id', $teacherId);
+                    })->pluck('id')
+                );
+            })
+            ->distinct('student_id')
+            ->count('student_id');
+
+        // الأرباح من الطلبات المقبولة
+        $profits = EnrollmentRequest::where('teacher_id', $teacherId)
+            ->where('status', 'approved')
+            ->sum('price');
+
+        // الكوبونات المستخدمة
+        $usedCoupons = PaymentCode::where('teacher_id', $teacherId)
+            ->where('is_used', true)
+            ->count();
+
+        // الامتحانات
+        $examsCount = Exam::where('teacher_id', $teacherId)
+            ->where('type', 'exam')
+            ->count();
+
+        // الواجبات
+        $assignmentsCount = Exam::where('teacher_id', $teacherId)
+            ->where('type', 'assignment')
+            ->count();
+
+        // الترمات
+        $semestersCount = Semester::where('teacher_id', $teacherId)
+            ->count();
+
+        // الطلبات
+        $requestsCount = EnrollmentRequest::where('teacher_id', $teacherId)
+            ->count();
+
+        $booksCount = Book::where('teacher_id', $teacherId)->count();
+
+        return response()->json([
+            'data' => [
+                'online_courses' => $onlineCourses,
+                'center_courses' => $centerCourses,
+                'students_count' => $studentsCount,
+                'profits' => $profits,
+                'used_coupons' => $usedCoupons,
+                'exams_count' => $examsCount,
+                'assignments_count' => $assignmentsCount,
+                'semesters_count' => $semestersCount,
+                'requests_count' => $requestsCount,
+                'books_count' => $booksCount,
+            ]
         ]);
     }
 

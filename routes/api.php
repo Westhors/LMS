@@ -313,3 +313,4 @@ Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
 
 
 Route::post('/activate/theme', [TeacherController::class, 'activateTheme']);
+Route::get('teachers/{teacher}/report', [TeacherController::class, 'teacherReport']);
