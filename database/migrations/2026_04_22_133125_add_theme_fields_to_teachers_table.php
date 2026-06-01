@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('teachers', function (Blueprint $table) {
-            $table->string('theme')->constrained()->cascadeOnDelete();});
+            $table->string('theme')->nullable()
+            ;});
     }
 
     /**
