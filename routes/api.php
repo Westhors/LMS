@@ -327,7 +327,9 @@ Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
 
 Route::get('teachers/monthly-profit-report', [TeacherController::class, 'monthlyProfitReport']);
 Route::post('/activate/theme', [TeacherController::class, 'activateTheme']);
+Route::post('/teachers/theme', [TeacherController::class, 'getTeacherTheme']);
 Route::get('teachers/{teacher}/report', [TeacherController::class, 'teacherReport']);
 Route::get('admin/report', [TeacherController::class, 'adminReport']);
 Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherPdfReport']);
+
 

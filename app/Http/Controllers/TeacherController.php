@@ -318,24 +318,49 @@ class TeacherController extends BaseController
         }
     }
 
-
     public function activateTheme(Request $request)
     {
         $request->validate([
+            'teacher_id' => 'required|exists:teachers,id',
             'theme' => 'required|in:theme1,theme2',
         ]);
 
+        $teacher = Teacher::findOrFail($request->teacher_id);
+
+        // حفظ الثيم على المدرس
+        $teacher->update([
+            'theme' => $request->theme,
+        ]);
+
         return response()->json([
+            'status' => true,
+            'teacher_id' => $teacher->id,
+            'active_theme' => $teacher->theme,
             'themes' => [
                 [
                     'name' => 'theme1',
-                    'active' => $request->theme === 'theme1',
+                    'active' => $teacher->theme === 'theme1',
                 ],
                 [
                     'name' => 'theme2',
-                    'active' => $request->theme === 'theme2',
+                    'active' => $teacher->theme === 'theme2',
                 ],
             ],
+        ]);
+    }
+
+    public function getTeacherTheme(Request $request)
+    {
+        $request->validate([
+            'teacher_id' => 'required|exists:teachers,id',
+        ]);
+
+        $teacher = Teacher::findOrFail($request->teacher_id);
+
+        return response()->json([
+            'status' => true,
+            'teacher_id' => $teacher->id,
+            'active_theme' => $teacher->theme ?? 'theme1',
         ]);
     }
 
