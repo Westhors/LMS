@@ -16,6 +16,7 @@ use App\Models\EnrollmentRequest;
 use App\Models\Exam;
 use App\Models\PaymentCode;
 use App\Models\Semester;
+use App\Models\Student;
 use App\Models\Teacher;
 use App\Traits\HttpResponses;
 use Exception;
@@ -378,28 +379,10 @@ class TeacherController extends BaseController
             ->where('type', 'center')
             ->count();
 
-        // عدد الطلاب المشتركين
-        $studentsCount = Enrollment::query()
-            ->where(function ($q) use ($teacherId) {
+        // عدد الطلاب
+        $studentsCount = Student::where('teacher_id', $teacherId)->count();
 
-                $q->whereIn('course_id',
-                    Course::where('teacher_id', $teacherId)->pluck('id')
-                );
-
-                $q->orWhereIn('semester_id',
-                    Semester::where('teacher_id', $teacherId)->pluck('id')
-                );
-
-                $q->orWhereIn('course_detail_id',
-                    CourseDetail::whereHas('course', function ($q) use ($teacherId) {
-                        $q->where('teacher_id', $teacherId);
-                    })->pluck('id')
-                );
-            })
-            ->distinct('student_id')
-            ->count('student_id');
-
-        // الأرباح من الطلبات المقبولة
+        // الأرباح
         $profits = EnrollmentRequest::where('teacher_id', $teacherId)
             ->where('status', 'approved')
             ->sum('price');
@@ -420,14 +403,62 @@ class TeacherController extends BaseController
             ->count();
 
         // الترمات
-        $semestersCount = Semester::where('teacher_id', $teacherId)
-            ->count();
+        $semestersCount = Semester::where('teacher_id', $teacherId)->count();
 
         // الطلبات
-        $requestsCount = EnrollmentRequest::where('teacher_id', $teacherId)
-            ->count();
+        $requestsCount = EnrollmentRequest::where('teacher_id', $teacherId)->count();
 
+        // الكتب
         $booksCount = Book::where('teacher_id', $teacherId)->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | التقارير
+        |--------------------------------------------------------------------------
+        */
+
+        // عدد الطلاب لكل شهر
+        $studentsPerMonth = Student::where('teacher_id', $teacherId)
+            ->selectRaw('YEAR(created_at) as year')
+            ->selectRaw('MONTH(created_at) as month')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        // المحافظات
+        $studentsByGovernorate = Student::where('teacher_id', $teacherId)
+            ->whereNotNull('governorate')
+            ->where('governorate', '!=', '')
+            ->selectRaw('governorate, COUNT(*) as total')
+            ->groupBy('governorate')
+            ->orderByDesc('total')
+            ->get();
+
+        // الجنس
+        $studentsByGender = Student::where('teacher_id', $teacherId)
+            ->whereNotNull('gender')
+            ->selectRaw('gender, COUNT(*) as total')
+            ->groupBy('gender')
+            ->get();
+
+        // المرحلة الدراسية
+        $studentsByStage = Student::query()
+            ->join('stages', 'students.stage_id', '=', 'stages.id')
+            ->where('students.teacher_id', $teacherId)
+            ->selectRaw('stages.id, stages.name, COUNT(*) as total')
+            ->groupBy('stages.id', 'stages.name')
+            ->get();
+
+        // اشتراكات الشهر الماضي
+        $lastMonthSubscriptions = EnrollmentRequest::where('teacher_id', $teacherId)
+            ->where('status', 'approved')
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->selectRaw('type, COUNT(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
 
         return response()->json([
             'data' => [
@@ -441,10 +472,23 @@ class TeacherController extends BaseController
                 'semesters_count' => $semestersCount,
                 'requests_count' => $requestsCount,
                 'books_count' => $booksCount,
+
+                'students_per_month' => $studentsPerMonth,
+
+                'students_by_governorate' => $studentsByGovernorate,
+
+                'students_by_gender' => $studentsByGender,
+
+                'students_by_stage' => $studentsByStage,
+
+                'last_month_subscriptions' => [
+                    'course' => $lastMonthSubscriptions['course'] ?? 0,
+                    'semester' => $lastMonthSubscriptions['semester'] ?? 0,
+                    'lesson' => $lastMonthSubscriptions['lesson'] ?? 0,
+                ],
             ]
         ]);
     }
-
 
     public function adminReport()
     {
@@ -490,126 +534,127 @@ class TeacherController extends BaseController
         ]);
     }
 
-public function monthlyProfitReport()
-{
-    $profits = EnrollmentRequest::where('status', 'approved')
-        ->select(
-            DB::raw('YEAR(created_at) as year'),
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('SUM(price) as total_profit')
-        )
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'desc')
-        ->orderBy('month', 'desc')
-        ->get();
+    public function monthlyProfitReport()
+    {
+        $profits = EnrollmentRequest::where('status', 'approved')
+            ->select(
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('SUM(price) as total_profit')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
 
-    $data = $profits->map(function ($item) {
+        $data = $profits->map(function ($item) {
 
-        $monthName = Carbon::create()
-            ->month($item->month)
-            ->format('F');
+            $monthName = Carbon::create()
+                ->month($item->month)
+                ->format('F');
 
-        return [
-            'month' => $monthName . ' ' . $item->year,
-            'profit' => (float) $item->total_profit,
-        ];
-    });
+            return [
+                'month' => $monthName . ' ' . $item->year,
+                'profit' => (float) $item->total_profit,
+            ];
+        });
 
-    return response()->json([
-        'data' => $data
-    ]);
-}
-public function teacherPdfReport(Request $request, $teacherId)
-{
-    $teacher = Teacher::findOrFail($teacherId);
+        return response()->json([
+            'data' => $data
+        ]);
+    }
 
-    $from = $request->from ? Carbon::parse($request->from) : null;
-    $to   = $request->to ? Carbon::parse($request->to) : null;
+    public function teacherPdfReport(Request $request, $teacherId)
+    {
+        $teacher = Teacher::findOrFail($teacherId);
 
-    // =========================
-    // APPROVED REQUESTS ONLY (MASTER SOURCE)
-    // =========================
-    $approvedRequests = EnrollmentRequest::where('teacher_id', $teacherId)
-        ->where('status', 'approved')
-        ->when($from && $to, fn($q) => $q->whereBetween('created_at', [$from, $to]))
-        ->get();
+        $from = $request->from ? Carbon::parse($request->from) : null;
+        $to   = $request->to ? Carbon::parse($request->to) : null;
 
-    // =========================
-    // COURSES
-    // =========================
-    $courses = Course::where('teacher_id', $teacherId)->get();
+        // =========================
+        // APPROVED REQUESTS ONLY (MASTER SOURCE)
+        // =========================
+        $approvedRequests = EnrollmentRequest::where('teacher_id', $teacherId)
+            ->where('status', 'approved')
+            ->when($from && $to, fn($q) => $q->whereBetween('created_at', [$from, $to]))
+            ->get();
 
-    $onlineCourses = $courses->where('type', 'online')->count();
-    $centerCourses = $courses->where('type', 'center')->count();
+        // =========================
+        // COURSES
+        // =========================
+        $courses = Course::where('teacher_id', $teacherId)->get();
 
-    $coursesData = $courses->map(function ($course) use ($approvedRequests) {
+        $onlineCourses = $courses->where('type', 'online')->count();
+        $centerCourses = $courses->where('type', 'center')->count();
 
-        $req = $approvedRequests->where('course_id', $course->id);
+        $coursesData = $courses->map(function ($course) use ($approvedRequests) {
 
-        return [
-            'id' => $course->id,
-            'title' => $course->title,
-            'type' => $course->type,
-            'students' => $req->pluck('student_id')->unique()->count(),
-            'profit' => $req->sum('price'),
-        ];
-    });
+            $req = $approvedRequests->where('course_id', $course->id);
 
-    // =========================
-    // SEMESTERS
-    // =========================
-    $semesters = Semester::where('teacher_id', $teacherId)->get();
+            return [
+                'id' => $course->id,
+                'title' => $course->title,
+                'type' => $course->type,
+                'students' => $req->pluck('student_id')->unique()->count(),
+                'profit' => $req->sum('price'),
+            ];
+        });
 
-    $semesterData = $semesters->map(function ($s) use ($approvedRequests) {
+        // =========================
+        // SEMESTERS
+        // =========================
+        $semesters = Semester::where('teacher_id', $teacherId)->get();
 
-        $req = $approvedRequests->where('semester_id', $s->id);
+        $semesterData = $semesters->map(function ($s) use ($approvedRequests) {
 
-        return [
-            'name' => $s->name,
-            'students' => $req->pluck('student_id')->unique()->count(),
-            'profit' => $req->sum('price'),
-        ];
-    });
+            $req = $approvedRequests->where('semester_id', $s->id);
 
-    // =========================
-    // LESSONS
-    // =========================
-    $lessons = CourseDetail::whereHas('course', function ($q) use ($teacherId) {
-        $q->where('teacher_id', $teacherId);
-    })->get();
+            return [
+                'name' => $s->name,
+                'students' => $req->pluck('student_id')->unique()->count(),
+                'profit' => $req->sum('price'),
+            ];
+        });
 
-    $lessonData = $lessons->map(function ($l) use ($approvedRequests) {
+        // =========================
+        // LESSONS
+        // =========================
+        $lessons = CourseDetail::whereHas('course', function ($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })->get();
 
-        $req = $approvedRequests->where('course_detail_id', $l->id);
+        $lessonData = $lessons->map(function ($l) use ($approvedRequests) {
 
-        return [
-            'title' => $l->title ?? 'Lesson',
-            'students' => $req->pluck('student_id')->unique()->count(),
-            'profit' => $req->sum('price'),
-        ];
-    });
+            $req = $approvedRequests->where('course_detail_id', $l->id);
 
-    // =========================
-    // TOTAL PROFIT
-    // =========================
-    $totalProfit = $approvedRequests->sum('price');
+            return [
+                'title' => $l->title ?? 'Lesson',
+                'students' => $req->pluck('student_id')->unique()->count(),
+                'profit' => $req->sum('price'),
+            ];
+        });
 
-    // =========================
-    // PDF GENERATION
-    // =========================
-    $pdf = PDF::loadView('reports.teacher_dashboard', [
-        'teacher' => $teacher,
-        'onlineCourses' => $onlineCourses,
-        'centerCourses' => $centerCourses,
-        'coursesData' => $coursesData,
-        'semesterData' => $semesterData,
-        'lessonData' => $lessonData,
-        'totalProfit' => $totalProfit,
-        'from' => $from,
-        'to' => $to,
-    ]);
+        // =========================
+        // TOTAL PROFIT
+        // =========================
+        $totalProfit = $approvedRequests->sum('price');
 
-    return $pdf->stream('teacher-report.pdf');
-}
+        // =========================
+        // PDF GENERATION
+        // =========================
+        $pdf = PDF::loadView('reports.teacher_dashboard', [
+            'teacher' => $teacher,
+            'onlineCourses' => $onlineCourses,
+            'centerCourses' => $centerCourses,
+            'coursesData' => $coursesData,
+            'semesterData' => $semesterData,
+            'lessonData' => $lessonData,
+            'totalProfit' => $totalProfit,
+            'from' => $from,
+            'to' => $to,
+        ]);
+
+        return $pdf->stream('teacher-report.pdf');
+    }
 }
 
