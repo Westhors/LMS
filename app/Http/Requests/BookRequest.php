@@ -27,6 +27,9 @@ class BookRequest extends FormRequest
             'teacher_id' => 'nullable|exists:teachers,id',
             'price' => 'nullable|numeric|min:0',
             'pages_count' => 'nullable|integer|min:1',
+            'stage_id'         => 'nullable|exists:stages,id',
+            'discount'         => 'nullable|numeric|min:0',
+
         ];
     }
 }

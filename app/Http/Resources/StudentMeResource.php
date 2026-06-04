@@ -20,6 +20,9 @@ class StudentMeResource extends JsonResource
             'code_parent' => $this->code_parent,
             'type_of_attendance' => $this->type_of_attendance,
             'gender' => $this->gender,
+            'governorate' => $this->governorate,
+            'school_name' => $this->school_name,
+            'type_of_study' => $this->type_of_study,
             'active' => $this->active,
 
             'teacher_id' => $this->teacher_id,

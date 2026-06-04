@@ -18,12 +18,15 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('code_parent')->nullable();
             $table->string('phone_parent')->nullable();
+            $table->string('governorate')->nullable();
+            $table->string('school_name')->nullable();
+            $table->enum('type_of_study', ['general', 'azhar'])->nullable();
             $table->enum('type_of_attendance', ['center', 'online'])->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->foreignId('teacher_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
-                
+
             $table->foreignId('stage_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();

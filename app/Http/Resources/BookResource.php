@@ -19,6 +19,8 @@ class BookResource extends JsonResource
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
             'createdAt' => $this->created_at->format('d F, Y'),
+            'discount' => $this->discount ?? null,
+            'stage_id' => $this->stage_id ?? null,
         ];
     }
 }

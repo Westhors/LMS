@@ -19,4 +19,10 @@ class Book extends BaseModel
     {
         return $this->belongsTo(Teacher::class);
     }
+
+    public function stage(): BelongsTo
+    {
+        return $this->belongsTo(Stage::class);
+    }
 }
+

@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
+
 class Semester extends BaseModel
 {
     protected $guarded = ['id'];
+    use HasMedia;
 
+    protected $with = [
+        'media',
+    ];
     protected $casts = [
         'active' => 'boolean'
     ];
