@@ -24,7 +24,9 @@ class CenterHourRequest extends FormRequest
         return [
             'title'         => 'nullable|string|max:255',
             'date'         => 'nullable|date',
-            'hours'         => 'nullable|string|max:255',
+            'hours_start'         => 'nullable|string|max:255',
+            'hours_end'         => 'nullable|string|max:255',
+            'address'         => 'nullable|string|max:255',
             'note'         => 'nullable|string',
             'teacher_id'       => 'nullable|exists:teachers,id',
         ];

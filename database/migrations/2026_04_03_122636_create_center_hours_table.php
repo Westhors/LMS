@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('center_hours', function (Blueprint $table) {
             $table->id();
             $table->string('title')->nullable();
-            $table->date('date')->nullable();
-            $table->string('hours')->nullable();
+            $table->string('date')->nullable();
+            $table->string('hours_start')->nullable();
+            $table->string('hours_end')->nullable();
+            $table->string('address')->nullable();
             $table->text('note')->nullable();
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
