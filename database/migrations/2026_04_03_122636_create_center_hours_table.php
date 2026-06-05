@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('hours_start')->nullable();
             $table->string('hours_end')->nullable();
             $table->string('address')->nullable();
+            $table->string('phone')->nullable();
             $table->text('note')->nullable();
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

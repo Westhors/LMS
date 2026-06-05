@@ -15,6 +15,7 @@ class CenterHourResource extends JsonResource
             'hours_start' => $this->hours_start ?? null,
             'hours_end' => $this->hours_end ?? null,
             'address' => $this->address ?? null,
+            'phone' => $this->phone ?? null,
             'note' => $this->note ?? null,
             'teacher_id' => $this->teacher_id ?? null,
             'createdAt' => $this->created_at->format('d F, Y'),
