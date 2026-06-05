@@ -21,6 +21,10 @@ class ExamRequest extends FormRequest
             'description' => 'nullable|string',
             'type' => 'nullable|in:assignment,exam',
             'type_exam' => 'nullable|in:online,center',
+
+            'time_start' => 'nullable|string|max:255',
+             'time_end' => 'nullable|string|max:255',
+
             'course_detail_id' => 'nullable|exists:course_details,id',
             'stage_id' => 'nullable|exists:stages,id',
             'teacher_id' => 'nullable|exists:teachers,id',

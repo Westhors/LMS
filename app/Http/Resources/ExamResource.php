@@ -26,6 +26,8 @@ class ExamResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'active' => $this->active,
 
+                'time_start' => $this->time_start,
+                'time_end' => $this->time_end,
             'type_exam' => $this->type_exam,
 
 

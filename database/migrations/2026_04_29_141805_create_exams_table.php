@@ -19,6 +19,9 @@ return new class extends Migration
             $table->enum('type', ['assignment', 'exam'])->default('exam');
             $table->enum('type_exam',  ['online', 'center'])->default('center');
 
+            $table->string('time_start')->nullable();
+            $table->string('time_end')->nullable();
+            
             $table->foreignId('course_detail_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
