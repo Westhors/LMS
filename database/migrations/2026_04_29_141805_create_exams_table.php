@@ -21,11 +21,11 @@ return new class extends Migration
 
             $table->string('time_start')->nullable();
             $table->string('time_end')->nullable();
-            
+
             $table->foreignId('course_detail_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
-
+ 
             $table->foreignId('stage_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
