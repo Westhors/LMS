@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('type', ['assignment', 'exam'])->default('exam');
+            $table->enum('type_exam',  ['online', 'center'])->default('center');
 
             $table->foreignId('course_detail_id')->nullable()
                 ->constrained()
@@ -45,6 +46,7 @@ return new class extends Migration
             // إظهار النتيجة بعد الانتهاء
             $table->boolean('show_result')
                 ->default(true);
+            $table->boolean('active')->default(true);
 
             $table->softDeletes();
             $table->timestamps();

@@ -24,6 +24,9 @@ class ExamResource extends JsonResource
             'total_marks' => $this->total_marks,
             'total_must_pass_marks' => $this->total_must_pass_marks,
             'duration_minutes' => $this->duration_minutes,
+            'active' => $this->active,
+
+            'type_exam' => $this->type_exam,
 
 
             'random_questions' => (bool) $this->random_questions,
