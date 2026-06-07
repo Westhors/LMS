@@ -53,7 +53,8 @@ class PaymentCodeController extends BaseController
         return response()->json([
             'status' => true,
             'message' => 'Codes generated',
-            'count' => count($codes)
+            'count' => count($codes),
+            'data' => $codes,
         ]);
     }
 
