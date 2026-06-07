@@ -124,6 +124,9 @@ class CourseDetailController extends BaseController
            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $course);
            }
+            if (request('pdf') !== null) {
+                $this->crudRepository->AddMediaCollection('pdf', $course , 'pdf');
+           }
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

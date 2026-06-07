@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('course_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
-            $table->string('title')->nullable();
             $table->text('description')->nullable();
-            $table->string('title_ar')->nullable();
+            $table->json('titles')->nullable();
+            $table->json('titles_ar')->nullable();
+            $table->json('link_video')->nullable();
             $table->text('description_ar')->nullable();
             $table->string('content_link')->nullable(); // لو فيديو يوتيوب أو لينك زووم
             $table->date('lession_date')->nullable(); // يوم الحصة
             $table->time('lession_time')->nullable(); // وقت الحصة
-            $table->string('link_video')->nullable();
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             // لازم ينجح عشان يفتح الحصة التالية

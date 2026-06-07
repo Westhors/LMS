@@ -12,8 +12,9 @@ class CourseDetailResource extends JsonResource
             'id' => $this->id,
             'course_id' => $this->course_id,
             'course' => new CourseResource($this->whenLoaded('course')),
-            'title' => $this->title,
-            'title_ar' => $this->title_ar,
+            'titles' => $this->titles,
+            'titles_ar' => $this->titles_ar,
+            'link_video' => $this->link_video,
             'description' => $this->description,
             'description_ar' => $this->description_ar,
             'content_link' => $this->must_pass_to_unlock
@@ -38,13 +39,20 @@ class CourseDetailResource extends JsonResource
                 $this->whenLoaded('students')
             ),
 
-         'attended' => (bool) (
+            'attended' => (bool) (
                 $this->attendances
                     ->where('student_id', auth()->id())
                     ->first()?->attended
             ),
 
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
+
+            'pdfUrl' => $this->getFirstMediaUrl('pdf'),
+            'pdf' => new MediaResource($this->getFirstMedia('pdf')),
+
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
 }
+

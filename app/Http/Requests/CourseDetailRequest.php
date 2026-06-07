@@ -17,12 +17,23 @@ class CourseDetailRequest extends FormRequest
             'course_id'    => 'required|exists:courses,id',
             'description'  => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'title'        => 'nullable|string|max:255',
-            'title_ar' => 'nullable|string|max:255',
             'content_link' => 'nullable|url',
+
+
+
+            'titles' => 'nullable|array',
+            'titles.*' => 'nullable|string|max:255',
+
+            'titles_ar' => 'nullable|array',
+            'titles_ar.*' => 'nullable|string|max:255',
+
+            'link_video' => 'nullable|array',
+            'link_video.*' => 'nullable|url',
+
+
+
             'lession_date' => 'nullable|date',
             'lession_time' => 'nullable',
-            'link_video' => 'nullable|url',
             'price'         => 'nullable|numeric|min:0',
             'discount'         => 'nullable|numeric|min:0',
         ];

@@ -16,7 +16,11 @@ class CourseDetail extends BaseModel
     protected $with = [
         'media',
     ];
-
+    protected $casts = [
+        'titles' => 'array',
+        'titles_ar' => 'array',
+        'link_video' => 'array',
+    ];
     protected $guarded = ['id'];
 
     public function course()
