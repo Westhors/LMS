@@ -25,7 +25,10 @@ class AboutUpdateRequest extends FormRequest
             'name' => 'nullable|string',
             'description' => 'nullable|string',
             'name_ar' => 'nullable|string',
-            'meta' => 'nullable|string',
+            'google_meta' => 'nullable|string',
+            'facebook_meta' => 'nullable|string',
+            'tiktok_meta' => 'nullable|string',
+            'you_tube_meta' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'teacher_id' => 'nullable|exists:teachers,id',
         ];

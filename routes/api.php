@@ -333,3 +333,5 @@ Route::get('admin/report', [TeacherController::class, 'adminReport']);
 Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherPdfReport']);
 
 
+Route::post('student/change-password', [TeacherController::class, 'changePasswordStudent']);
+Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesReport']);

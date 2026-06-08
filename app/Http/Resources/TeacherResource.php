@@ -15,7 +15,8 @@ class TeacherResource extends JsonResource
             'sub_domain' => $this->sub_domain ?? null,
             'phone' => $this->phone ?? null,
             'active' => $this->active ?? null,
-
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
             'website' => [
 
                 'home' => new HomeResource($this->whenLoaded('home')),

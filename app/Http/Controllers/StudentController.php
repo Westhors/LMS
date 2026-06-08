@@ -50,9 +50,12 @@ class StudentController extends BaseController
             'password' => Hash::make($request->password),
         ]);
 
-        // 👇 لازم save
         $student->code_parent = rand(1000, 9999) . $student->id;
         $student->save();
+
+        if ($request->image) {
+            $this->crudRepository->AddMediaCollection('image', $student);
+        }
 
         $token = $student->createToken('student_token')->plainTextToken;
 
@@ -60,7 +63,7 @@ class StudentController extends BaseController
             'status' => true,
             'message' => 'Student registered successfully',
             'token' => $token,
-            'data' => new StudentResource($student)
+            'data' => new StudentResource($student),
         ]);
     }
 

@@ -196,6 +196,10 @@ class CourseDetailController extends BaseController
                 $courseDetail = CourseDetail::find($courseDetail->id);
                 $this->crudRepository->AddMediaCollection('image', $courseDetail);
             }
+            if ($request->filled('pdf')) {
+                $courseDetail = CourseDetail::find($courseDetail->id);
+                $this->crudRepository->AddMediaCollection('pdf', $courseDetail, 'pdf');
+            }
             activity()->performedOn($courseDetail)->withProperties(['attributes' => $courseDetail])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
         } catch (Exception $e) {

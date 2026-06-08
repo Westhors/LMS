@@ -21,7 +21,8 @@ class StudentResource extends JsonResource
             'governorate' => $this->governorate,
             'school_name' => $this->school_name,
             'type_of_study' => $this->type_of_study,
-
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
             'stage' => $this->whenLoaded('stage'),

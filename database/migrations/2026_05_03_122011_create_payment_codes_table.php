@@ -18,6 +18,8 @@ return new class extends Migration
 
             // نوع الكود
             $table->enum('type', ['wallet', 'course', 'semester', 'lesson']);
+            
+            $table->enum('type_code',  ['online', 'center'])->default('online');
 
             // علاقات مباشرة
             $table->foreignId('course_id')->nullable()->constrained()->cascadeOnDelete();

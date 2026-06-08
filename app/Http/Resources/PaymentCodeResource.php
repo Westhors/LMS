@@ -18,6 +18,7 @@ class PaymentCodeResource extends JsonResource
             'used_at' => $this->used_at ?? null,
             'expires_at' => $this->expires_at ?? null,
             'active' => $this->active ?? null,
+            'type_code' => $this->type_code ?? null,
             'note' => $this->note ?? null,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];

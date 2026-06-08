@@ -57,6 +57,9 @@ class TeacherController extends BaseController
                 $data['password'] = Hash::make($request->password);
             }
             $teacher = $this->crudRepository->create($data);
+            if (request('image') !== null) {
+                $this->crudRepository->AddMediaCollection('image', $teacher);
+           }
             if ($request->filled('stage')) {
                 foreach ($request->stage as $item) {
 
@@ -655,6 +658,26 @@ class TeacherController extends BaseController
         ]);
 
         return $pdf->stream('teacher-report.pdf');
+    }
+
+
+    public function changePasswordStudent(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'password' => 'required|min:6',
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        $student->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully',
+        ]);
     }
 }
 

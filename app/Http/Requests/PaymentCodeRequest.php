@@ -28,6 +28,7 @@ class PaymentCodeRequest extends FormRequest
             'is_used'      => 'nullable|boolean',
             'student_id'            => 'nullable|exists:students,id',
             'used_at'         => 'nullable|string|max:255',
+            'type_code' => 'nullable|in:online,center',
             'expires_at'      => 'nullable|date',
             'active'            => 'nullable|string|max:255',
             'note'   => 'nullable|string',

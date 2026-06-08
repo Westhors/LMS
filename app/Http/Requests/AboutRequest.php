@@ -26,7 +26,10 @@ class AboutRequest extends FormRequest
             'description' => 'required|string',
             'name_ar' => 'required|string',
             'description_ar' => 'required|string',
-            'meta' => 'nullable|string',
+            'google_meta' => 'nullable|string',
+            'facebook_meta' => 'nullable|string',
+            'tiktok_meta' => 'nullable|string',
+            'you_tube_meta' => 'nullable|string',
             'teacher_id' => 'required|exists:teachers,id',
         ];
     }
