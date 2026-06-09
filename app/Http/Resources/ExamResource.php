@@ -20,7 +20,32 @@ class ExamResource extends JsonResource
 
 
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
-            'answers' => AnswerResource::collection($this->whenLoaded('answers')),
+            'students' => $this->whenLoaded('answers', function () {
+                return $this->answers
+                    ->load('student')
+                    ->groupBy('student_id')
+                    ->map(function ($answers) {
+
+                        $student = $answers->first()->student;
+
+                        return [
+                            'id' => $student->id,
+                            'name' => $student->name,
+
+                            'answers' => $answers->map(function ($answer) {
+                                return [
+                                    'id' => $answer->id,
+                                    'question_id' => $answer->question_id,
+                                    'answer' => $answer->answer,
+                                    'mark' => $answer->mark,
+                                    'is_auto_corrected' => $answer->is_auto_corrected,
+                                    'is_correct' => $answer->is_correct,
+                                    'created_at' => $answer->created_at?->format('Y-m-d H:i:s'),
+                                ];
+                            })->values(),
+                        ];
+                    })->values();
+            }),
             'total_marks' => $this->total_marks,
             'total_must_pass_marks' => $this->total_must_pass_marks,
             'duration_minutes' => $this->duration_minutes,

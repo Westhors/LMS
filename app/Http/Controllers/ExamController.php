@@ -58,7 +58,7 @@ class ExamController extends BaseController
     public function show(Exam $exam): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exam->load(['questions', 'answers', 'courseDetail', 'stage', 'teacher']);
+            $exam->load(['questions', 'answers.student','courseDetail', 'stage', 'teacher']);
             return JsonResponse::respondSuccess('Item Fetched Successfully', new ExamResource($exam));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
