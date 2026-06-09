@@ -62,9 +62,9 @@ class PaymentCodeController extends BaseController
 
     public function index(Request $request)
     {
-        $query = PaymentCode::query();
+        $query = PaymentCode::with('student');
 
-        // 🎯 المدرس (أفضل من body security-wise)
+        // 🎯 المدرس
         $query->when(auth()->check(), function ($q) {
             $q->where('teacher_id', auth()->id());
         });
@@ -91,12 +91,18 @@ class PaymentCodeController extends BaseController
         $query->when($filters['type_code'] ?? null, function ($q, $value) {
             $q->where('type_code', $value);
         });
+
         // 🔎 Search by code
         if ($request->filled('search')) {
             $query->where('code', 'like', '%' . $request->search . '%');
         }
 
         $codes = $query->get();
+
+        // إضافة اسم الطالب لكل كود
+        $codes->each(function ($code) {
+            $code->student_name = $code->student?->name;
+        });
 
         return response()->json([
             'status' => true,
