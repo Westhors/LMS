@@ -404,21 +404,30 @@ public function addQuestions(Request $request)
     public function result($examId, $studentId)
     {
         $exam = Exam::findOrFail($examId);
-        if (!$exam->show_result) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Result is hidden for this exam.'
-            ], 403);
-        }
+
         $answers = ExamAnswer::with('question.options')
             ->where('exam_id', $examId)
             ->where('student_id', $studentId)
             ->get();
+
+        $total = $answers->sum('mark');
+
+        $passed = $total >= $exam->total_must_pass_marks;
+
+        if (!$exam->show_result) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Result is hidden for this exam.',
+                'passed' => $passed,
+            ], 403);
+        }
+
         return response()->json([
             'status' => true,
             'exam_id' => $exam->id,
             'exam_title' => $exam->title,
-            'total' => $answers->sum('mark'),
+            'total' => $total,
+            'passed' => $passed,
             'data' => AnswerResource::collection($answers)
         ]);
     }

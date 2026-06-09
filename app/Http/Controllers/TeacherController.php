@@ -177,29 +177,46 @@ class TeacherController extends BaseController
     public function update(TeacherUpdateRequest $request, Teacher $teacher)
     {
         try {
+
             $data = $request->validated();
+
             unset($data['stage'], $data['subject']);
+
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-            $teacher = $this->crudRepository->update($data, $teacher->id);
+
+            // تحديث البيانات
+            $this->crudRepository->update($data, $teacher->id);
+
+            // إعادة تحميل المدرس
+            $teacher = Teacher::findOrFail($teacher->id);
+
+            // الصورة
             if ($request->filled('image')) {
-                $teacher = Teacher::find($teacher->id);
                 $this->crudRepository->AddMediaCollection('image', $teacher);
             }
+
+            // المراحل
             if ($request->filled('stage')) {
+
                 $stageIds = collect($request->stage)
                     ->pluck('stage_id')
                     ->toArray();
+
                 $teacher->stages()->sync($stageIds);
+
                 foreach ($request->stage as $item) {
+
                     if (!empty($item['image'])) {
+
                         DB::table('mediable')
                             ->where('model_type', \App\Models\Stage::class)
                             ->where('model_id', $item['stage_id'])
                             ->where('collection', 'stage_image')
                             ->where('teacher_id', $teacher->id)
                             ->delete();
+
                         DB::table('mediable')->insert([
                             'model_type' => \App\Models\Stage::class,
                             'model_id'   => $item['stage_id'],
@@ -210,17 +227,25 @@ class TeacherController extends BaseController
                     }
                 }
             }
+
+            // المواد
             if ($request->filled('subject')) {
+
                 $subjectIds = collect($request->subject)
                     ->pluck('subject_id')
                     ->toArray();
+
                 $teacher->subjects()->sync($subjectIds);
             }
+
             return JsonResponse::respondSuccess(
                 trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY)
             );
+
         } catch (Exception $e) {
+
             return JsonResponse::respondError($e->getMessage());
+
         }
     }
 
