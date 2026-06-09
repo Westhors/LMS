@@ -59,7 +59,7 @@ class TeacherController extends BaseController
             $teacher = $this->crudRepository->create($data);
             if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $teacher);
-           }
+            }
             if ($request->filled('stage')) {
                 foreach ($request->stage as $item) {
 
@@ -182,7 +182,11 @@ class TeacherController extends BaseController
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-            $this->crudRepository->update($data, $teacher->id);
+            $teacher = $this->crudRepository->update($data, $teacher->id);
+            if ($request->filled('image')) {
+                $teacher = Teacher::find($teacher->id);
+                $this->crudRepository->AddMediaCollection('image', $teacher);
+            }
             if ($request->filled('stage')) {
                 $stageIds = collect($request->stage)
                     ->pluck('stage_id')
