@@ -24,7 +24,8 @@ class StudentMeResource extends JsonResource
             'school_name' => $this->school_name,
             'type_of_study' => $this->type_of_study,
             'active' => $this->active,
-
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
             'stage' => $this->whenLoaded('stage'),

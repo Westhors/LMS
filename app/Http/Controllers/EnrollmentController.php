@@ -235,7 +235,6 @@ class EnrollmentController extends Controller
         $student = Student::find($id);
 
         $enrollments = Enrollment::where('student_id', $student->id)->get();
-
         // 🎓 IDs
         $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
         $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
