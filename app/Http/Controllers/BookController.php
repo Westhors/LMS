@@ -50,7 +50,11 @@ class BookController extends BaseController
     public function show(Book $book): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $book->load(['teacher']);
+            $book->load([
+                'teacher',
+                'students.stage',
+                'students.teacher'
+            ]);
             return JsonResponse::respondSuccess('Item Fetched Successfully', new BookResource($book));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -58,7 +62,7 @@ class BookController extends BaseController
     }
 
 
-    
+
     public function update(BookRequest $request, Book $book): \Illuminate\Http\JsonResponse
     {
         try {

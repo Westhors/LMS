@@ -22,10 +22,11 @@ class EnrollmentController extends Controller
     public function requestEnroll(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:course,semester,lesson',
+            'type' => 'required|in:course,semester,lesson,book',
             'course_id' => 'nullable',
             'semester_id' => 'nullable',
             'course_detail_id' => 'nullable',
+            'book_id' => 'nullable',
             'price' => 'required|numeric'
         ]);
 
@@ -46,6 +47,7 @@ class EnrollmentController extends Controller
                     'course_id' => $request->course_id,
                     'semester_id' => $request->semester_id,
                     'course_detail_id' => $request->course_detail_id,
+                    'book_id' => $request->book_id,
                 ]);
 
                 DB::commit();
@@ -64,6 +66,7 @@ class EnrollmentController extends Controller
                 'course_id' => $request->course_id,
                 'semester_id' => $request->semester_id,
                 'course_detail_id' => $request->course_detail_id,
+                'book_id' => $request->book_id,
                 'price' => $request->price,
                 'status' => 'pending'
             ]);
@@ -169,6 +172,7 @@ class EnrollmentController extends Controller
                 'course_id' => $code->course_id,
                 'semester_id' => $code->semester_id,
                 'course_detail_id' => $code->course_detail_id,
+                'book_id' => $code->book_id,
             ]);
 
             // 🔥 update request
@@ -177,6 +181,7 @@ class EnrollmentController extends Controller
                 ->where('course_id', $code->course_id)
                 ->where('semester_id', $code->semester_id)
                 ->where('course_detail_id', $code->course_detail_id)
+                ->where('book_id', $code->book_id)
                 ->where('status', 'pending')
                 ->first();
 

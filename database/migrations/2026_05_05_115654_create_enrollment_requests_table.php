@@ -17,12 +17,13 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained();
             $table->foreignId('teacher_id')->constrained();
 
-            $table->enum('type', ['course', 'semester', 'lesson']);
+            $table->enum('type', ['course', 'semester', 'lesson', 'book']);
 
             $table->foreignId('course_id')->nullable();
             $table->foreignId('semester_id')->nullable();
             $table->foreignId('course_detail_id')->nullable();
-
+            $table->foreignId('book_id')->nullable();
+            
             $table->decimal('price', 10, 2);
 
             $table->enum('status', ['pending', 'rejected', 'approved'])->default('pending');

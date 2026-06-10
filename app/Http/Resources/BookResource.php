@@ -21,6 +21,9 @@ class BookResource extends JsonResource
             'createdAt' => $this->created_at->format('d F, Y'),
             'discount' => $this->discount ?? null,
             'stage_id' => $this->stage_id ?? null,
+            'students' => StudentResource::collection(
+                $this->whenLoaded('students')
+            ),
         ];
     }
 }

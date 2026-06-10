@@ -16,11 +16,12 @@ return new class extends Migration
 
             $table->foreignId('student_id');
 
-            $table->enum('type', ['course', 'semester', 'lesson']);
+            $table->enum('type', ['course', 'semester', 'lesson', 'book']);
 
             $table->foreignId('course_id')->nullable();
             $table->foreignId('semester_id')->nullable();
             $table->foreignId('course_detail_id')->nullable();
+            $table->foreignId('book_id')->nullable();
 
             $table->timestamps();
         });

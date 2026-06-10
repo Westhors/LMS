@@ -24,5 +24,15 @@ class Book extends BaseModel
     {
         return $this->belongsTo(Stage::class);
     }
+
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'enrollments',
+            'book_id',
+            'student_id'
+        )->where('type', 'book');
+    }
 }
 
