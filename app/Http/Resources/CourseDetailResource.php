@@ -14,7 +14,13 @@ class CourseDetailResource extends JsonResource
             'course' => new CourseResource($this->whenLoaded('course')),
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
-            'link_video' => $this->link_video,
+            
+            'link_video' => $this->must_pass_to_unlock
+                ? $this->checkStudentPassedExam()
+                    ? $this->link_video
+                    : 'You must pass the exam first'
+                : $this->link_video,
+
             'description' => $this->description,
             'description_ar' => $this->description_ar,
             'content_link' => $this->must_pass_to_unlock
