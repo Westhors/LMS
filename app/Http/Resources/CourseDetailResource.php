@@ -14,7 +14,7 @@ class CourseDetailResource extends JsonResource
             'course' => new CourseResource($this->whenLoaded('course')),
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
-            
+
             'link_video' => $this->must_pass_to_unlock
                 ? $this->checkStudentPassedExam()
                     ? $this->link_video
@@ -32,6 +32,7 @@ class CourseDetailResource extends JsonResource
             'lession_time' => $this->lession_time,
             'price' => $this->price,
             'must_pass_to_unlock' => (bool) $this->must_pass_to_unlock,
+            'must_solve_assignment_to_unlock' => (bool) $this->must_solve_assignment_to_unlock,
             'exams' => ExamResource::collection(
                 $this->whenLoaded('exams')
             ),

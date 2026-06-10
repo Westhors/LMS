@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('course_detail_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
- 
+
             $table->foreignId('stage_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();
