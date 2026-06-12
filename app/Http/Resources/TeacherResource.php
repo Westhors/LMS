@@ -15,6 +15,13 @@ class TeacherResource extends JsonResource
             'sub_domain' => $this->sub_domain ?? null,
             'phone' => $this->phone ?? null,
             'active' => $this->active ?? null,
+            'theme' => $this->theme ?? null,
+            'backgroud_color' => $this->backgroud_color ?? null,
+            'font_color' => $this->font_color ?? null,
+
+
+
+
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
             'website' => [

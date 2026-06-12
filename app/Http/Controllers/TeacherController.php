@@ -353,30 +353,40 @@ class TeacherController extends BaseController
 
     public function activateTheme(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'teacher_id' => 'required|exists:teachers,id',
             'theme' => 'required|in:theme1,theme2',
+            'backgroud_color' => 'nullable|string',
+            'font_color' => 'nullable|string',
         ]);
 
-        $teacher = Teacher::findOrFail($request->teacher_id);
+        $teacher = Teacher::findOrFail($data['teacher_id']);
 
-        // حفظ الثيم على المدرس
         $teacher->update([
-            'theme' => $request->theme,
+            'theme' => $data['theme'],
+            'backgroud_color' => $data['backgroud_color'] ?? $teacher->backgroud_color,
+            'font_color' => $data['font_color'] ?? $teacher->font_color,
         ]);
+
+        $teacher->refresh();
 
         return response()->json([
             'status' => true,
-            'teacher_id' => $teacher->id,
-            'active_theme' => $teacher->theme,
-            'themes' => [
-                [
-                    'name' => 'theme1',
-                    'active' => $teacher->theme === 'theme1',
-                ],
-                [
-                    'name' => 'theme2',
-                    'active' => $teacher->theme === 'theme2',
+            'message' => 'Theme activated successfully',
+            'data' => [
+                'teacher_id' => $teacher->id,
+                'active_theme' => $teacher->theme,
+                'active_backgroud_color' => $teacher->backgroud_color,
+                'active_font_color' => $teacher->font_color,
+                'themes' => [
+                    [
+                        'name' => 'theme1',
+                        'active' => $teacher->theme === 'theme1',
+                    ],
+                    [
+                        'name' => 'theme2',
+                        'active' => $teacher->theme === 'theme2',
+                    ],
                 ],
             ],
         ]);
@@ -394,6 +404,8 @@ class TeacherController extends BaseController
             'status' => true,
             'teacher_id' => $teacher->id,
             'active_theme' => $teacher->theme ?? 'theme1',
+            'active_backgroud_color' => $teacher->backgroud_color,
+            'active_font_color' => $teacher->font_color,
         ]);
     }
 
