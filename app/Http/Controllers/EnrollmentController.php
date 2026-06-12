@@ -32,6 +32,39 @@ class EnrollmentController extends Controller
 
         $student = auth()->user();
 
+        // منع الاشتراك مرتين
+        $alreadyEnrolled = Enrollment::where('student_id', $student->id)
+            ->where('type', $request->type)
+            ->where('course_id', $request->course_id)
+            ->where('semester_id', $request->semester_id)
+            ->where('course_detail_id', $request->course_detail_id)
+            ->where('book_id', $request->book_id)
+            ->exists();
+
+        if ($alreadyEnrolled) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You are already enrolled'
+            ], 400);
+        }
+
+        // منع إرسال نفس الطلب أكثر من مرة
+        $alreadyRequested = EnrollmentRequest::where('student_id', $student->id)
+            ->where('type', $request->type)
+            ->where('course_id', $request->course_id)
+            ->where('semester_id', $request->semester_id)
+            ->where('course_detail_id', $request->course_detail_id)
+            ->where('book_id', $request->book_id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($alreadyRequested) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Request already sent'
+            ], 400);
+        }
+
         DB::beginTransaction();
 
         try {
@@ -79,12 +112,14 @@ class EnrollmentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+
             DB::rollBack();
 
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
-
     public function teacherRequests()
     {
         return EnrollmentRequest::where('teacher_id', auth()->id())
@@ -107,6 +142,7 @@ class EnrollmentController extends Controller
              'message' => 'Status updated'
         ]);
     }
+
 
     public function redeemCode(Request $request)
     {
@@ -158,6 +194,22 @@ class EnrollmentController extends Controller
                 ], 400);
             }
 
+            // منع الاشتراك مرتين
+            $alreadyEnrolled = Enrollment::where('student_id', $student->id)
+                ->where('type', $code->type)
+                ->where('course_id', $code->course_id)
+                ->where('semester_id', $code->semester_id)
+                ->where('course_detail_id', $code->course_detail_id)
+                ->where('book_id', $code->book_id)
+                ->exists();
+
+            if ($alreadyEnrolled) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'You are already enrolled'
+                ], 400);
+            }
+
             // 🎟️ mark code as used
             $code->update([
                 'is_used' => true,
@@ -199,6 +251,7 @@ class EnrollmentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+
             DB::rollBack();
 
             return response()->json([
@@ -207,6 +260,7 @@ class EnrollmentController extends Controller
             ], 500);
         }
     }
+
 
     public function redeemWallet(Request $request)
     {
