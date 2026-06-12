@@ -8,6 +8,7 @@ use App\Http\Controllers\CenterHourController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseDetailController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\ExamAnswerController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
@@ -335,3 +336,4 @@ Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherP
 
 Route::post('student/change-password', [TeacherController::class, 'changePasswordStudent']);
 Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesReport']);
+Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
