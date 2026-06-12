@@ -110,10 +110,7 @@ h3{
 
 <div class="header">
 
-    <img
-        src="https://dashboardlms.dentin.cloud/assets/1-CKpN-bpc.png"
-        alt="Logo"
-    >
+    <img src="{{ public_path('logo.png') }}" style="width:120px; height:auto;">
 
     <h2>{{ $teacher->name }} Report Dashboard</h2>
 
