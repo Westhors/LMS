@@ -19,8 +19,14 @@ body{
     text-align:center;
 }
 
-/* CARDS SAFE (NO FLEX) */
-.cards-table{
+.header img{
+    width:120px;
+    height:auto;
+    margin-bottom:15px;
+}
+
+/* CARDS SAFE */
+.cards{
     width:100%;
     margin-top:15px;
     border-collapse:separate;
@@ -36,9 +42,17 @@ body{
     font-weight:bold;
 }
 
-.blue{background:#dbeafe;}
-.green{background:#dcfce7;}
-.dark{background:#e5e7eb;}
+.blue{
+    background:#dbeafe;
+}
+
+.green{
+    background:#dcfce7;
+}
+
+.dark{
+    background:#e5e7eb;
+}
 
 /* TABLE SAFE */
 .table{
@@ -95,7 +109,14 @@ h3{
 <body>
 
 <div class="header">
+
+    <img
+        src="https://dashboardlms.dentin.cloud/assets/1-CKpN-bpc.png"
+        alt="Logo"
+    >
+
     <h2>{{ $teacher->name }} Report Dashboard</h2>
+
     <p>
         @if($from && $to)
             From {{ $from->format('Y-m-d') }} To {{ $to->format('Y-m-d') }}
@@ -103,10 +124,12 @@ h3{
             Full Report
         @endif
     </p>
+
 </div>
 
 <table class="cards">
     <tr>
+
         <td class="card blue">
             <h4>Online Courses</h4>
             <h2>{{ $onlineCourses }}</h2>
@@ -121,10 +144,12 @@ h3{
             <h4>Total Profit</h4>
             <h2>{{ $totalProfit }} EGP</h2>
         </td>
+
     </tr>
 </table>
 
 <h3>Courses Breakdown</h3>
+
 <table class="table">
     <tr>
         <th>Title</th>
@@ -136,6 +161,7 @@ h3{
     @foreach($coursesData as $c)
     <tr>
         <td>{{ $c['title'] }}</td>
+
         <td>
             @if($c['type'] == 'online')
                 <span class="badge-online">Online</span>
@@ -143,13 +169,19 @@ h3{
                 <span class="badge-center">Center</span>
             @endif
         </td>
+
         <td>{{ $c['students'] }}</td>
-        <td class="profit">{{ $c['profit'] }}</td>
+
+        <td class="profit">
+            {{ $c['profit'] }}
+        </td>
     </tr>
     @endforeach
+
 </table>
 
 <h3>Semesters Breakdown</h3>
+
 <table class="table">
     <tr>
         <th>Name</th>
@@ -164,9 +196,11 @@ h3{
         <td class="profit">{{ $s['profit'] }}</td>
     </tr>
     @endforeach
+
 </table>
 
 <h3>Lessons Breakdown</h3>
+
 <table class="table">
     <tr>
         <th>Title</th>
@@ -181,6 +215,7 @@ h3{
         <td class="profit">{{ $l['profit'] }}</td>
     </tr>
     @endforeach
+
 </table>
 
 </body>
