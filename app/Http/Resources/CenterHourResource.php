@@ -20,6 +20,10 @@ class CenterHourResource extends JsonResource
             'teacher_id' => $this->teacher_id ?? null,
             'subject_id' => $this->subject_id ,
             'stage_id' => $this->stage_id ,
+
+            'stage' => $this->stage ? new StageResource($this->stage) : null,
+            'subject' => $this->subject ? new SubjectResource($this->subject) : null,
+
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
