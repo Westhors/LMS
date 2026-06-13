@@ -51,6 +51,7 @@ class StudentController extends BaseController
         ]);
 
         $student->code_parent = rand(1000, 9999) . $student->id;
+        $student->barcode = rand(1000, 9999999);
         $student->save();
 
         if ($request->image) {

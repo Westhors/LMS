@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('phone')->unique()->nullable();
             $table->string('password')->nullable();
             $table->string('code_parent')->nullable();
+            $table->string('barcode')->nullable();
             $table->string('phone_parent')->nullable();
             $table->string('governorate')->nullable();
             $table->string('school_name')->nullable();
