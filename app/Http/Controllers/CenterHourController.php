@@ -45,8 +45,13 @@ class CenterHourController extends BaseController
     public function show(CenterHour $center_hour): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $center_hour->load(['teacher' , 'subject' ,'stage']);
-            return JsonResponse::respondSuccess('Item Fetched Successfully', new CenterHourResource($center_hour));
+           $center_hour = CenterHour::with(['teacher', 'subject', 'stage'])
+                ->findOrFail($center_hour->id);
+
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new CenterHourResource($center_hour)
+            );
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
