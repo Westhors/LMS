@@ -526,14 +526,11 @@ class TeacherController extends BaseController
                 'books_count' => $booksCount,
 
                 'students_per_month' => $studentsPerMonth,
-
                 'students_by_governorate' => $studentsByGovernorate,
                 'students_by_region' => $studentsByRegion,
-
                 'students_by_gender' => $studentsByGender,
-
                 'students_by_stage' => $studentsByStage,
-
+                
                 'last_month_subscriptions' => [
                     'course' => $lastMonthSubscriptions['course'] ?? 0,
                     'semester' => $lastMonthSubscriptions['semester'] ?? 0,

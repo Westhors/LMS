@@ -21,107 +21,91 @@ use Illuminate\Support\Facades\DB;
 
 class EnrollmentController extends Controller
 {
-    public function requestEnroll(Request $request)
-    {
-        $request->validate([
-            'type' => 'required|in:course,semester,lesson,book',
-            'course_id' => 'nullable',
-            'semester_id' => 'nullable',
-            'course_detail_id' => 'nullable',
-            'book_id' => 'nullable',
-            'price' => 'required|numeric'
-        ]);
+public function requestEnroll(Request $request)
+{
+    $request->validate([
+        'type' => 'required|in:course,semester,lesson,book',
+        'course_id' => 'nullable',
+        'semester_id' => 'nullable',
+        'course_detail_id' => 'nullable',
+        'book_id' => 'nullable',
+        'price' => 'required|numeric'
+    ]);
 
-        $student = auth()->user();
+    $student = auth()->user();
 
-        // منع الاشتراك مرتين
-        $alreadyEnrolled = Enrollment::where('student_id', $student->id)
-            ->where('type', $request->type)
-            ->where('course_id', $request->course_id)
-            ->where('semester_id', $request->semester_id)
-            ->where('course_detail_id', $request->course_detail_id)
-            ->where('book_id', $request->book_id)
-            ->exists();
+    // منع الاشتراك مرتين
+    $alreadyEnrolled = Enrollment::where('student_id', $student->id)
+        ->where('type', $request->type)
+        ->where('course_id', $request->course_id)
+        ->where('semester_id', $request->semester_id)
+        ->where('course_detail_id', $request->course_detail_id)
+        ->where('book_id', $request->book_id)
+        ->exists();
 
-        if ($alreadyEnrolled) {
-            return response()->json([
-                'status' => false,
-                'message' => 'You are already enrolled'
-            ], 400);
-        }
+    if ($alreadyEnrolled) {
+        return response()->json([
+            'status' => false,
+            'message' => 'You are already enrolled'
+        ], 400);
+    }
 
-        // منع إرسال نفس الطلب أكثر من مرة
-        $alreadyRequested = EnrollmentRequest::where('student_id', $student->id)
-            ->where('type', $request->type)
-            ->where('course_id', $request->course_id)
-            ->where('semester_id', $request->semester_id)
-            ->where('course_detail_id', $request->course_detail_id)
-            ->where('book_id', $request->book_id)
-            ->where('status', 'pending')
-            ->exists();
+    DB::beginTransaction();
 
-        if ($alreadyRequested) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Request already sent'
-            ], 400);
-        }
+    try {
 
-        DB::beginTransaction();
+        // 💰 لو عنده رصيد كافي → شراء مباشر
+        if ($student->balance >= $request->price) {
 
-        try {
+            $student->decrement('balance', $request->price);
 
-            // 💰 لو عنده رصيد → شراء مباشر
-            if ($student->balance >= $request->price) {
-
-                $student->decrement('balance', $request->price);
-
-                Enrollment::create([
-                    'student_id' => $student->id,
-                    'type' => $request->type,
-                    'course_id' => $request->course_id,
-                    'semester_id' => $request->semester_id,
-                    'course_detail_id' => $request->course_detail_id,
-                    'book_id' => $request->book_id,
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Purchased successfully from wallet'
-                ]);
-            }
-
-            // ❌ مفيش رصيد → Request للمدرس
-            EnrollmentRequest::create([
+            Enrollment::create([
                 'student_id' => $student->id,
-                'teacher_id' => $student->teacher_id,
                 'type' => $request->type,
                 'course_id' => $request->course_id,
                 'semester_id' => $request->semester_id,
                 'course_detail_id' => $request->course_detail_id,
                 'book_id' => $request->book_id,
-                'price' => $request->price,
-                'status' => 'pending'
             ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Request sent to teacher'
+                'message' => 'Purchased successfully from wallet'
             ]);
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 500);
         }
+
+        // ❌ الرصيد غير كافي → إرسال طلب للمدرس
+        EnrollmentRequest::create([
+            'student_id' => $student->id,
+            'teacher_id' => $student->teacher_id,
+            'type' => $request->type,
+            'course_id' => $request->course_id,
+            'semester_id' => $request->semester_id,
+            'course_detail_id' => $request->course_detail_id,
+            'book_id' => $request->book_id,
+            'price' => $request->price,
+            'status' => 'pending',
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'رصيد المحفظة غير كاف، وتم إرسال طلب للمدرس'
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
     public function teacherRequests()
     {
         return EnrollmentRequest::where('teacher_id', auth()->id())
