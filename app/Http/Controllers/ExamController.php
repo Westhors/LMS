@@ -119,140 +119,162 @@ class ExamController extends BaseController
 
 
 /////////////////////////////////////////// addQuestions //////////////////////////////////////////////
-public function addQuestions(Request $request)
-{
-    $request->validate([
-        'exam_id'   => 'required|exists:exams,id',
-        'questions' => 'required|array'
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-
-        $exam = Exam::findOrFail($request->exam_id);
-
-        $createdQuestions = [];
-
-        foreach ($request->questions as $q) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create Exam Question
-            |--------------------------------------------------------------------------
-            */
-
-            $question = ExamQuestion::create([
-                'exam_id'        => $request->exam_id,
-                'question_type'  => $q['question_type'],
-                'question'       => $q['question'],
-                'mark'           => $q['mark'] ?? 1,
-                'correct_answer' => $q['correct_answer'] ?? null,
-            ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save Question Image
-            |--------------------------------------------------------------------------
-            */
-
-            if (!empty($q['image'])) {
-
-                DB::table('mediable')->insert([
-                    'model_type' => \App\Models\ExamQuestion::class,
-                    'model_id'   => $question->id,
-                    'media_id'   => $q['image'],
-                    'collection' => 'question_image',
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save To Question Bank
-            |--------------------------------------------------------------------------
-            */
-
-            $bankQuestion = QuestionBank::create([
-                'teacher_id'     => $exam->teacher_id,
-                'stage_id'       => $exam->stage_id,
-                'subject_id'     => $exam->courseDetail?->course?->subject_id,
-                'question_type'  => $q['question_type'],
-                'question'       => $q['question'],
-                'mark'           => $q['mark'] ?? 1,
-                'correct_answer' => $q['correct_answer'] ?? null,
-            ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save Bank Question Image
-            |--------------------------------------------------------------------------
-            */
-
-            if (!empty($q['image'])) {
-
-                DB::table('mediable')->insert([
-                    'model_type' => \App\Models\QuestionBank::class,
-                    'model_id'   => $bankQuestion->id,
-                    'media_id'   => $q['image'],
-                    'collection' => 'question_bank_image',
-                ]);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save MCQ Options
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                $q['question_type'] === 'multiple_choice'
-                && isset($q['options'])
-            ) {
-
-                foreach ($q['options'] as $opt) {
-
-                    // exam question options
-                    QuestionOption::create([
-                        'question_id'      => $question->id,
-                        'question_bank_id' => $bankQuestion->id,
-                        'option_text'      => $opt['option_text'],
-                        'is_correct'       => $opt['is_correct'] ?? false,
-                    ]);
-
-                    // question bank options
-                    QuestionBankOption::create([
-                        'question_bank_id' => $bankQuestion->id,
-                        'option_text'      => $opt['option_text'],
-                        'is_correct'       => $opt['is_correct'] ?? false,
-                    ]);
-                }
-            }
-
-            $createdQuestions[] = [
-                'exam_question_id' => $question->id,
-                'question_bank_id' => $bankQuestion->id,
-                'question'         => $question->question,
-            ];
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Questions added successfully and saved to question bank',
-            'data'    => $createdQuestions
+    public function addQuestions(Request $request)
+    {
+        $request->validate([
+            'exam_id'   => 'required|exists:exams,id',
+            'questions' => 'required|array'
         ]);
 
-    } catch (\Exception $e) {
+        DB::beginTransaction();
 
-        DB::rollBack();
+        try {
 
-        return response()->json([
-            'status'  => false,
-            'message' => $e->getMessage()
-        ], 500);
+            $exam = Exam::findOrFail($request->exam_id);
+
+            $createdQuestions = [];
+
+            foreach ($request->questions as $q) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Exam Question
+                |--------------------------------------------------------------------------
+                */
+
+                $question = ExamQuestion::create([
+                    'exam_id'        => $request->exam_id,
+                    'question_type'  => $q['question_type'],
+                    'question'       => $q['question'],
+                    'mark'           => $q['mark'] ?? 1,
+                    'correct_answer' => $q['correct_answer'] ?? null,
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Question Image
+                |--------------------------------------------------------------------------
+                */
+
+                if (!empty($q['image'])) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\ExamQuestion::class,
+                        'model_id'   => $question->id,
+                        'media_id'   => $q['image'],
+                        'collection' => 'question_image',
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save To Question Bank
+                |--------------------------------------------------------------------------
+                */
+
+                $bankQuestion = QuestionBank::create([
+                    'teacher_id'     => $exam->teacher_id,
+                    'stage_id'       => $exam->stage_id,
+                    'subject_id'     => $exam->courseDetail?->course?->subject_id,
+                    'question_type'  => $q['question_type'],
+                    'question'       => $q['question'],
+                    'mark'           => $q['mark'] ?? 1,
+                    'correct_answer' => $q['correct_answer'] ?? null,
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Bank Question Image
+                |--------------------------------------------------------------------------
+                */
+
+                if (!empty($q['image'])) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\QuestionBank::class,
+                        'model_id'   => $bankQuestion->id,
+                        'media_id'   => $q['image'],
+                        'collection' => 'question_bank_image',
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save MCQ Options
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $q['question_type'] === 'multiple_choice'
+                    && isset($q['options'])
+                ) {
+
+                    foreach ($q['options'] as $opt) {
+
+                        // exam question options
+                        $option = QuestionOption::create([
+                            'question_id'      => $question->id,
+                            'question_bank_id' => $bankQuestion->id,
+                            'option_text'      => $opt['option_text'],
+                            'is_correct'       => $opt['is_correct'] ?? false,
+                        ]);
+
+                        // حفظ صورة الاختيار
+                        if (!empty($opt['image'])) {
+
+                            DB::table('mediable')->insert([
+                                'model_type' => \App\Models\QuestionOption::class,
+                                'model_id'   => $option->id,
+                                'media_id'   => $opt['image'],
+                                'collection' => 'option_image',
+                            ]);
+                        }
+
+                        // question bank options
+                        $bankOption = QuestionBankOption::create([
+                            'question_bank_id' => $bankQuestion->id,
+                            'option_text'      => $opt['option_text'],
+                            'is_correct'       => $opt['is_correct'] ?? false,
+                        ]);
+
+                        // حفظ صورة اختيار بنك الأسئلة
+                        if (!empty($opt['image'])) {
+
+                            DB::table('mediable')->insert([
+                                'model_type' => \App\Models\QuestionBankOption::class,
+                                'model_id'   => $bankOption->id,
+                                'media_id'   => $opt['image'],
+                                'collection' => 'option_bank_image',
+                            ]);
+                        }
+                    }
+                }
+
+                $createdQuestions[] = [
+                    'exam_question_id' => $question->id,
+                    'question_bank_id' => $bankQuestion->id,
+                    'question'         => $question->question,
+                ];
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Questions added successfully and saved to question bank',
+                'data'    => $createdQuestions
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 //////////////////////////////////////////// submitExam ////////////////////////////////////
     public function getQuestions($examId)
     {
