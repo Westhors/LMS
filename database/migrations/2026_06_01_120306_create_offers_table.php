@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title')->nullable();
             $table->text('description')->nullable();
-            $table->decimal('offer_price', 10, 2)->nullable();
+            $table->string('offer_discount')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->boolean('active')->default(true);
