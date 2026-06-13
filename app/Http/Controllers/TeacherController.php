@@ -480,6 +480,14 @@ class TeacherController extends BaseController
             ->orderByDesc('total')
             ->get();
 
+        $studentsByRegion = Student::where('teacher_id', $teacherId)
+            ->whereNotNull('region')
+            ->where('region', '!=', '')
+            ->selectRaw('region, COUNT(*) as total')
+            ->groupBy('region')
+            ->orderByDesc('total')
+            ->get();
+
         // الجنس
         $studentsByGender = Student::where('teacher_id', $teacherId)
             ->whereNotNull('gender')
@@ -520,6 +528,7 @@ class TeacherController extends BaseController
                 'students_per_month' => $studentsPerMonth,
 
                 'students_by_governorate' => $studentsByGovernorate,
+                'students_by_region' => $studentsByRegion,
 
                 'students_by_gender' => $studentsByGender,
 
