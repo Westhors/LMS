@@ -25,7 +25,7 @@ class CenterHourController extends BaseController
     public function index()
     {
         try {
-            $CenterHours = CenterHourResource::collection($this->crudRepository->all(['teacher'], [], ['*']));
+            $CenterHours = CenterHourResource::collection($this->crudRepository->all(['teacher' , 'subject' , 'stage'], [], ['*']));
             return $CenterHours->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -45,7 +45,7 @@ class CenterHourController extends BaseController
     public function show(CenterHour $center_hour): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $center_hour->load(['teacher']);
+            $center_hour->load(['teacher' , 'subject' ,'stage']);
             return JsonResponse::respondSuccess('Item Fetched Successfully', new CenterHourResource($center_hour));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());

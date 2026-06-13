@@ -18,10 +18,12 @@ class CenterHour extends BaseModel
     public function subject()
     {
         return $this->belongsTo(Subject::class);
-    }    public function stage()
+    }
+    public function stage()
     {
         return $this->belongsTo(Stage::class);
     }
+
     public function students()
     {
         return $this->hasMany(Student::class);
