@@ -24,6 +24,8 @@ return new class extends Migration
             $table->enum('type_of_study', ['general', 'azhar'])->nullable();
             $table->enum('type_of_attendance', ['center', 'online'])->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();
+            $table->string('region')->nullable();
+
             $table->foreignId('teacher_id')->nullable()
                 ->constrained()
                 ->nullOnDelete();

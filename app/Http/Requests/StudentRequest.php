@@ -26,6 +26,7 @@ class StudentRequest extends FormRequest
             'phone' => 'required|unique:students,phone',
             'password' => 'required|min:6',
             'code_parent' => 'nullable|string',
+            'region' => 'nullable|string',
             'phone_parent' => 'nullable|unique:students,phone_parent',
             'type_of_attendance' => 'nullable|in:center,online',
             'gender' => 'nullable|in:male,female',
@@ -41,4 +42,3 @@ class StudentRequest extends FormRequest
 }
 
 
- 
