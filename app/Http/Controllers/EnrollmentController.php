@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookResource;
 use App\Http\Resources\CourseDetailResource;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentMeResource;
 use App\Http\Resources\StudentResource;
+use App\Models\Book;
 use App\Models\Course;
 use App\Models\CourseDetail;
 use App\Models\Enrollment;
@@ -353,6 +355,7 @@ class EnrollmentController extends Controller
         $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
         $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
         $lessonIds   = $enrollments->where('type', 'lesson')->pluck('course_detail_id')->unique()->values();
+    $bookIds = $enrollments->where('type', 'book')->pluck('book_id')->unique()->values();
 
         // 🎓 Semesters
         $semesters = Semester::with([
@@ -382,6 +385,9 @@ class EnrollmentController extends Controller
             'media'
         ])->whereIn('id', $lessonIds)->get();
 
+        $books = Book::with([
+            'media'
+        ])->whereIn('id', $bookIds)->get();
         return response()->json([
             'status' => true,
             'data' => [
@@ -392,6 +398,8 @@ class EnrollmentController extends Controller
                 'semesters' => SemesterResource::collection($semesters),
                 'courses'   => CourseResource::collection($courses),
                 'lessons'   => CourseDetailResource::collection($lessons),
+                'books'     => BookResource::collection($books),
+
             ]
         ]);
     }
