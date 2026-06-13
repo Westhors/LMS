@@ -28,6 +28,7 @@ class SemesterRequest extends FormRequest
             'price'         => 'nullable|numeric|min:0',
             'teacher_id'         => 'nullable|exists:teachers,id',
             'subject_id'         => 'required|exists:subjects,id',
+            'offer_id'         => 'required|exists:offers,id',
         ];
     }
 }

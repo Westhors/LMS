@@ -34,9 +34,11 @@ class TeacherResource extends JsonResource
                 'courses' => CourseResource::collection(
                     $this->whenLoaded('courses')
                 ),
-                'featured_courses' => CourseResource::collection(
-                    $this->whenLoaded('courses')?->where('star', 1)
-                ),
+                'featured_courses' => $this->relationLoaded('courses')
+                    ? CourseResource::collection(
+                        $this->courses->where('star', 1)->values()
+                    )
+                    : [],
                 'books' => BookResource::collection(
                     $this->whenLoaded('books')
                 ),
