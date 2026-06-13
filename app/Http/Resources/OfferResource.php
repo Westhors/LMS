@@ -16,6 +16,9 @@ class OfferResource extends JsonResource
             'start_date' => $this->start_date ?? null,
             'end_date' => $this->end_date ?? null,
             'active' => $this->active ?? null,
+            'type' => $this->type ?? null,
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
             'teacher_id' => $this->teacher_id ?? null,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
