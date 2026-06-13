@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Illuminate\Support\Facades\DB;
 class CenterHourResource extends JsonResource
 {
     public function toArray($request)
@@ -18,11 +18,13 @@ class CenterHourResource extends JsonResource
             'phone' => $this->phone ?? null,
             'note' => $this->note ?? null,
             'teacher_id' => $this->teacher_id ?? null,
-            'subject_id' => $this->subject_id ,
-            'stage_id' => $this->stage_id ,
+            'subject' => DB::table('subjects')
+                ->where('id', $this->subject_id)
+                ->value('name'),
 
-            'stage' => $this->stage ? new StageResource($this->stage) : null,
-            'subject' => $this->subject ? new SubjectResource($this->subject) : null,
+            'stage' => DB::table('stages')
+                ->where('id', $this->stage_id)
+                ->value('name'),
 
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
