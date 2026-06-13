@@ -27,6 +27,7 @@ return new class extends Migration
             $table->enum('type', ['online', 'center'])->default('center');
             $table->integer('count_student')->nullable();
             $table->boolean('active')->default(1);
+            $table->boolean('star')->default(0);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('link_video')->nullable();
