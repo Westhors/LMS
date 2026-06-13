@@ -18,8 +18,8 @@ class CenterHourResource extends JsonResource
             'phone' => $this->phone ?? null,
             'note' => $this->note ?? null,
             'teacher_id' => $this->teacher_id ?? null,
-            'subject_id' => $this->subject ,
-            'stage_id' => $this->stage ,
+            'subject_id' => $this->subject_id ,
+            'stage_id' => $this->stage_id ,
             'createdAt' => $this->created_at->format('d F, Y'),
         ];
     }
