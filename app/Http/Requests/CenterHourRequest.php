@@ -30,6 +30,8 @@ class CenterHourRequest extends FormRequest
             'phone'         => 'nullable|string|max:255',
             'note'         => 'nullable|string',
             'teacher_id'       => 'nullable|exists:teachers,id',
+            'subject_id'       => 'nullable',
+            'stage_id'       => 'nullable',
         ];
     }
 }
