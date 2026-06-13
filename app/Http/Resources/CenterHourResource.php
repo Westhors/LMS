@@ -18,6 +18,8 @@ class CenterHourResource extends JsonResource
             'phone' => $this->phone ?? null,
             'note' => $this->note ?? null,
             'teacher_id' => $this->teacher_id ?? null,
+            'subject_id' => $this->subject_id ?? null,
+            'stage_id' => $this->stage_id ?? null,
             'subject' => DB::table('subjects')
                 ->where('id', $this->subject_id)
                 ->value('name'),
