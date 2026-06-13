@@ -12,26 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('course_details', function (Blueprint $table) {
-            $table->foreignId('subject_id')
-                ->nullable()
-                ->constrained()
-                ->cascadeOnDelete();
-
-            $table->foreignId('stage_id')
-                ->nullable()
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            $table->unsignedBigInteger('stage_id')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
-        {
-            Schema::table('course_details', function (Blueprint $table) {
-                $table->dropColumn('subject_id');
-                $table->dropColumn('stage_id');
-            });
-        }
+    {
+        Schema::table('course_details', function (Blueprint $table) {
+            $table->dropColumn(['subject_id', 'stage_id']);
+        });
+    }
 };
