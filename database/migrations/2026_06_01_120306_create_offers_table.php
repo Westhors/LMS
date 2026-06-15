@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->string('offer_discount')->nullable();
+            $table->string('url')->nullable();
             $table->enum('type',['offer','banner'])->default('offer');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

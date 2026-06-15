@@ -25,6 +25,7 @@ class OfferRequest extends FormRequest
             'title' => 'nullable|string',
             'description' => 'nullable|string',
             'offer_discount' => 'nullable',
+            'url' => 'nullable',
             'type' => 'nullable|in:offer,banner',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
