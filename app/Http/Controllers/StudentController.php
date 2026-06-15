@@ -223,5 +223,42 @@ class StudentController extends BaseController
             ]);
         }
     }
+
+    public function showAttendance(Request $request)
+    {
+        $request->validate([
+            'course_detail_id' => 'required|exists:course_details,id',
+            'student_id' => 'required|exists:students,id',
+        ]);
+
+        $attendance = CourseDetailAttendance::with([
+            'student',
+            'courseDetail'
+        ])
+        ->where('course_detail_id', $request->course_detail_id)
+        ->where('student_id', $request->student_id)
+        ->first();
+
+        if (!$attendance) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Attendance not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $attendance->id,
+                'attended' => $attendance->attended,
+                'attended_at' => $attendance->attended_at,
+                'student' => $attendance->student,
+                'course_detail' => $attendance->courseDetail,
+                'created_at' => $attendance->created_at,
+                'updated_at' => $attendance->updated_at,
+            ]
+        ]);
+    }
+
 }
 

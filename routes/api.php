@@ -337,3 +337,4 @@ Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherP
 Route::post('student/change-password', [TeacherController::class, 'changePasswordStudent']);
 Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesReport']);
 Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
+Route::post('/course-detail-attendance', [StudentController::class, 'showAttendance']);
