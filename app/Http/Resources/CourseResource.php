@@ -8,6 +8,8 @@ class CourseResource extends JsonResource
 {
     public function toArray($request)
     {
+        $offerDiscount = $this->offer?->offer_discount ?? 0;
+        $discountAmount = ($this->price * $offerDiscount) / 100;
         return [
             'id' => $this->id,
             'teacher_id' => $this->teacher_id,
@@ -18,12 +20,16 @@ class CourseResource extends JsonResource
             'subject' => new SubjectResource($this->whenLoaded('subject')),
             'semester_id' => $this->semester_id,
             'semester' => new SemesterResource($this->semester),
-            'price' => $this->price ?? null,
-            'discount' => $this->discount ?? null,
-            'offer_id'=> $this->offer_id ?? null,
-            'price_before_discount' => $this->discount
-            ? round($this->price / (1 - ($this->discount / 100)), 2)
-            : $this->price,
+            // السعر النهائي بعد الخصم
+            'price' => $this->price - $discountAmount,
+
+            // قيمة الخصم بالجنيه
+            'discount' => $discountAmount,
+
+            'offer_id' => $this->offer_id,
+
+            // السعر الأصلي
+            'price_before_discount' => $this->price,
 
             'details' => CourseDetailResource::collection(
                 $this->whenLoaded('details')
