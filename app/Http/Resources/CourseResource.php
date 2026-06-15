@@ -20,7 +20,7 @@ class CourseResource extends JsonResource
             'semester' => new SemesterResource($this->semester),
             'price' => $this->price ?? null,
             'discount' => $this->discount ?? null,
-
+            'offer_id'=> $this->offer_id ?? null,
             'price_before_discount' => $this->discount
             ? round($this->price / (1 - ($this->discount / 100)), 2)
             : $this->price,

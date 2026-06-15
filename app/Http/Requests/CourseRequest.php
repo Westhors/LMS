@@ -26,6 +26,7 @@ class CourseRequest extends FormRequest
             'stage_id'         => 'nullable|exists:stages,id',
             'subject_id'       => 'nullable|exists:subjects,id',
             'semester_id'      => 'nullable|exists:semesters,id',
+            'offer_id'         => 'nullable|exists:offers,id',
             'title'            => 'nullable|string|max:255',
             'title_ar'         => 'nullable|string|max:255',
             'description'      => 'nullable|string',

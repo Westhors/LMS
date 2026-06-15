@@ -42,4 +42,8 @@ class Semester extends BaseModel
         )
         ->where('type', 'semester');
     }
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class);
+    }
 }

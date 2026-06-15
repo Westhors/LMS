@@ -17,6 +17,7 @@ class SemesterResource extends JsonResource
             'discount' => $this->discount ?? null,
             'teacher_id' => $this->teacher_id ?? null,
             'subject_id' => $this->subject_id ?? null,
+            'offer_id'=> $this->offer_id ?? null,
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
              // 🌐 علاقة المادة

@@ -63,4 +63,9 @@ class Course extends BaseModel
             ->wherePivot('type', 'course')
             ->withPivot(['created_at']);
     }
+
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class);
+    }
 }
