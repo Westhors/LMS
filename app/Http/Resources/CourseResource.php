@@ -20,16 +20,14 @@ class CourseResource extends JsonResource
             'subject' => new SubjectResource($this->whenLoaded('subject')),
             'semester_id' => $this->semester_id,
             'semester' => new SemesterResource($this->semester),
-            // السعر النهائي بعد الخصم
+
+
+            'original_price' => $this->price,
             'price' => $this->price - $discountAmount,
-
-            // قيمة الخصم بالجنيه
             'discount' => $discountAmount,
-
             'offer_id' => $this->offer_id,
+            'offer_discount' => $offerDiscount,
 
-            // السعر الأصلي
-            'price_before_discount' => $this->price,
 
             'details' => CourseDetailResource::collection(
                 $this->whenLoaded('details')
