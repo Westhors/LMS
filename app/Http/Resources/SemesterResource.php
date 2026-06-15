@@ -8,13 +8,20 @@ class SemesterResource extends JsonResource
 {
     public function toArray($request)
     {
+            $offerPercent = $this->offer?->offer_discount ?? 0;
+
+            $discountAmount = ($this->price * $offerPercent) / 100;
         return [
             'id' => $this->id,
             'name' => $this->name ?? null,
             'name_ar' => $this->name_ar ?? null,
             'active' => $this->active ?? null,
-            'price' => $this->price ?? null,
-            'discount' => $this->discount ?? null,
+
+            'original_price' => $this->price,
+            'price' => $this->price - $discountAmount,
+            'discount' => $discountAmount,
+            'offer_discount' => $offerPercent,
+            
             'teacher_id' => $this->teacher_id ?? null,
             'subject_id' => $this->subject_id ?? null,
             'offer_id'=> $this->offer_id ?? null,
