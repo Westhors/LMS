@@ -20,7 +20,9 @@ class SemesterResource extends JsonResource
             'price' => $this->price - $discountAmount,
             'discount' => $discountAmount,
             'offer_discount' => $offerPercent,
-
+            // بيانات العرض
+            'offer_start_date' => $this->offer?->start_date,
+            'offer_end_date' => $this->offer?->end_date,
             'teacher_id' => $this->teacher_id ?? null,
             'subject_id' => $this->subject_id ?? null,
             'offer_id'=> $this->offer_id ?? null,
