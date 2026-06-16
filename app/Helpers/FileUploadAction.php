@@ -84,16 +84,16 @@ class FileUploadAction
             ], 404);
         }
 
-        $pivot = $user->permissions()
-            ->where('permissions.id', $permission->id)
-            ->first();
+        $hasPermission = DB::table('assistant_teacher_permissions')
+            ->where('assistant_teacher_id', $user->id)
+            ->where('permission_id', $permission->id)
+            ->where($action, 1)
+            ->exists();
 
-        if (!$pivot) {
-            return response()->json(['message' => 'ليس لديك صلاحية'], 403);
-        }
-
-        if (!$pivot->pivot->{$action}) {
-            return response()->json(['message' => 'ليس لديك صلاحية'], 403);
+        if (!$hasPermission) {
+            return response()->json([
+                'message' => 'ليس لديك صلاحية'
+            ], 403);
         }
 
         return true;

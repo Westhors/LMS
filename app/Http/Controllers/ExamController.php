@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\ExamRequest;
 use App\Http\Resources\AnswerResource;
@@ -44,6 +45,10 @@ class ExamController extends BaseController
     public function store(ExamRequest $request)
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('exams', 'create');
+            if ($result !== true) {
+                return $result;
+            }
            $exam = $this->crudRepository->create($request->validated());
            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $exam);
@@ -69,6 +74,10 @@ class ExamController extends BaseController
     public function update(ExamRequest $request, Exam $exam): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('exams', 'update');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->update($request->validated(), $exam->id);
             if ($request->filled('image')) {
                 $exam = Exam::find($exam->id);
@@ -84,6 +93,10 @@ class ExamController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('exams', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('exams', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

@@ -26,6 +26,5 @@ class AssistantTeacher extends BaseModel
         return $this->belongsToMany(Permission::class, 'assistant_teacher_permissions')
             ->withPivot(['view', 'create', 'update', 'delete']);
     }
-
 }
 
