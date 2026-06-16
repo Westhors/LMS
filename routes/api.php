@@ -53,6 +53,7 @@ Route::apiResource('stage', StageController::class);
 //////////////////////////////////////////////////////////Subject//////////////////////////////////////
 
 Route::post('subject/index', [SubjectController::class, 'index']);
+Route::post('index-subject/index', [SubjectController::class, 'indexSubject']);
 Route::post('subject/restore', [SubjectController::class, 'restore']);
 Route::delete('subject/delete', [SubjectController::class, 'destroy']);
 Route::delete('subject/force-delete', [SubjectController::class, 'forceDelete']);

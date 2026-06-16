@@ -113,5 +113,24 @@ class SubjectController extends BaseController
             return JsonResponse::respondError($e->getMessage());
         }
     }
+
+    public function indexSubject(Request $request)
+    {
+        $query = Subject::query();
+
+        if ($request->filled('filters.teacher_id')) {
+            $query->whereHas('teachers', function ($q) use ($request) {
+                $q->where('teachers.id', $request->input('filters.teacher_id'));
+            });
+        }
+
+        if ($request->filled('filters.stage_id')) {
+            $query->where('stage_id', $request->input('filters.stage_id'));
+        }
+
+        $subjects = $query->with(['teachers', 'stage'])->get();
+
+        return SubjectResource::collection($subjects);
+    }
 }
 
