@@ -79,4 +79,5 @@ class JsonResponse
     {
         return ['result' => trans(self::MSG_SUCCESS), 'message' => trans(self::MSG_UPDATED_SUCCESSFULLY), 'status' => 200];
     }
+    
 }

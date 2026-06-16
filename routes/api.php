@@ -16,6 +16,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PaymentCodeController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StageController;
 use App\Http\Controllers\StudentController;
@@ -221,14 +222,12 @@ Route::apiResource('center-hour', CenterHourController::class);
 
 
 
-
 //////////////////////////////////////////////////////////Semester//////////////////////////////////////
 
 Route::post('semesters/index', [SemesterController::class, 'index']);
 Route::post('semesters/restore', [SemesterController::class, 'restore']);
 Route::delete('semesters/delete', [SemesterController::class, 'destroy']);
 Route::delete('semesters/force-delete', [SemesterController::class, 'forceDelete']);
-Route::post('semesters/update/{semester}', [SemesterController::class, 'forceUpdate']);
 Route::put('/semesters/{id}/{column}', [SemesterController::class, 'toggle']);
 Route::apiResource('semesters', SemesterController::class);
 
@@ -300,32 +299,39 @@ Route::apiResource('offer', OfferController::class);
 //////////////////////////////////////////////////////////Offer//////////////////////////////////////
 
 
-
+//////////////////////////////////////////////////////////Enrollment//////////////////////////////////////
 Route::middleware('auth:sanctum')->group(function () {
     // 🎓 الطالب يطلب شراء / أو شراء مباشر
     Route::post('/enroll/request', [EnrollmentController::class, 'requestEnroll']);
-
     // 🎟️ الطالب يستخدم كود
     Route::post('/enroll/redeem-code', [EnrollmentController::class, 'redeemCode']);
-
     // 💰 الطالب يستخدم كود wallet
     Route::post('/wallet/redeem', [EnrollmentController::class, 'redeemWallet']);
-
     // 🧑‍🏫 المدرس يشوف الطلبات
     Route::get('/requests-redeem/teacher', [EnrollmentController::class, 'teacherRequests']);
-
     // ❌ رفض طلب
     Route::post('/request/teacher/{id}/status', [EnrollmentController::class, 'status']);
-
     Route::post('lessons/{lessonId}/attendance',[CourseDetailController::class, 'markAttendance']);
 });
+//////////////////////////////////////////////////////////Enrollment//////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////my student//////////////////////////////////////
 Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearning']);
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
+//////////////////////////////////////////////////////////my student//////////////////////////////////////
 
 
 
+//////////////////////////////////////////////////////////permissions//////////////////////////////////////
+Route::get('access-control/permissions',[PermissionController::class, 'allPermission']);
+Route::post('assistant/permissions',[PermissionController::class, 'assignPermission']);
+//////////////////////////////////////////////////////////permissions//////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////diffrent request//////////////////////////////////////
 Route::get('teachers/monthly-profit-report', [TeacherController::class, 'monthlyProfitReport']);
 Route::post('/activate/theme', [TeacherController::class, 'activateTheme']);
 Route::post('/teachers/theme', [TeacherController::class, 'getTeacherTheme']);
@@ -333,8 +339,8 @@ Route::get('teachers/{teacher}/report', [TeacherController::class, 'teacherRepor
 Route::get('admin/report', [TeacherController::class, 'adminReport']);
 Route::get('teachers/{teacher}/report/pdf', [TeacherController::class, 'teacherPdfReport']);
 
-
 Route::post('student/change-password', [TeacherController::class, 'changePasswordStudent']);
 Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesReport']);
 Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
 Route::post('/course-detail-attendance', [StudentController::class, 'showAttendance']);
+//////////////////////////////////////////////////////////diffrent request//////////////////////////////////////

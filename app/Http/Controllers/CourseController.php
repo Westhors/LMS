@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\CourseRequest;
 use App\Http\Requests\StageRequest;
@@ -37,6 +38,10 @@ class CourseController extends BaseController
     public function store(CourseRequest $request)
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('courses', 'create');
+            if ($result !== true) {
+                return $result;
+            }
            $course = $this->crudRepository->create($request->validated());
            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $course);
@@ -75,6 +80,10 @@ class CourseController extends BaseController
     public function update(CourseRequest $request, Course $course): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('courses', 'update');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->update($request->validated(), $course->id);
             if ($request->filled('image')) {
                 $course = Course::find($course->id);
@@ -90,6 +99,10 @@ class CourseController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('courses', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('courses', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

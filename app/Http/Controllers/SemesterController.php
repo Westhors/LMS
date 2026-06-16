@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\BookRequest;
 use App\Http\Requests\SemesterRequest;
@@ -38,7 +39,12 @@ class SemesterController extends BaseController
     public function store(SemesterRequest $request)
     {
         try {
-           $Semesters = $this->crudRepository->create($request->validated());
+            $result = (new FileUploadAction())
+            ->checkAssistantPermission('semesters', 'create');
+            if ($result !== true) {
+                return $result;
+            }
+            $Semesters = $this->crudRepository->create($request->validated());
             if (request('image') !== null) {
                     $this->crudRepository->AddMediaCollection('image', $Semesters);
             }
@@ -76,6 +82,10 @@ class SemesterController extends BaseController
     public function update(SemesterRequest $request, Semester $semester): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('semesters', 'update');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->update($request->validated(), $semester->id);
             if ($request->filled('image')) {
                 $semester = Semester::find($semester->id);
@@ -91,6 +101,10 @@ class SemesterController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('semesters', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('semesters', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

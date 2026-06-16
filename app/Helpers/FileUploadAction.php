@@ -10,8 +10,11 @@ use App\Mail\Event\EventResetPasswordMail;
 use App\Mail\Event\EventSenderOneToOneMail;
 use App\Mail\Event\InvoiceMail;
 use App\Mail\Event\InvoiceMailAdmin;
+use App\Models\AssistantTeacher;
+use App\Models\AssistantTeacherPermission;
 use App\Models\Delegate;
 use App\Models\EmailTemplate;
+use App\Models\Permission;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -63,7 +66,36 @@ class FileUploadAction
         }
     }
 
+    public function checkAssistantPermission($module, $action)
+    {
+        $user = auth('sanctum')->user();
 
+        if (!$user) return true;
 
+        if (!($user instanceof \App\Models\AssistantTeacher)) {
+            return true;
+        }
 
+        $permission = Permission::where('name', $module)->first();
+
+        if (!$permission) {
+            return response()->json([
+                'message' => 'Permission not found'
+            ], 404);
+        }
+
+        $pivot = $user->permissions()
+            ->where('permissions.id', $permission->id)
+            ->first();
+
+        if (!$pivot) {
+            return response()->json(['message' => 'ليس لديك صلاحية'], 403);
+        }
+
+        if (!$pivot->pivot->{$action}) {
+            return response()->json(['message' => 'ليس لديك صلاحية'], 403);
+        }
+
+        return true;
+    }
 }

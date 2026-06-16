@@ -8,6 +8,7 @@ use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Teacher;
+use App\Models\AssistantTeacher;
 use Exception;
 
 class AdminController extends Controller
@@ -25,10 +26,13 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
-        // 🔹 أولاً: Admin
-        $admin = Admin::where('email', $request->email)->first();
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        if ($admin && Hash::check($request->password, $admin->password)) {
+        // 🔹 أولاً: Admin
+        $admin = Admin::where('email', $email)->first();
+
+        if ($admin && Hash::check($password, $admin->password)) {
             $token = $admin->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -40,9 +44,9 @@ class AdminController extends Controller
         }
 
         // 🔹 ثانياً: Teacher
-        $teacher = Teacher::where('email', $request->email)->first();
+        $teacher = Teacher::where('email', $email)->first();
 
-        if ($teacher && Hash::check($request->password, $teacher->password)) {
+        if ($teacher && Hash::check($password, $teacher->password)) {
             $token = $teacher->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -50,6 +54,20 @@ class AdminController extends Controller
                 'role'    => 'teacher',
                 'token'   => $token,
                 'data'    => $teacher,
+            ]);
+        }
+
+        // 🔹 ثالثاً: AssistantTeacher
+        $assistant = AssistantTeacher::where('email', $email)->first();
+
+        if ($assistant && Hash::check($password, $assistant->password)) {
+            $token = $assistant->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login success',
+                'role'    => 'assistant_teacher',
+                'token'   => $token,
+                'data'    => $assistant,
             ]);
         }
 
