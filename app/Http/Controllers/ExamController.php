@@ -346,74 +346,106 @@ class ExamController extends BaseController
             'answers' => 'required|array'
         ]);
 
-        $totalScore = 0;
+        DB::beginTransaction();
 
-        foreach ($request->answers as $item) {
+        try {
 
-            $question = ExamQuestion::findOrFail($item['question_id']);
-            $answer = $item['answer'];
+            $totalScore = 0;
 
-            $mark = 0;
-            $isCorrect = null;
-            $auto = false;
+            foreach ($request->answers as $item) {
 
-            // TRUE / FALSE
-            if ($question->question_type === 'true_false') {
+                $question = ExamQuestion::findOrFail($item['question_id']);
+                $answer = $item['answer'];
 
-                $auto = true;
-
-                if ($answer == $question->correct_answer) {
-                    $mark = $question->mark;
-                    $isCorrect = true;
-                } else {
-                    $isCorrect = false;
-                }
-
-                $totalScore += $mark;
-            }
-
-            // MCQ
-            if ($question->question_type === 'multiple_choice') {
-
-                $auto = true;
-
-                $correctOption = $question->options()
-                    ->where('is_correct', 1)
-                    ->first();
-
-                if ($correctOption && $correctOption->option_text == $answer) {
-                    $mark = $question->mark;
-                    $isCorrect = true;
-                } else {
-                    $isCorrect = false;
-                }
-
-                $totalScore += $mark;
-            }
-
-            // ESSAY (manual correction)
-            if ($question->question_type === 'essay') {
-                $mark = null;
+                $mark = 0;
                 $isCorrect = null;
                 $auto = false;
+
+                // TRUE / FALSE
+                if ($question->question_type === 'true_false') {
+
+                    $auto = true;
+
+                    if ($answer == $question->correct_answer) {
+                        $mark = $question->mark;
+                        $isCorrect = true;
+                    } else {
+                        $isCorrect = false;
+                    }
+
+                    $totalScore += $mark;
+                }
+
+                // MCQ
+                if ($question->question_type === 'multiple_choice') {
+
+                    $auto = true;
+
+                    $correctOption = $question->options()
+                        ->where('is_correct', 1)
+                        ->first();
+
+                    if ($correctOption && $correctOption->option_text == $answer) {
+                        $mark = $question->mark;
+                        $isCorrect = true;
+                    } else {
+                        $isCorrect = false;
+                    }
+
+                    $totalScore += $mark;
+                }
+
+                // ESSAY (manual correction)
+                if ($question->question_type === 'essay') {
+                    $mark = null;
+                    $isCorrect = null;
+                    $auto = false;
+                }
+
+                $examAnswer = ExamAnswer::create([
+                    'exam_id' => $request->exam_id,
+                    'student_id' => $request->student_id,
+                    'question_id' => $question->id,
+                    'answer' => $answer,
+                    'mark' => $mark,
+                    'is_auto_corrected' => $auto,
+                    'is_correct' => $isCorrect
+                ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Answer Image
+                |--------------------------------------------------------------------------
+                */
+
+                if (!empty($item['image'])) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\ExamAnswer::class,
+                        'model_id'   => $examAnswer->id,
+                        'media_id'   => $item['image'],
+                        'collection' => 'answer_image',
+                    ]);
+                }
             }
 
-            ExamAnswer::create([
-                'exam_id' => $request->exam_id,
-                'student_id' => $request->student_id,
-                'question_id' => $question->id,
-                'answer' => $answer,
-                'mark' => $mark,
-                'is_auto_corrected' => $auto,
-                'is_correct' => $isCorrect
-            ]);
-        }
+            DB::commit();
 
-        return response()->json([
-            'status' => true,
-            // 'auto_score' => $totalScore,
-            'message' => 'Exam submitted successfully'
-        ]);
+            return response()->json([
+                'status' => true,
+                // 'auto_score' => $totalScore,
+                'message' => 'Exam submitted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
 /////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
