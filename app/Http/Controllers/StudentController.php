@@ -260,5 +260,33 @@ class StudentController extends BaseController
         ]);
     }
 
+    public function allAttendance(Request $request)
+    {
+        $request->validate([
+            'course_detail_id' => 'required|exists:course_details,id',
+        ]);
+
+        $attendance = CourseDetailAttendance::with([
+            'student',
+            'courseDetail'
+        ])
+        ->where('course_detail_id', $request->course_detail_id)
+        ->where('attended', 1) // لو عندك عمود attended بقيمة 1 للحضور
+        ->get();
+
+        if ($attendance->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No students attended this lesson'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'count' => $attendance->count(),
+            'data' => $attendance
+        ]);
+    }
+
 }
 

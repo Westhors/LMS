@@ -343,4 +343,7 @@ Route::post('student/change-password', [TeacherController::class, 'changePasswor
 Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesReport']);
 Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
 Route::post('/course-detail-attendance', [StudentController::class, 'showAttendance']);
+Route::post('/all/course-detail-attendance', [StudentController::class, 'allAttendance']);
+
+
 //////////////////////////////////////////////////////////diffrent request//////////////////////////////////////
