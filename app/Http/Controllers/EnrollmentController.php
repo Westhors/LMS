@@ -339,7 +339,7 @@ public function requestEnroll(Request $request)
         $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
         $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
         $lessonIds   = $enrollments->where('type', 'lesson')->pluck('course_detail_id')->unique()->values();
-    $bookIds = $enrollments->where('type', 'book')->pluck('book_id')->unique()->values();
+        $bookIds = $enrollments->where('type', 'book')->pluck('book_id')->unique()->values();
 
         // 🎓 Semesters
         $semesters = Semester::with([

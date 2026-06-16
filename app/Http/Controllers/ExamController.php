@@ -395,7 +395,7 @@ class ExamController extends BaseController
                     $totalScore += $mark;
                 }
 
-                // ESSAY (manual correction)
+                // ESSAY
                 if ($question->question_type === 'essay') {
                     $mark = null;
                     $isCorrect = null;

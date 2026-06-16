@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class ExamResource extends JsonResource
 {
@@ -33,6 +34,14 @@ class ExamResource extends JsonResource
                             'name' => $student->name,
 
                             'answers' => $answers->map(function ($answer) {
+
+                                $image = DB::table('mediable')
+                                    ->join('media', 'media.id', '=', 'mediable.media_id')
+                                    ->where('mediable.model_type', \App\Models\ExamAnswer::class)
+                                    ->where('mediable.model_id', $answer->id)
+                                    ->where('mediable.collection', 'answer_image')
+                                    ->first();
+
                                 return [
                                     'id' => $answer->id,
                                     'question_id' => $answer->question_id,
@@ -40,6 +49,18 @@ class ExamResource extends JsonResource
                                     'mark' => $answer->mark,
                                     'is_auto_corrected' => $answer->is_auto_corrected,
                                     'is_correct' => $answer->is_correct,
+
+                                    'image' => $image ? [
+                                        'id' => $image->id,
+                                        'name' => $image->name,
+                                        'mimeType' => $image->mime_type,
+                                        'size' => $image->size,
+                                        'authorId' => $image->author_id,
+                                        'previewUrl' => '/storage/' . $image->file_path,
+                                        'fullUrl' => asset('storage/' . $image->file_path),
+                                        'createdAt' => optional($image->created_at)?->format('d F, Y'),
+                                    ] : null,
+
                                     'created_at' => $answer->created_at?->format('Y-m-d H:i:s'),
                                 ];
                             })->values(),
