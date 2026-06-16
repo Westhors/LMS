@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\CenterHourRequest;
 use App\Http\Resources\CenterHourResource;
@@ -34,6 +35,10 @@ class CenterHourController extends BaseController
     public function store(CenterHourRequest $request)
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('center-hours', 'create');
+                if ($result !== true) {
+                    return $result;
+            }
            $CenterHour = $this->crudRepository->create($request->validated());
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
@@ -56,6 +61,10 @@ class CenterHourController extends BaseController
     public function update(CenterHourRequest $request, CenterHour $center_hour): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('center-hours', 'update');
+                if ($result !== true) {
+                    return $result;
+            }
             $this->crudRepository->update($request->validated(), $center_hour->id);
             activity()->performedOn($center_hour)->withProperties(['attributes' => $center_hour])->log('update');
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_UPDATED_SUCCESSFULLY));
@@ -67,6 +76,10 @@ class CenterHourController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('center-hours', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('center_hours', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

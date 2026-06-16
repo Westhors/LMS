@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\OfferRequest;
 use App\Http\Resources\OfferResource;
@@ -35,6 +36,10 @@ class OfferController extends BaseController
     public function store(OfferRequest $request)
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('offers', 'create');
+            if ($result !== true) {
+                return $result;
+            }
            $event = $this->crudRepository->create($request->validated());
             if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $event);
@@ -64,6 +69,10 @@ class OfferController extends BaseController
     public function update(OfferRequest $request, Offer $offer): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('offers', 'update');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->update($request->validated(), $offer->id);
             if ($request->filled('image')) {
                 $offer = Offer::find($offer->id);
@@ -80,6 +89,10 @@ class OfferController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('offers', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('offers', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\BookRequest;
 use App\Http\Resources\BookResource;
@@ -36,6 +37,10 @@ class BookController extends BaseController
     public function store(BookRequest $request)
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('books', 'create');
+            if ($result !== true) {
+                return $result;
+            }
            $Books = $this->crudRepository->create($request->validated());
            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $Books);
@@ -66,6 +71,10 @@ class BookController extends BaseController
     public function update(BookRequest $request, Book $book): \Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('books', 'update');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->update($request->validated(), $book->id);
             if ($request->filled('image')) {
                 $book = Book::find($book->id);
@@ -81,6 +90,10 @@ class BookController extends BaseController
     public function destroy(Request $request): ?\Illuminate\Http\JsonResponse
     {
         try {
+            $result = (new FileUploadAction())->checkAssistantPermission('books', 'delete');
+            if ($result !== true) {
+                return $result;
+            }
             $this->crudRepository->deleteRecords('books', $request['items']);
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_DELETED_SUCCESSFULLY));
         } catch (Exception $e) {

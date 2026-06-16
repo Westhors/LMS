@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Helpers\FileUploadAction;
 use App\Interfaces\PaymentCodeRepositoryInterface;
 use App\Models\PaymentCode;
 use App\Traits\HttpResponses;
@@ -21,6 +21,10 @@ class PaymentCodeController extends BaseController
 
     public function generateCodes(Request $request)
     {
+        $result = (new FileUploadAction())->checkAssistantPermission('payment-codes', 'create');
+            if ($result !== true) {
+                return $result;
+        }
         $request->validate([
             'type' => 'required|in:wallet,course,semester,lesson',
             'type_code' => 'nullable|in:online,center',

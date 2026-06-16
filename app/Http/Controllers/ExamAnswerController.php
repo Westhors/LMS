@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FileUploadAction;
 use App\Models\ExamAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,10 @@ class ExamAnswerController extends Controller
 {
     public function passStudent(Request $request)
     {
+        $result = (new FileUploadAction())->checkAssistantPermission('correct-answers', 'create');
+            if ($result !== true) {
+                return $result;
+        }
         $request->validate([
             'exam_id' => 'required|exists:exams,id',
             'student_id' => 'required|exists:students,id',

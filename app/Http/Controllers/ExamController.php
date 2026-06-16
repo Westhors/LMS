@@ -134,6 +134,10 @@ class ExamController extends BaseController
 /////////////////////////////////////////// addQuestions //////////////////////////////////////////////
     public function addQuestions(Request $request)
     {
+        $result = (new FileUploadAction())->checkAssistantPermission('questions', 'create');
+                if ($result !== true) {
+                    return $result;
+        }
         $request->validate([
             'exam_id'   => 'required|exists:exams,id',
             'questions' => 'required|array'
@@ -416,6 +420,10 @@ class ExamController extends BaseController
 
     public function gradeEssay(Request $request)
     {
+        $result = (new FileUploadAction())->checkAssistantPermission('correct-answers', 'create');
+            if ($result !== true) {
+                return $result;
+        }
         $request->validate([
             'answer_id' => 'required|exists:exam_answers,id',
             'mark' => 'required|numeric'
