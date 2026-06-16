@@ -27,7 +27,9 @@ class CourseResource extends JsonResource
             'discount' => $discountAmount,
             'offer_id' => $this->offer_id,
             'offer_discount' => $offerDiscount,
-
+            // بيانات العرض
+            'offer_start_date' => $this->offer?->start_date,
+            'offer_end_date' => $this->offer?->end_date,
 
             'details' => CourseDetailResource::collection(
                 $this->whenLoaded('details')
