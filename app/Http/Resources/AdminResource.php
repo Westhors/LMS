@@ -13,6 +13,9 @@ class AdminResource extends JsonResource
             'name' => $this->name,
             'type' =>"admin",
             'role' => 'admin',
+
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
         ];
     }
 }
