@@ -18,6 +18,17 @@ class AboutResource extends JsonResource
             'google_meta' => $this->google_meta ?? null,
             'tiktok_meta' => $this->tiktok_meta ?? null,
             'you_tube_meta' => $this->you_tube_meta ?? null,
+
+
+            'facebook_count' => $this->facebook_count ?? null,
+            'google_count' => $this->google_count ?? null,
+            'tiktok_count' => $this->tiktok_count ?? null,
+            'you_tube_count' => $this->you_tube_count ?? null,
+
+
+
+
+
             'active' => $this->active ?? null,
             'teacher_id' => $this->teacher_id ?? null,
             'imageUrl' => $this->getFirstMediaUrl(),

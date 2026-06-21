@@ -21,6 +21,10 @@ return new class extends Migration
             $table->text('google_meta')->nullable();
             $table->text('tiktok_meta')->nullable();
             $table->text('you_tube_meta')->nullable();
+            $table->string('facebook_count')->nullable();
+            $table->string('google_count')->nullable();
+            $table->string('tiktok_count')->nullable();
+            $table->string('you_tube_count')->nullable();
             $table->boolean('active')->default(1);
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();

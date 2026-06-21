@@ -30,6 +30,12 @@ class AboutRequest extends FormRequest
             'facebook_meta' => 'nullable|string',
             'tiktok_meta' => 'nullable|string',
             'you_tube_meta' => 'nullable|string',
+
+            'facebook_count' => 'nullable|string',
+            'google_count' => 'nullable|string',
+            'tiktok_count' => 'nullable|string',
+            'you_tube_count' => 'nullable|string',
+
             'teacher_id' => 'required|exists:teachers,id',
         ];
     }
