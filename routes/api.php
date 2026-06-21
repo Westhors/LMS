@@ -327,7 +327,7 @@ Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
 
 //////////////////////////////////////////////////////////permissions//////////////////////////////////////
 Route::get('access-control/permissions',[PermissionController::class, 'allPermission']);
-Route::get('show-permissions',[PermissionController::class, 'showPermissions']);
+Route::post('assistant-teachers/show-permissions',[PermissionController::class, 'showPermissions']);
 Route::post('assistant/permissions',[PermissionController::class, 'assignPermission']);
 
 
