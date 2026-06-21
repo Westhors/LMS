@@ -189,7 +189,8 @@ Route::post('about/index', [AboutController::class, 'index']);
 Route::post('about/restore', [AboutController::class, 'restore']);
 Route::delete('about/delete', [AboutController::class, 'destroy']);
 Route::delete('about/force-delete', [AboutController::class, 'forceDelete']);
-Route::post('about/update/{about}', [AboutController::class, 'forceUpdate']);
+Route::post('seo/update/{about}', [AboutController::class, 'update']);
+Route::get('seo/show/{about}', [AboutController::class, 'showSeo']);
 Route::put('/about/{id}/{column}', [AboutController::class, 'toggle']);
 Route::apiResource('about', AboutController::class);
 

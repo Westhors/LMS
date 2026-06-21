@@ -29,6 +29,7 @@ class TeacherResource extends JsonResource
                 'home' => new HomeResource($this->whenLoaded('home')),
                 'features' => FeatureResource::collection($this->whenLoaded('features')),
                 'about' => new AboutResource($this->whenLoaded('about')),
+                'seo' => new SeoResource($this->whenLoaded('about')),
                 'stages' => StageResource::collection($this->whenLoaded('stages')),
                 'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
                 'courses' => CourseResource::collection(

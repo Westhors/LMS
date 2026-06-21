@@ -6,6 +6,7 @@ use App\Helpers\JsonResponse;
 use App\Http\Requests\AboutRequest;
 use App\Http\Requests\AboutUpdateRequest;
 use App\Http\Resources\AboutResource;
+use App\Http\Resources\SeoResource;
 use App\Interfaces\AboutRepositoryInterface;
 use App\Models\About;
 use App\Traits\HttpResponses;
@@ -54,6 +55,17 @@ class AboutController extends BaseController
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
                 new AboutResource($about)
+            );
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+    public function showSeo(About $about): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new SeoResource($about)
             );
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
