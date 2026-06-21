@@ -327,8 +327,62 @@ public function requestEnroll(Request $request)
         ]);
     }
 
+    public function barcodeStudentLearning($barcode)
+    {
+        $student = Student::where('barcode', $barcode)->first();
 
+        if (!$student) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Student not found'
+            ], 404);
+        }
 
+        $enrollments = Enrollment::where('student_id', $student->id)->get();
+
+        // 🎓 IDs
+        $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
+        $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
+        $lessonIds   = $enrollments->where('type', 'lesson')->pluck('course_detail_id')->unique()->values();
+
+        // 🎓 Semesters
+        $semesters = Semester::with([
+            'courses.details',
+            'courses.teacher',
+            'courses.subject',
+            'courses.stage',
+            'courses.media',
+            'courses.details.media'
+        ])->whereIn('id', $semesterIds)->get();
+
+        // 📚 Courses
+        $courses = Course::with([
+            'details',
+            'teacher',
+            'subject',
+            'stage',
+            'media',
+            'details.media',
+            'semester'
+        ])->whereIn('id', $courseIds)->get();
+
+        // 📖 Lessons
+        $lessons = CourseDetail::with([
+            'course.teacher',
+            'course.semester',
+            'media'
+        ])->whereIn('id', $lessonIds)->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'student' => new StudentMeResource($student),
+                'semesters' => SemesterResource::collection($semesters),
+                'courses' => CourseResource::collection($courses),
+                'lessons' => CourseDetailResource::collection($lessons),
+            ]
+        ]);
+    }
     public function myLearning()
     {
         $student = auth()->user();

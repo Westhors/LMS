@@ -319,6 +319,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //////////////////////////////////////////////////////////my student//////////////////////////////////////
 Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearning']);
+Route::get('barcode/my-student/{barcode}', [EnrollmentController::class, 'barcodeStudentLearning']);
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
 //////////////////////////////////////////////////////////my student//////////////////////////////////////
