@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
 use App\Http\Resources\AdminResource;
+use App\Http\Resources\TeacherAdminResource;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -80,16 +81,27 @@ class AdminController extends Controller
     public function checkAuth(Request $request)
     {
         try {
-            $admin = $request->user(); // Sanctum يرجّع الـ authenticated model
+            $user = $request->user();
 
-            if (!$admin) {
+            if (!$user) {
                 return JsonResponse::respondError('Unauthenticated', 401);
             }
 
-            return JsonResponse::respondSuccess(
-                'Admin Fetched Successfully',
-                new AdminResource($admin)
-            );
+            if ($user instanceof Teacher) {
+                return JsonResponse::respondSuccess(
+                    'Teacher Fetched Successfully',
+                    new TeacherAdminResource($user)
+                );
+            }
+
+            if ($user instanceof Admin) {
+                return JsonResponse::respondSuccess(
+                    'Admin Fetched Successfully',
+                    new AdminResource($user)
+                );
+            }
+
+            return JsonResponse::respondError('Unknown User Type', 400);
 
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
