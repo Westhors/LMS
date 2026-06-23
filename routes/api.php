@@ -189,7 +189,8 @@ Route::post('about/index', [AboutController::class, 'index']);
 Route::post('about/restore', [AboutController::class, 'restore']);
 Route::delete('about/delete', [AboutController::class, 'destroy']);
 Route::delete('about/force-delete', [AboutController::class, 'forceDelete']);
-Route::post('about/update/{about}', [AboutController::class, 'forceUpdate']);
+Route::post('seo/update/{about}', [AboutController::class, 'update']);
+Route::get('seo/show/{about}', [AboutController::class, 'showSeo']);
 Route::put('/about/{id}/{column}', [AboutController::class, 'toggle']);
 Route::apiResource('about', AboutController::class);
 
@@ -319,6 +320,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //////////////////////////////////////////////////////////my student//////////////////////////////////////
 Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearning']);
+Route::get('barcode/my-student/{barcode}', [EnrollmentController::class, 'barcodeStudentLearning']);
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
 //////////////////////////////////////////////////////////my student//////////////////////////////////////
@@ -327,7 +329,10 @@ Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
 
 //////////////////////////////////////////////////////////permissions//////////////////////////////////////
 Route::get('access-control/permissions',[PermissionController::class, 'allPermission']);
+Route::post('assistant-teachers/show-permissions',[PermissionController::class, 'showPermissions']);
 Route::post('assistant/permissions',[PermissionController::class, 'assignPermission']);
+
+
 //////////////////////////////////////////////////////////permissions//////////////////////////////////////
 
 

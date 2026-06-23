@@ -14,32 +14,62 @@ class PermissionController extends Controller
         $permissions = DB::table('permissions')->get();
         return response()->json($permissions);
     }
+
+    public function showPermissions(Request $request)
+    {
+        $request->validate([
+            'assistant_teacher_id' => 'required|exists:assistant_teachers,id',
+        ]);
+
+        $permissions = AssistantTeacherPermission::with('permission')
+            ->where('assistant_teacher_id', $request->assistant_teacher_id)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'permission_id' => $item->permission_id,
+                    'permission_name' => $item->permission->name,
+                    'view' => (bool) $item->view,
+                    'create' => (bool) $item->create,
+                    'update' => (bool) $item->update,
+                    'delete' => (bool) $item->delete,
+                ];
+            });
+
+        return response()->json([
+            'assistant_teacher_id' => $request->assistant_teacher_id,
+            'permissions' => $permissions
+        ]);
+    }
     public function assignPermission(Request $request)
     {
         $request->validate([
             'assistant_teacher_id' => 'required|exists:assistant_teachers,id',
-            'permission_id' => 'required|exists:permissions,id',
-            'view' => 'nullable|boolean',
-            'create' => 'nullable|boolean',
-            'update' => 'nullable|boolean',
-            'delete' => 'nullable|boolean',
+            'permissions' => 'required|array',
+            'permissions.*.permission_id' => 'required|exists:permissions,id',
+            'permissions.*.view' => 'nullable|boolean',
+            'permissions.*.create' => 'nullable|boolean',
+            'permissions.*.update' => 'nullable|boolean',
+            'permissions.*.delete' => 'nullable|boolean',
         ]);
 
-        AssistantTeacherPermission::updateOrCreate(
-            [
-                'assistant_teacher_id' => $request->assistant_teacher_id,
-                'permission_id' => $request->permission_id,
-            ],
-            [
-                'view' => $request->view ?? false,
-                'create' => $request->create ?? false,
-                'update' => $request->update ?? false,
-                'delete' => $request->delete ?? false,
-            ]
-        );
+        foreach ($request->permissions as $permission) {
+
+            AssistantTeacherPermission::updateOrCreate(
+                [
+                    'assistant_teacher_id' => $request->assistant_teacher_id,
+                    'permission_id' => $permission['permission_id'],
+                ],
+                [
+                    'view' => $permission['view'] ?? false,
+                    'create' => $permission['create'] ?? false,
+                    'update' => $permission['update'] ?? false,
+                    'delete' => $permission['delete'] ?? false,
+                ]
+            );
+        }
 
         return response()->json([
-            'message' => 'Permission assigned successfully'
+            'message' => 'Permissions assigned successfully'
         ]);
     }
 }

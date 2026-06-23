@@ -134,6 +134,9 @@ class TeacherController extends BaseController
     public function subDomain(Teacher $teacher): \Illuminate\Http\JsonResponse
     {
         try {
+            if (!$teacher->active) {
+                 return JsonResponse::respondError('Teacher is inactive');
+            }
             $teacher->load([
                 'stages',
                 'subjects',
@@ -530,7 +533,7 @@ class TeacherController extends BaseController
                 'students_by_region' => $studentsByRegion,
                 'students_by_gender' => $studentsByGender,
                 'students_by_stage' => $studentsByStage,
-                
+
                 'last_month_subscriptions' => [
                     'course' => $lastMonthSubscriptions['course'] ?? 0,
                     'semester' => $lastMonthSubscriptions['semester'] ?? 0,
