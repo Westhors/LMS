@@ -11,7 +11,6 @@ class TeacherAdminResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
             'type' =>"teacher",
