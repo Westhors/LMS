@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::domain('api.web-lec.ahmed.com')->group(function () {
+Route::domain('api.web-lec.01062206359.com')->group(function () {
 
     Route::get('/', function () {
         return response()->json([
