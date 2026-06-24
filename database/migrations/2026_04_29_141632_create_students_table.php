@@ -21,6 +21,12 @@ return new class extends Migration
             $table->string('phone_parent')->nullable();
             $table->string('governorate')->nullable();
             $table->string('school_name')->nullable();
+
+            $table->string('device_id')->nullable();
+            $table->string('fingerprint')->nullable();
+            $table->string('last_ip')->nullable();
+            $table->text('user_agent')->nullable();
+
             $table->enum('type_of_study', ['general', 'azhar'])->nullable();
             $table->enum('type_of_attendance', ['center', 'online'])->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();

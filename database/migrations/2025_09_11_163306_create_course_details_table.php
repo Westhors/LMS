@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('content_link')->nullable(); // لو فيديو يوتيوب أو لينك زووم
             $table->date('lession_date')->nullable(); // يوم الحصة
             $table->time('lession_time')->nullable(); // وقت الحصة
+            $table->string('available_watch_count')->nullable();
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             // لازم ينجح عشان يفتح الحصة التالية

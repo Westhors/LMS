@@ -17,6 +17,14 @@ class StudentMeResource extends JsonResource
             'name' => $this->name,
             'phone' => $this->phone,
             'phone_parent' => $this->phone_parent,
+            'device_id'=> $this->device_id,
+            'fingerprint'=> $this->fingerprint,
+            'last_ip'=> $this->last_ip,
+            'user_agent'=> $this->user_agent,
+
+
+
+
             'barcode' => $this->barcode,
             'region' => $this->region,
             'code_parent' => $this->code_parent,

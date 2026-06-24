@@ -74,6 +74,8 @@ class StudentController extends BaseController
             'type' => 'required|in:student,parent',
             'phone' => 'required',
             'password' => 'required',
+            'device_id' => 'required|string',
+            'fingerprint' => 'required|string',
         ]);
 
         if ($request->type === 'student') {
@@ -90,10 +92,11 @@ class StudentController extends BaseController
             }
 
         } else {
+
             $student = Student::where('phone_parent', $request->phone)
-             ->where('code_parent', $request->password)
-             ->where('active', true)
-            ->first();
+                ->where('code_parent', $request->password)
+                ->where('active', true)
+                ->first();
 
             if (!$student) {
                 return response()->json([
@@ -103,17 +106,49 @@ class StudentController extends BaseController
             }
         }
 
-        // 🔥 مهم: امسح التوكنات القديمة (اختياري)
+        // أول جهاز أو بعد ما المدرس عمل Reset للجهاز
+        if (
+            empty($student->device_id) ||
+            empty($student->fingerprint)
+        ) {
+            $student->update([
+                'device_id'   => $request->device_id,
+                'fingerprint' => $request->fingerprint,
+                'last_ip'     => $request->ip(),
+                'user_agent'  => $request->userAgent(),
+            ]);
+        }
+        // جهاز مختلف
+        elseif (
+            $student->device_id !== $request->device_id ||
+            $student->fingerprint !== $request->fingerprint
+        ) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This account is already active on another device.'
+            ], 403);
+        }
+        // نفس الجهاز
+        else {
+            $student->update([
+                'last_ip'    => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         $student->tokens()->delete();
 
-        $token = $student->createToken('token', [$request->type])->plainTextToken;
+        $token = $student->createToken(
+            'token',
+            [$request->type]
+        )->plainTextToken;
 
         return response()->json([
             'status' => true,
             'message' => 'Login successful',
             'token' => $token,
-            'type'  => $request->type,
-            'data'  => new StudentResource($student)
+            'type' => $request->type,
+            'data' => new StudentResource($student)
         ]);
     }
 

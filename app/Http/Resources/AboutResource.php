@@ -79,7 +79,6 @@ class AboutResource extends JsonResource
                     ],
 
 
-
             'active' => $this->active,
             'teacher_id' => $this->teacher_id,
 
