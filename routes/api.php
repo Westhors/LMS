@@ -25,6 +25,20 @@ use App\Http\Controllers\TeacherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+Route::domain('api.web-lec.01062206359.com')->group(function () {
+
+    Route::get('/', function () {
+        return response()->json([
+            'status' => true,
+            'message' => 'Subdomain Working Successfully',
+            'host' => request()->getHost(),
+        ]);
+    });
+
+});
+
+
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
