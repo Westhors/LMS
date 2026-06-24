@@ -140,7 +140,7 @@ class CourseDetailController extends BaseController
     }
 
 
-    public function show(CourseDetail $courseDetail): ?JsonResponse
+    public function show(CourseDetail $courseDetail)
     {
         try {
 
@@ -189,7 +189,7 @@ class CourseDetailController extends BaseController
             return JsonResponse::respondError($e->getMessage());
         }
     }
-    
+
     public function markAttendance($lessonId)
     {
         try {
