@@ -22,7 +22,10 @@ class CourseDetail extends BaseModel
         'link_video' => 'array',
     ];
     protected $guarded = ['id'];
-
+    public function views()
+    {
+        return $this->hasMany(CourseDetailView::class);
+    }
     public function course()
     {
         return $this->belongsTo(Course::class)->withDefault();

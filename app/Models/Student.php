@@ -22,7 +22,10 @@ class Student extends Authenticatable
         'active' => 'boolean',
         'device_blocked' => 'boolean'
     ];
-
+    public function courseDetailViews()
+    {
+        return $this->hasMany(CourseDetailView::class);
+    }
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);

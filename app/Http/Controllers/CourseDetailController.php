@@ -9,6 +9,7 @@ use App\Http\Resources\CourseDetailResource;
 use App\Interfaces\CourseDetailRepositoryInterface;
 use App\Models\CourseDetail;
 use App\Models\CourseDetailAttendance;
+use App\Models\CourseDetailView;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
@@ -139,9 +140,35 @@ class CourseDetailController extends BaseController
     }
 
 
-    public function show(CourseDetail $courseDetail): ?\Illuminate\Http\JsonResponse
+    public function show(CourseDetail $courseDetail): ?JsonResponse
     {
         try {
+
+            $student = auth()->user();
+
+            $viewsCount = CourseDetailView::where(
+                'course_detail_id',
+                $courseDetail->id
+            )
+            ->where(
+                'student_id',
+                $student->id
+            )
+            ->count();
+
+            if (
+                $courseDetail->available_watch_count !== null &&
+                $viewsCount >= $courseDetail->available_watch_count
+            ) {
+                return JsonResponse::respondError(
+                    'عدد مشاهدات الدرس انتهت'
+                );
+            }
+
+            CourseDetailView::create([
+                'course_detail_id' => $courseDetail->id,
+                'student_id' => $student->id,
+            ]);
 
             $courseDetail->load([
                 'course',
@@ -162,7 +189,7 @@ class CourseDetailController extends BaseController
             return JsonResponse::respondError($e->getMessage());
         }
     }
-
+    
     public function markAttendance($lessonId)
     {
         try {

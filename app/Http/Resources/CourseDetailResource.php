@@ -2,19 +2,42 @@
 
 namespace App\Http\Resources;
 
+use App\Models\CourseDetailView;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseDetailResource extends JsonResource
 {
     public function toArray($request)
     {
+        $viewsCount = 0;
+        $remaining = null;
+
+        if (auth()->check()) {
+            $viewsCount = CourseDetailView::where(
+                'course_detail_id',
+                $this->id
+            )
+            ->where(
+                'student_id',
+                auth()->id()
+            )
+            ->count();
+
+            $remaining = $this->available_watch_count === null
+                ? null
+                : max(0, $this->available_watch_count - $viewsCount);
+        }
         return [
             'id' => $this->id,
             'course_id' => $this->course_id,
             'course' => new CourseResource($this->whenLoaded('course')),
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
+            
             'available_watch_count' => $this->available_watch_count,
+            'usedWatchCount' => $viewsCount,
+            'remainingWatchCount' => $remaining,
+
             'link_video' => $this->must_pass_to_unlock
                 ? $this->checkStudentPassedExam()
                     ? $this->link_video
