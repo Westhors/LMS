@@ -71,11 +71,11 @@ class StudentController extends BaseController
     public function login(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:student,parent',
-            'phone' => 'required',
-            'password' => 'required',
-            'device_id' => 'required|string',
-            'fingerprint' => 'required|string',
+            'type' => 'nullable|in:student,parent',
+            'phone' => 'nullable',
+            'password' => 'nullable',
+            'device_id' => 'nullable|string',
+            'fingerprint' => 'nullable|string',
         ]);
 
         if ($request->type === 'student') {
