@@ -19,7 +19,8 @@ class Student extends Authenticatable
     protected $guarded = ['id'];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'device_blocked' => 'boolean'
     ];
 
     public function teacher()
