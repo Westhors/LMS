@@ -337,6 +337,11 @@ Route::get('/my-student/learn/{id}', [EnrollmentController::class, 'studentLearn
 Route::get('barcode/my-student/{barcode}', [EnrollmentController::class, 'barcodeStudentLearning']);
 Route::get('/my-student/learn', [EnrollmentController::class, 'myLearning'])
     ->middleware('auth:sanctum');
+
+Route::post(
+    'students/{student}/reset-device',
+    [StudentController::class, 'resetStudentDevice']
+);
 //////////////////////////////////////////////////////////my student//////////////////////////////////////
 
 

@@ -26,7 +26,8 @@ return new class extends Migration
             $table->string('fingerprint')->nullable();
             $table->string('last_ip')->nullable();
             $table->text('user_agent')->nullable();
-
+            $table->boolean('device_blocked')->default(false);
+            $table->timestamp('device_blocked_at')->nullable();
             $table->enum('type_of_study', ['general', 'azhar'])->nullable();
             $table->enum('type_of_attendance', ['center', 'online'])->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();

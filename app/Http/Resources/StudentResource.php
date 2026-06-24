@@ -18,6 +18,8 @@ class StudentResource extends JsonResource
             'fingerprint'=> $this->fingerprint,
             'last_ip'=> $this->last_ip,
             'user_agent'=> $this->user_agent,
+            'device_blocked'=> $this->device_blocked,
+            'device_blocked_at'=> $this->device_blocked_at,
             'barcode' => $this->barcode,
             'region' => $this->region,
             'type_of_attendance' => $this->type_of_attendance,

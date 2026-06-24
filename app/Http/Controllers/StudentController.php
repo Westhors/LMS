@@ -71,11 +71,11 @@ class StudentController extends BaseController
     public function login(Request $request)
     {
         $request->validate([
-            'type' => 'nullable|in:student,parent',
-            'phone' => 'nullable',
-            'password' => 'nullable',
-            'device_id' => 'nullable|string',
-            'fingerprint' => 'nullable|string',
+            'type' => 'required|in:student,parent',
+            'phone' => 'required',
+            'password' => 'required',
+            'device_id' => 'required|string',
+            'fingerprint' => 'required|string',
         ]);
 
         if ($request->type === 'student') {
@@ -106,16 +106,25 @@ class StudentController extends BaseController
             }
         }
 
-        // أول جهاز أو بعد ما المدرس عمل Reset للجهاز
+        // الحساب متوقف
+        if ($student->device_blocked) {
+            return response()->json([
+                'status' => false,
+                'message' => 'تم إيقاف الحساب بسبب محاولة تسجيل الدخول من جهاز آخر. برجاء التواصل مع الدعم أو المدرس لإعادة التفعيل.'
+            ], 403);
+        }
+
+        // أول تسجيل أو بعد Reset
         if (
             empty($student->device_id) ||
             empty($student->fingerprint)
         ) {
+
             $student->update([
-                'device_id'   => $request->device_id,
+                'device_id' => $request->device_id,
                 'fingerprint' => $request->fingerprint,
-                'last_ip'     => $request->ip(),
-                'user_agent'  => $request->userAgent(),
+                'last_ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ]);
         }
         // جهاز مختلف
@@ -123,19 +132,28 @@ class StudentController extends BaseController
             $student->device_id !== $request->device_id ||
             $student->fingerprint !== $request->fingerprint
         ) {
+
+            $student->update([
+                'device_blocked' => true,
+                'device_blocked_at' => now(),
+            ]);
+
+            $student->tokens()->delete();
+
             return response()->json([
                 'status' => false,
-                'message' => 'This account is already active on another device.'
+                'message' => 'تم إيقاف الحساب لأنك حاولت تسجيل الدخول من جهاز آخر. برجاء التواصل مع الدعم أو المدرس لإعادة تفعيل الحساب.'
             ], 403);
         }
         // نفس الجهاز
         else {
             $student->update([
-                'last_ip'    => $request->ip(),
+                'last_ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
         }
 
+        // تسجيل دخول طبيعي
         $student->tokens()->delete();
 
         $token = $student->createToken(
@@ -148,10 +166,9 @@ class StudentController extends BaseController
             'message' => 'Login successful',
             'token' => $token,
             'type' => $request->type,
-            'data' => new StudentResource($student)
+            'data' => new StudentResource($student),
         ]);
     }
-
     public function checkAuth(Request $request)
     {
         return response()->json([
@@ -323,5 +340,23 @@ class StudentController extends BaseController
         ]);
     }
 
+    public function resetStudentDevice(Student $student)
+    {
+        $student->update([
+            'device_id' => null,
+            'fingerprint' => null,
+            'last_ip' => null,
+            'user_agent' => null,
+            'device_blocked' => false,
+            'device_blocked_at' => null,
+        ]);
+
+        $student->tokens()->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Student device has been reset successfully.'
+        ]);
+    }
 }
 
