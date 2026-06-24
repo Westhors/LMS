@@ -26,6 +26,7 @@ class CourseDetail extends BaseModel
     {
         return $this->hasMany(CourseDetailView::class);
     }
+    
     public function course()
     {
         return $this->belongsTo(Course::class)->withDefault();

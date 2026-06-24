@@ -9,23 +9,28 @@ class CourseDetailResource extends JsonResource
 {
     public function toArray($request)
     {
+        $studentId = auth('sanctum')->id() ?? auth()->id();
+
         $viewsCount = 0;
         $remaining = null;
 
-        if (auth()->check()) {
+        if ($studentId) {
             $viewsCount = CourseDetailView::where(
                 'course_detail_id',
                 $this->id
             )
             ->where(
                 'student_id',
-                auth()->id()
+                $studentId
             )
             ->count();
 
             $remaining = $this->available_watch_count === null
                 ? null
-                : max(0, $this->available_watch_count - $viewsCount);
+                : max(
+                    0,
+                    (int)$this->available_watch_count - $viewsCount
+                );
         }
         return [
             'id' => $this->id,
@@ -33,7 +38,7 @@ class CourseDetailResource extends JsonResource
             'course' => new CourseResource($this->whenLoaded('course')),
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
-            
+
             'available_watch_count' => $this->available_watch_count,
             'usedWatchCount' => $viewsCount,
             'remainingWatchCount' => $remaining,

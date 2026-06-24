@@ -29,7 +29,7 @@ class CourseController extends BaseController
     public function index()
     {
         try {
-            $Courses = CourseResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject' , 'semester' , 'details'], [], ['*']));
+            $Courses = CourseResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject', 'semester', 'details'], [], ['*']));
             return $Courses->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -42,10 +42,10 @@ class CourseController extends BaseController
             if ($result !== true) {
                 return $result;
             }
-           $course = $this->crudRepository->create($request->validated());
-           if (request('image') !== null) {
+            $course = $this->crudRepository->create($request->validated());
+            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $course);
-           }
+            }
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -56,6 +56,7 @@ class CourseController extends BaseController
     public function show(Course $course): ?\Illuminate\Http\JsonResponse
     {
         try {
+           $studentId = auth()->id();
 
             $course->load([
                 'teacher',
@@ -63,14 +64,27 @@ class CourseController extends BaseController
                 'subject',
                 'semester',
                 'details',
-                'students'
+                'students',
+                'details' => function ($q) use ($studentId) {
+                    $q->with([
+                        'course',
+                        'exams',
+                        'assignments',
+                        'students.stage',
+                        'students.teacher',
+                        'attendances',
+                        'views' => function ($query) use ($studentId) {
+                            $query->where('student_id', $studentId);
+                        }
+                    ]);
+                }
+
             ]);
 
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
                 new CourseResource($course)
             );
-
         } catch (Exception $e) {
 
             return JsonResponse::respondError($e->getMessage());
@@ -134,4 +148,3 @@ class CourseController extends BaseController
         }
     }
 }
-
