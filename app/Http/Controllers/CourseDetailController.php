@@ -149,27 +149,25 @@ class CourseDetailController extends BaseController
             $viewsCount = CourseDetailView::where(
                 'course_detail_id',
                 $courseDetail->id
-            )
-            ->where(
+            )->where(
                 'student_id',
                 $student->id
-            )
-            ->count();
+            )->count();
 
             if (
                 $courseDetail->available_watch_count !== null &&
                 $viewsCount >= $courseDetail->available_watch_count
             ) {
-                return JsonResponse::respondError(
-                    'عدد مشاهدات الدرس انتهت'
-                );
+                return response()->json([
+                    'status' => false,
+                    'message' => 'عدد مشاهدات الدرس انتهت'
+                ], 403);
             }
 
             CourseDetailView::create([
                 'course_detail_id' => $courseDetail->id,
                 'student_id' => $student->id,
             ]);
-
             $courseDetail->load([
                 'course',
                 'exams',
