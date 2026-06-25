@@ -24,6 +24,10 @@ class TeacherResource extends JsonResource
 
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
+
+
+            'logoUrl' => $this->getFirstMediaUrl('logo'),
+            'logo' => new MediaResource($this->getFirstMedia('logo')),
             'website' => [
 
                 'home' => new HomeResource($this->whenLoaded('home')),

@@ -60,6 +60,9 @@ class TeacherController extends BaseController
             if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $teacher);
             }
+            if (request('logo') !== null) {
+                $this->crudRepository->AddMediaCollection('logo', $teacher , 'logo');
+            }
             if ($request->filled('stage')) {
                 foreach ($request->stage as $item) {
 
@@ -198,6 +201,9 @@ class TeacherController extends BaseController
             // الصورة
             if ($request->filled('image')) {
                 $this->crudRepository->AddMediaCollection('image', $teacher);
+            }
+            if ($request->filled('logo')) {
+                $this->crudRepository->AddMediaCollection('logo', $teacher , 'logo');
             }
 
             // المراحل
