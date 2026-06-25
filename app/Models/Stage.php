@@ -9,7 +9,7 @@ class Stage extends BaseModel
     use HasFactory;
 
     use HasMedia;
-    
+
     protected $with = [
         'media',
     ];
@@ -23,6 +23,10 @@ class Stage extends BaseModel
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class);
+    }
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
     }
 }
 
