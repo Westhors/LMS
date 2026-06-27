@@ -390,10 +390,34 @@ public function requestEnroll(Request $request)
         $enrollments = Enrollment::where('student_id', $student->id)->get();
 
         // 🎓 IDs
-        $semesterIds = $enrollments->where('type', 'semester')->pluck('semester_id')->unique()->values();
-        $courseIds   = $enrollments->where('type', 'course')->pluck('course_id')->unique()->values();
-        $lessonIds   = $enrollments->where('type', 'lesson')->pluck('course_detail_id')->unique()->values();
-        $bookIds = $enrollments->where('type', 'book')->pluck('book_id')->unique()->values();
+        $semesterIds = $enrollments->where('type', 'semester')
+            ->pluck('semester_id')
+            ->unique()
+            ->values();
+
+        $courseIds = $enrollments->where('type', 'course')
+            ->pluck('course_id')
+            ->unique()
+            ->values();
+
+        // إضافة كورسات الترمات المشتركة فيها
+        $semesterCourseIds = Course::whereIn('semester_id', $semesterIds)
+            ->pluck('id');
+
+        $courseIds = $courseIds
+            ->merge($semesterCourseIds)
+            ->unique()
+            ->values();
+
+        $lessonIds = $enrollments->where('type', 'lesson')
+            ->pluck('course_detail_id')
+            ->unique()
+            ->values();
+
+        $bookIds = $enrollments->where('type', 'book')
+            ->pluck('book_id')
+            ->unique()
+            ->values();
 
         // 🎓 Semesters
         $semesters = Semester::with([
@@ -423,21 +447,19 @@ public function requestEnroll(Request $request)
             'media'
         ])->whereIn('id', $lessonIds)->get();
 
+        // 📚 Books
         $books = Book::with([
             'media'
         ])->whereIn('id', $bookIds)->get();
+
         return response()->json([
             'status' => true,
             'data' => [
-                // 👤 Student من الريسورس
                 'student' => new StudentMeResource($student),
-
-                // 🎓 Learning Data
                 'semesters' => SemesterResource::collection($semesters),
                 'courses'   => CourseResource::collection($courses),
                 'lessons'   => CourseDetailResource::collection($lessons),
                 'books'     => BookResource::collection($books),
-
             ]
         ]);
     }
