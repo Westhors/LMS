@@ -23,7 +23,7 @@ class StudentRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string|max:255',
-            'phone' => 'required|unique:students,phone',
+            'phone' => 'required|unique:students,phone|different:phone_parent',
             'password' => 'required|min:6',
             'code_parent' => 'nullable|string',
 
@@ -33,7 +33,7 @@ class StudentRequest extends FormRequest
             'user_agent' => 'nullable|string',
 
             'region' => 'nullable|string',
-            'phone_parent' => 'nullable|unique:students,phone_parent',
+            'phone_parent' => 'nullable|unique:students,phone_parent|different:phone',
             'type_of_attendance' => 'nullable|in:center,online',
             'gender' => 'nullable|in:male,female',
             'type_of_study' => 'nullable|in:general,azhar',
