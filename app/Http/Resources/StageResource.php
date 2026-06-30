@@ -14,14 +14,19 @@ class StageResource extends JsonResource
             'name_ar' => $this->name_ar,
             'position' => $this->position ?? null,
             'active' => $this->active ?? null,
-            'subjects' => $this->subjects->map(function ($subject) {
-                return [
-                    'id' => $subject->id,
-                    'name' => $subject->name,
-                    'name_ar' => $subject->name_ar,
-                    'active' => $subject->active ?? null,
-                ];
-            }),
+'subjects' => $this->subjects()
+    ->whereHas('teachers', function ($q) {
+        $q->where('teacher_id', $this->teacher_id);
+    })
+    ->get()
+    ->map(function ($subject) {
+        return [
+            'id' => $subject->id,
+            'name' => $subject->name,
+            'name_ar' => $subject->name_ar,
+            'active' => $subject->active,
+        ];
+    }),
             'image' => $this->teacher_image ? [
                 'id' => $this->teacher_image->id,
                 'name' => $this->teacher_image->name,

@@ -34,8 +34,12 @@ class TeacherResource extends JsonResource
                 'features' => FeatureResource::collection($this->whenLoaded('features')),
                 'about' => new AboutResource($this->whenLoaded('about')),
                 'seo' => new SeoResource($this->whenLoaded('about')),
-                'stages' => StageResource::collection($this->whenLoaded('stages')),
-                'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
+'stages' => StageResource::collection(
+    $this->stages->map(function ($stage) {
+        $stage->teacher_id = $this->id;
+        return $stage;
+    })
+),                'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
                 'courses' => CourseResource::collection(
                     $this->whenLoaded('courses')
                 ),
