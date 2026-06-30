@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use PDF;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+
 class TeacherController extends BaseController
 {
     use HttpResponses;
@@ -377,6 +379,9 @@ class TeacherController extends BaseController
             'font_color' => $data['font_color'] ?? $teacher->font_color,
         ]);
 
+        // فك الكاش
+        Cache::flush();
+
         $teacher->refresh();
 
         return response()->json([
@@ -406,7 +411,7 @@ class TeacherController extends BaseController
         $request->validate([
             'teacher_id' => 'required|exists:teachers,id',
         ]);
-
+         Cache::flush();
         $teacher = Teacher::findOrFail($request->teacher_id);
 
         return response()->json([
