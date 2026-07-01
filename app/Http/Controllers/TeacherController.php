@@ -726,18 +726,36 @@ class TeacherController extends BaseController
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'password' => 'required|min:6',
+            'password' => 'nullable|min:6',
+
+            'name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|unique:students,phone,' . $request->student_id,
+            'phone_parent' => 'nullable|string',
+            'birth_date' => 'nullable|date',
+            'type_of_attendance' => 'nullable|string',
+            'stage_id' => 'nullable|exists:stages,id',
         ]);
 
         $student = Student::findOrFail($request->student_id);
 
-        $student->update([
-            'password' => Hash::make($request->password),
-        ]);
+        if ($request->filled('password')) {
+            $student->update([
+                'password' => Hash::make($request->password),
+            ]);
+        }
+
+        $student->update($request->only([
+            'name',
+            'phone',
+            'phone_parent',
+            'birth_date',
+            'type_of_attendance',
+            'stage_id',
+        ]));
 
         return response()->json([
             'status' => true,
-            'message' => 'Password updated successfully',
+            'message' => 'Student updated successfully',
         ]);
     }
 }

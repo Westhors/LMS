@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('school_name')->nullable();
 
             $table->string('device_id')->nullable();
+            $table->date('birth_date')->nullable();
             $table->string('fingerprint')->nullable();
             $table->string('last_ip')->nullable();
             $table->text('user_agent')->nullable();

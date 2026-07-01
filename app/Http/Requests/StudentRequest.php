@@ -26,6 +26,7 @@ class StudentRequest extends FormRequest
             'phone' => 'required|unique:students,phone|different:phone_parent',
             'password' => 'required|min:6',
             'code_parent' => 'nullable|string',
+            'birth_date' => 'nullable|date',
 
             'device_id' => 'nullable|string',
             'fingerprint' => 'nullable|string',
@@ -33,7 +34,7 @@ class StudentRequest extends FormRequest
             'user_agent' => 'nullable|string',
 
             'region' => 'nullable|string',
-            'phone_parent' => 'nullable|unique:students,phone_parent|different:phone',
+            'phone_parent' => 'nullable|different:phone',
             'type_of_attendance' => 'nullable|in:center,online',
             'gender' => 'nullable|in:male,female',
             'type_of_study' => 'nullable|in:general,azhar',
