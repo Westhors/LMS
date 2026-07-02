@@ -72,7 +72,7 @@ class StudentController extends BaseController
     {
         $request->validate([
             'type' => 'required|in:student,parent',
-            'phone' => 'required',
+            'phone' => 'nullable',
             'password' => 'required',
             'device_id' => 'required|string',
             'fingerprint' => 'required|string',
@@ -169,6 +169,8 @@ class StudentController extends BaseController
             'data' => new StudentResource($student),
         ]);
     }
+
+
     public function checkAuth(Request $request)
     {
         return response()->json([
