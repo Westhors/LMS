@@ -93,8 +93,7 @@ class StudentController extends BaseController
 
         } else {
 
-            $student = Student::where('phone_parent', $request->phone)
-                ->where('code_parent', $request->password)
+            $student = Student::where('code_parent', $request->password)
                 ->where('active', true)
                 ->first();
 
