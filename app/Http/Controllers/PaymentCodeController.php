@@ -159,7 +159,27 @@ class PaymentCodeController extends BaseController
         ]);
     }
 
+    public function delete(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*' => 'required|integer|exists:payment_codes,id',
+        ]);
 
+        $query = PaymentCode::whereIn('id', $request->items);
+
+        if (auth()->check()) {
+            $query->where('teacher_id', auth()->id());
+        }
+
+        $deleted = $query->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Payment codes deleted successfully',
+            'deleted_count' => $deleted,
+        ]);
+    }
 
     public function paymentCodesReport()
     {

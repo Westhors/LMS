@@ -35,7 +35,6 @@ Route::domain('api.web-lec.01062206359.com')->group(function () {
             'host' => request()->getHost(),
         ]);
     });
-
 });
 
 
@@ -256,6 +255,7 @@ Route::apiResource('semesters', SemesterController::class);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('generate-codes', [PaymentCodeController::class, 'generateCodes']);
     Route::post('payment-code/index', [PaymentCodeController::class, 'index']);
+    Route::delete('/payment-code/delete', [PaymentCodeController::class, 'delete']);
 });
 
 
@@ -327,7 +327,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/requests-redeem/teacher', [EnrollmentController::class, 'teacherRequests']);
     // ❌ رفض طلب
     Route::post('/request/teacher/{id}/status', [EnrollmentController::class, 'status']);
-    Route::post('lessons/{lessonId}/attendance',[CourseDetailController::class, 'markAttendance']);
+    Route::post('lessons/{lessonId}/attendance', [CourseDetailController::class, 'markAttendance']);
 });
 //////////////////////////////////////////////////////////Enrollment//////////////////////////////////////
 
@@ -347,9 +347,9 @@ Route::post(
 
 
 //////////////////////////////////////////////////////////permissions//////////////////////////////////////
-Route::get('access-control/permissions',[PermissionController::class, 'allPermission']);
-Route::post('assistant-teachers/show-permissions',[PermissionController::class, 'showPermissions']);
-Route::post('assistant/permissions',[PermissionController::class, 'assignPermission']);
+Route::get('access-control/permissions', [PermissionController::class, 'allPermission']);
+Route::post('assistant-teachers/show-permissions', [PermissionController::class, 'showPermissions']);
+Route::post('assistant/permissions', [PermissionController::class, 'assignPermission']);
 
 
 //////////////////////////////////////////////////////////permissions//////////////////////////////////////
