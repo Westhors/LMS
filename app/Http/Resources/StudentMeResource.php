@@ -48,14 +48,21 @@ class StudentMeResource extends JsonResource
         ];
     }
 
-    private function formatByType($type)
+       private function formatByType($type)
     {
         return $this->answers
-            ->where('exam.type', $type)
+            ->filter(function ($answer) use ($type) {
+                return $answer->exam
+                    && strtolower($answer->exam->type) === strtolower($type);
+            })
             ->groupBy('exam_id')
             ->map(function ($answers) {
 
                 $exam = $answers->first()->exam;
+
+                if (!$exam) {
+                    return null;
+                }
 
                 return [
                     'exam' => [
@@ -65,13 +72,13 @@ class StudentMeResource extends JsonResource
                         'type' => $exam->type,
                     ],
 
-                    // 🧮 total mark
                     'student_mark' => $answers->sum('mark'),
 
-                    // 📖 questions
                     'questions' => $exam->questions->map(function ($q) use ($answers) {
 
-                        $studentAnswer = $answers->where('question_id', $q->id)->first();
+                        $studentAnswer = $answers
+                            ->where('question_id', $q->id)
+                            ->first();
 
                         return [
                             'id' => $studentAnswer?->id,
@@ -85,9 +92,10 @@ class StudentMeResource extends JsonResource
                             'is_correct' => $studentAnswer?->is_correct,
                             'mark_obtained' => $studentAnswer?->mark,
                         ];
-                    }),
+                    })->values(),
                 ];
             })
+            ->filter()
             ->values();
     }
 }

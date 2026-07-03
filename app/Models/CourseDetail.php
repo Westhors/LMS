@@ -26,7 +26,7 @@ class CourseDetail extends BaseModel
     {
         return $this->hasMany(CourseDetailView::class);
     }
-    
+
     public function course()
     {
         return $this->belongsTo(Course::class)->withDefault();
@@ -57,37 +57,32 @@ class CourseDetail extends BaseModel
 
     public function checkStudentPassedExam()
     {
-     $user = auth()->user();
+        $user = auth()->user();
 
+        if (!$user) {
+            return false;
+        }
 
+        if ($user instanceof Teacher) {
+            return true;
+        }
 
-    if (!$user) {
-        return false;
+        if (!($user instanceof Student)) {
+            return false;
+        }
+
+        $exam = $this->exams()->first();
+
+        if (!$exam) {
+            return true;
+        }
+
+        $studentTotal = ExamAnswer::where('exam_id', $exam->id)
+            ->where('student_id', $user->id)
+            ->sum('mark');
+
+        return $studentTotal >= $exam->total_must_pass_marks;
     }
-
-
-    if ($user instanceof Teacher) {
-        return true;
-    }
-
-    if (!($user instanceof Student)) {
-        return false;
-    }
-
-    $exam = $this->exams()->first();
-
-    if (!$exam) {
-        return true;
-    }
-
-
-
-    $studentTotal = ExamAnswer::where('exam_id', $exam->id)
-        ->where('student_id', $user->id)
-        ->sum('mark');
-
-    return $studentTotal >= $exam->total_must_pass_marks;
-}
 
 
     public function attendances()
