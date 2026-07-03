@@ -14,15 +14,30 @@ class ExamResource extends JsonResource
         $studentSolved = false;
         $studentMark = 0;
         $studentPassed = false;
+        $studentPassedMessage = null;
 
         if ($studentId) {
+
             $studentAnswers = $this->answers()
                 ->where('student_id', $studentId)
                 ->get();
 
             $studentSolved = $studentAnswers->isNotEmpty();
             $studentMark = $studentAnswers->sum('mark');
-            $studentPassed = $studentMark >= $this->total_must_pass_marks;
+
+            $hasPendingEssay = $studentAnswers
+                ->load('question')
+                ->contains(function ($answer) {
+                    return $answer->is_auto_corrected == 0
+                        && optional($answer->question)->question_type === 'essay';
+                });
+
+            if ($hasPendingEssay) {
+                $studentPassed = null;
+                $studentPassedMessage = 'Waiting for essay correction';
+            } else {
+                $studentPassed = $studentMark >= $this->total_must_pass_marks;
+            }
         }
         return [
             'id' => $this->id,
@@ -36,6 +51,7 @@ class ExamResource extends JsonResource
             'student_solved' => $studentSolved,
             'student_mark' => $studentMark,
             'student_passed' => $studentPassed,
+            'student_passed_message' => $studentPassedMessage,
 
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'students' => $this->whenLoaded('answers', function () {
