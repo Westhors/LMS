@@ -109,12 +109,12 @@ class CourseDetailResource extends JsonResource
                 ->where('student_id', $student->id)
                 ->get();
 
-            // الطالب لسه ممتحنش الامتحان ده
+            // لسه ممتحنش الامتحان ده
             if ($answers->isEmpty()) {
                 return collect([$exam]);
             }
 
-            // فيه سؤال مقالي لسه متصححش
+            // سؤال مقالي لسه متصححش
             $hasPendingEssay = $answers
                 ->load('question')
                 ->contains(function ($answer) {
@@ -130,14 +130,15 @@ class CourseDetailResource extends JsonResource
 
             $studentMark = $answers->sum('mark');
 
-            // نجح فى الامتحان
+            // نجح ➜ رجع نفس الامتحان
             if ($studentMark >= $exam->total_must_pass_marks) {
-                return collect();
+                return collect([$exam]);
             }
 
-            // سقط → نكمل للامتحان اللى بعده
+            // سقط ➜ كمل للامتحان اللي بعده
         }
 
+        // سقط في كل الامتحانات
         return collect();
     }
 
