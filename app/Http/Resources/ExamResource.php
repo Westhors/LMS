@@ -9,7 +9,7 @@ class ExamResource extends JsonResource
 {
     public function toArray($request)
     {
-        $studentId = auth('sanctum')->id() ?? auth()->id();
+         $studentId = auth('sanctum')->id() ?? auth()->id();
 
         $studentSolved = false;
         $studentMark = 0;
@@ -28,8 +28,10 @@ class ExamResource extends JsonResource
             $hasPendingEssay = $studentAnswers
                 ->load('question')
                 ->contains(function ($answer) {
-                    return $answer->is_auto_corrected == 0
-                        && optional($answer->question)->question_type === 'essay';
+                    return optional($answer->question)->question_type === 'essay'
+                        && $answer->is_auto_corrected == 0
+                        && is_null($answer->is_correct)
+                        && is_null($answer->mark);
                 });
 
             if ($hasPendingEssay) {
@@ -39,6 +41,7 @@ class ExamResource extends JsonResource
                 $studentPassed = $studentMark >= $this->total_must_pass_marks;
             }
         }
+
         return [
             'id' => $this->id,
 
