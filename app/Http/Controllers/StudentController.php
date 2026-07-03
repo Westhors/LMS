@@ -170,7 +170,7 @@ class StudentController extends BaseController
     }
 
 
-   public function delete(Request $request)
+    public function delete(Request $request)
     {
         $request->validate([
             'items' => 'required|array|min:1',
@@ -183,11 +183,11 @@ class StudentController extends BaseController
             $query->where('teacher_id', auth()->id());
         }
 
-        $deleted = $query->forceDelete();
+        $deleted = $query->delete();
 
         return response()->json([
             'status' => true,
-            'message' => 'Students deleted permanently successfully',
+            'message' => 'students deleted successfully',
             'deleted_count' => $deleted,
         ]);
     }

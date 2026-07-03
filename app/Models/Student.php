@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Traits\HasMedia;
 use Illuminate\Foundation\Auth\User as Authenticatable; // 🔥 مهم
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Student extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable ,HasMedia;
+    use HasApiTokens, HasFactory, Notifiable ,HasMedia , SoftDeletes;
 
     protected $with = [
         'media',
