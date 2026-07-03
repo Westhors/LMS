@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('type', ['assignment', 'exam'])->default('exam');
-            $table->enum('type_exam',  ['online', 'center'])->default('center');
+            $table->enum('type_exam',  ['online', 'center' ,'all'])->default('center');
 
             $table->string('time_start')->nullable();
             $table->string('time_end')->nullable();

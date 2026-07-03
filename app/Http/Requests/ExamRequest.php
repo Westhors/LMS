@@ -20,7 +20,7 @@ class ExamRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'nullable|in:assignment,exam',
-            'type_exam' => 'nullable|in:online,center',
+            'type_exam' => 'nullable|in:online,center,all',
 
             'time_start' => 'nullable|string|max:255',
              'time_end' => 'nullable|string|max:255',
