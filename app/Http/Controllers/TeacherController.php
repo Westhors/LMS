@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Hash;
 use PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 
 class TeacherController extends BaseController
 {
@@ -722,14 +723,18 @@ class TeacherController extends BaseController
     }
 
 
-    public function changePasswordStudent(Request $request)
+   public function changePasswordStudent(Request $request)
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
             'password' => 'nullable|min:6',
 
             'name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|unique:students,phone,' . $request->student_id,
+            'phone' => [
+                'nullable',
+                'string',
+                Rule::unique('students', 'phone')->ignore($request->student_id),
+            ],
             'phone_parent' => 'nullable|string',
             'birth_date' => 'nullable|date',
             'type_of_attendance' => 'nullable|string',
@@ -738,24 +743,25 @@ class TeacherController extends BaseController
 
         $student = Student::findOrFail($request->student_id);
 
-        if ($request->filled('password')) {
-            $student->update([
-                'password' => Hash::make($request->password),
-            ]);
-        }
-
-        $student->update($request->only([
+        $data = $request->only([
             'name',
             'phone',
             'phone_parent',
             'birth_date',
             'type_of_attendance',
             'stage_id',
-        ]));
+        ]);
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $student->update($data);
 
         return response()->json([
             'status' => true,
             'message' => 'Student updated successfully',
+            'data' => $student->fresh(),
         ]);
     }
 }
