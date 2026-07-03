@@ -18,9 +18,11 @@ class ExamResource extends JsonResource
             'course_detail_id' => new CourseDetailResource($this->whenLoaded('courseDetail')),
             'stage_id' => new StageResource($this->whenLoaded('stage')),
             'teacher_id' => new TeacherResource($this->whenLoaded('teacher')),
-            'student_solved' => $this->answers()
-                ->where('student_id', request()->student_id)
-                ->exists(),
+            'student_solved' => request()->filled('student_id')
+                ? $this->answers()
+                    ->where('student_id', request()->student_id)
+                    ->exists()
+                : false,
 
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'students' => $this->whenLoaded('answers', function () {
