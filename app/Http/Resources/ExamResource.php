@@ -9,6 +9,21 @@ class ExamResource extends JsonResource
 {
     public function toArray($request)
     {
+        $studentId = auth('sanctum')->id() ?? auth()->id();
+
+        $studentSolved = false;
+        $studentMark = 0;
+        $studentPassed = false;
+
+        if ($studentId) {
+            $studentAnswers = $this->answers()
+                ->where('student_id', $studentId)
+                ->get();
+
+            $studentSolved = $studentAnswers->isNotEmpty();
+            $studentMark = $studentAnswers->sum('mark');
+            $studentPassed = $studentMark >= $this->total_must_pass_marks;
+        }
         return [
             'id' => $this->id,
 
@@ -18,11 +33,9 @@ class ExamResource extends JsonResource
             'course_detail_id' => new CourseDetailResource($this->whenLoaded('courseDetail')),
             'stage_id' => new StageResource($this->whenLoaded('stage')),
             'teacher_id' => new TeacherResource($this->whenLoaded('teacher')),
-            'student_solved' => request()->filled('student_id')
-                ? $this->answers()
-                    ->where('student_id', request()->student_id)
-                    ->exists()
-                : false,
+            'student_solved' => $studentSolved,
+            'student_mark' => $studentMark,
+            'student_passed' => $studentPassed,
 
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'students' => $this->whenLoaded('answers', function () {
