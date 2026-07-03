@@ -91,67 +91,66 @@ class CourseDetailResource extends JsonResource
         ];
     }
 
-private function availableExamsForStudent()
-{
-    $student = auth()->user();
+    private function availableExamsForStudent()
+    {
+        $student = auth()->user();
 
-    if (!$student) {
-        return collect();
-    }
-
-    $result = collect();
-
-    $exams = $this->relationLoaded('exams')
-        ? $this->exams->sortBy('id')->values()
-        : $this->exams()->orderBy('id')->get();
-
-    foreach ($exams as $exam) {
-
-        $answers = $exam->answers()
-            ->where('student_id', $student->id)
-            ->get();
-
-        // الامتحان ده لسه ممتحنوش
-        if ($answers->isEmpty()) {
-            return $result;
+        if (!$student) {
+            return collect();
         }
 
-        // ضيف الامتحان الحالي لأنه اتحل
-        $result->push($exam);
+        $exams = $this->relationLoaded('exams')
+            ? $this->exams->sortBy('id')->values()
+            : $this->exams()->orderBy('id')->get();
 
-        // سؤال مقالي لسه متصححش
-        $hasPendingEssay = $answers
-            ->load('question')
-            ->contains(function ($answer) {
-                return optional($answer->question)->question_type === 'essay'
-                    && $answer->is_auto_corrected == 0
-                    && is_null($answer->is_correct)
-                    && is_null($answer->mark);
-            });
+        $result = collect();
 
-        if ($hasPendingEssay) {
-            return $result;
-        }
+        foreach ($exams as $exam) {
 
-        $studentMark = $answers->sum('mark');
+            $answers = $exam->answers()
+                ->where('student_id', $student->id)
+                ->get();
 
-        // نجح ➜ متظهرش أي امتحان بعده
-        if ($studentMark >= $exam->total_must_pass_marks) {
-            return $result;
-        }
+            // الطالب لم يدخل الامتحان
+            if ($answers->isEmpty()) {
 
-        // سقط ➜ أظهر الامتحان التالي فقط
-        $nextExam = $exams->firstWhere('id', '>', $exam->id);
+                // لو لم يمتحن أي امتحان قبل كده
+                if ($result->isEmpty()) {
+                    $result->push($exam);
+                }
 
-        if ($nextExam) {
-            $result->push($nextExam);
+                break;
+            }
+
+            // أضف الامتحان الذى تم حله
+            $result->push($exam);
+
+            // فى انتظار تصحيح مقالى
+            $hasPendingEssay = $answers
+                ->load('question')
+                ->contains(function ($answer) {
+                    return optional($answer->question)->question_type === 'essay'
+                        && $answer->is_auto_corrected == 0
+                        && is_null($answer->is_correct)
+                        && is_null($answer->mark);
+                });
+
+            if ($hasPendingEssay) {
+                break;
+            }
+
+            $studentMark = $answers->sum('mark');
+
+            // نجح
+            if ($studentMark >= $exam->total_must_pass_marks) {
+                break;
+            }
+
+            // سقط -> نكمل للامتحان التالي
         }
 
         return $result;
     }
-
-    return $result;
-}
 
     private function needSupport()
     {
