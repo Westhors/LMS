@@ -14,9 +14,10 @@ class ExamAnswer extends BaseModel
 
     protected $guarded = ['id'];
 
-     protected $casts = [
+    protected $casts = [
+        'answer' => 'array',
         'is_auto_corrected' => 'boolean',
-        'is_correct' => 'boolean'
+        'is_correct' => 'boolean',
     ];
 
     public function exam()
