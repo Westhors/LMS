@@ -57,45 +57,37 @@ class CourseDetail extends BaseModel
 
     public function checkStudentPassedExam()
     {
-        $user = auth()->user();
+     $user = auth()->user();
 
-        if (!$user) {
-            return false;
-        }
 
-        if ($user instanceof Teacher) {
-            return true;
-        }
 
-        if (!($user instanceof Student)) {
-            return false;
-        }
-
-        $exams = $this->exams()->orderBy('id')->get();
-
-        if ($exams->isEmpty()) {
-            return true;
-        }
-
-        foreach ($exams as $exam) {
-
-            $answers = ExamAnswer::where('exam_id', $exam->id)
-                ->where('student_id', $user->id)
-                ->get();
-
-            if ($answers->isEmpty()) {
-                continue;
-            }
-
-            $studentMark = $answers->sum('mark');
-
-            if ($studentMark >= $exam->total_must_pass_marks) {
-                return true;
-            }
-        }
-
+    if (!$user) {
         return false;
     }
+
+
+    if ($user instanceof Teacher) {
+        return true;
+    }
+
+    if (!($user instanceof Student)) {
+        return false;
+    }
+
+    $exam = $this->exams()->first();
+
+    if (!$exam) {
+        return true;
+    }
+
+
+
+    $studentTotal = ExamAnswer::where('exam_id', $exam->id)
+        ->where('student_id', $user->id)
+        ->sum('mark');
+
+    return $studentTotal >= $exam->total_must_pass_marks;
+}
 
 
     public function attendances()
