@@ -36,7 +36,7 @@ class ExamResource extends JsonResource
 
             if ($hasPendingEssay) {
                 $studentPassed = null;
-                $studentPassedMessage = 'جارى تصحيح الامنتجان انتظر !';
+                $studentPassedMessage = 'جارى تصحيح الامنتحان انتظر !';
             } else {
                 $studentPassed = $studentMark >= $this->total_must_pass_marks;
             }
