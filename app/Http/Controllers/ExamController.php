@@ -338,44 +338,43 @@ class ExamController extends BaseController
     }
 //////////////////////////////////////////// getQuestions ////////////////////////////////////
 
- public function submitExam(Request $request)
+public function submitExam(Request $request)
 {
     $request->validate([
-        'exam_id'    => 'required|exists:exams,id',
+        'exam_id' => 'required|exists:exams,id',
         'student_id' => 'required|exists:students,id',
-        'answers'    => 'required|array',
+        'answers' => 'required|array',
     ]);
 
     DB::beginTransaction();
 
     try {
 
-        $totalScore = 0;
+        // تحويل الداتا الجديدة للشكل القديم
+        $answers = collect($request->answers)->map(function ($item) {
 
-        foreach ($request->answers as $item) {
+            if (is_array($item['answer'] ?? null)) {
+                return [
+                    'question_id' => $item['question_id'],
+                    'answer' => $item['answer']['text'] ?? null,
+                    'image' => $item['answer']['images'][0] ?? null,
+                ];
+            }
+
+            return $item;
+        })->toArray();
+
+        foreach ($answers as $item) {
 
             $question = ExamQuestion::findOrFail($item['question_id']);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Prepare Answer
-            |--------------------------------------------------------------------------
-            */
             $answer = $item['answer'] ?? null;
-
-            if (is_array($answer)) {
-                $answer = implode(',', $answer);
-            }
 
             $mark = 0;
             $isCorrect = null;
             $auto = false;
 
-            /*
-            |--------------------------------------------------------------------------
-            | TRUE / FALSE
-            |--------------------------------------------------------------------------
-            */
+            // TRUE / FALSE
             if ($question->question_type === 'true_false') {
 
                 $auto = true;
@@ -386,15 +385,9 @@ class ExamController extends BaseController
                 } else {
                     $isCorrect = false;
                 }
-
-                $totalScore += $mark;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | MULTIPLE CHOICE
-            |--------------------------------------------------------------------------
-            */
+            // Multiple Choice
             if ($question->question_type === 'multiple_choice') {
 
                 $auto = true;
@@ -412,15 +405,9 @@ class ExamController extends BaseController
                 } else {
                     $isCorrect = false;
                 }
-
-                $totalScore += $mark;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | ESSAY
-            |--------------------------------------------------------------------------
-            */
+            // Essay
             if ($question->question_type === 'essay') {
                 $mark = null;
                 $isCorrect = null;
@@ -428,36 +415,22 @@ class ExamController extends BaseController
             }
 
             $examAnswer = ExamAnswer::create([
-                'exam_id'           => $request->exam_id,
-                'student_id'        => $request->student_id,
-                'question_id'       => $question->id,
-                'answer'            => $answer,
-                'mark'              => $mark,
+                'exam_id' => $request->exam_id,
+                'student_id' => $request->student_id,
+                'question_id' => $question->id,
+                'answer' => $answer,
+                'mark' => $mark,
                 'is_auto_corrected' => $auto,
-                'is_correct'        => $isCorrect,
+                'is_correct' => $isCorrect,
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Save Answer Image
-            |--------------------------------------------------------------------------
-            */
+            // حفظ الصورة إن وجدت
             if (!empty($item['image'])) {
 
-                $mediaId = $item['image'];
-
-                if (is_array($mediaId)) {
-                    if (isset($mediaId['id'])) {
-                        $mediaId = $mediaId['id'];
-                    } else {
-                        $mediaId = reset($mediaId);
-                    }
-                }
-
                 DB::table('mediable')->insert([
-                    'model_type' => ExamAnswer::class,
+                    'model_type' => \App\Models\ExamAnswer::class,
                     'model_id'   => $examAnswer->id,
-                    'media_id'   => $mediaId,
+                    'media_id'   => $item['image'],
                     'collection' => 'answer_image',
                 ]);
             }
@@ -467,7 +440,6 @@ class ExamController extends BaseController
 
         return response()->json([
             'status' => true,
-            'auto_score' => $totalScore,
             'message' => 'Exam submitted successfully',
         ]);
 
@@ -479,11 +451,9 @@ class ExamController extends BaseController
             'status' => false,
             'message' => $e->getMessage(),
             'line' => $e->getLine(),
-            'file' => $e->getFile(),
         ], 500);
     }
 }
-
 /////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
 
     public function gradeEssay(Request $request)
