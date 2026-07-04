@@ -338,115 +338,151 @@ class ExamController extends BaseController
     }
 //////////////////////////////////////////// getQuestions ////////////////////////////////////
 
-    public function submitExam(Request $request)
-    {
-        $request->validate([
-            'exam_id' => 'required|exists:exams,id',
-            'student_id' => 'required|exists:students,id',
-            'answers' => 'required|array'
-        ]);
+ public function submitExam(Request $request)
+{
+    $request->validate([
+        'exam_id'    => 'required|exists:exams,id',
+        'student_id' => 'required|exists:students,id',
+        'answers'    => 'required|array',
+    ]);
 
-        DB::beginTransaction();
+    DB::beginTransaction();
 
-        try {
+    try {
 
-            $totalScore = 0;
+        $totalScore = 0;
 
-            foreach ($request->answers as $item) {
+        foreach ($request->answers as $item) {
 
-                $question = ExamQuestion::findOrFail($item['question_id']);
-                $answer = $item['answer'];
+            $question = ExamQuestion::findOrFail($item['question_id']);
 
-                $mark = 0;
-                $isCorrect = null;
-                $auto = false;
+            /*
+            |--------------------------------------------------------------------------
+            | Prepare Answer
+            |--------------------------------------------------------------------------
+            */
+            $answer = $item['answer'] ?? null;
 
-                // TRUE / FALSE
-                if ($question->question_type === 'true_false') {
-
-                    $auto = true;
-
-                    if ($answer == $question->correct_answer) {
-                        $mark = $question->mark;
-                        $isCorrect = true;
-                    } else {
-                        $isCorrect = false;
-                    }
-
-                    $totalScore += $mark;
-                }
-
-                // MCQ
-                if ($question->question_type === 'multiple_choice') {
-
-                    $auto = true;
-
-                    $correctOption = $question->options()
-                        ->where('is_correct', 1)
-                        ->first();
-
-                    if ($correctOption && $correctOption->option_text == $answer) {
-                        $mark = $question->mark;
-                        $isCorrect = true;
-                    } else {
-                        $isCorrect = false;
-                    }
-
-                    $totalScore += $mark;
-                }
-
-                // ESSAY
-                if ($question->question_type === 'essay') {
-                    $mark = null;
-                    $isCorrect = null;
-                    $auto = false;
-                }
-
-                $examAnswer = ExamAnswer::create([
-                    'exam_id' => $request->exam_id,
-                    'student_id' => $request->student_id,
-                    'question_id' => $question->id,
-                    'answer' => $answer,
-                    'mark' => $mark,
-                    'is_auto_corrected' => $auto,
-                    'is_correct' => $isCorrect
-                ]);
-
-                /*
-                |--------------------------------------------------------------------------
-                | Save Answer Image
-                |--------------------------------------------------------------------------
-                */
-
-                if (!empty($item['image'])) {
-
-                    DB::table('mediable')->insert([
-                        'model_type' => \App\Models\ExamAnswer::class,
-                        'model_id'   => $examAnswer->id,
-                        'media_id'   => $item['image'],
-                        'collection' => 'answer_image',
-                    ]);
-                }
+            if (is_array($answer)) {
+                $answer = implode(',', $answer);
             }
 
-            DB::commit();
+            $mark = 0;
+            $isCorrect = null;
+            $auto = false;
 
-            return response()->json([
-                'status' => true,
-                // 'auto_score' => $totalScore,
-                'message' => 'Exam submitted successfully'
+            /*
+            |--------------------------------------------------------------------------
+            | TRUE / FALSE
+            |--------------------------------------------------------------------------
+            */
+            if ($question->question_type === 'true_false') {
+
+                $auto = true;
+
+                if ($answer == $question->correct_answer) {
+                    $mark = $question->mark;
+                    $isCorrect = true;
+                } else {
+                    $isCorrect = false;
+                }
+
+                $totalScore += $mark;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | MULTIPLE CHOICE
+            |--------------------------------------------------------------------------
+            */
+            if ($question->question_type === 'multiple_choice') {
+
+                $auto = true;
+
+                $correctOption = $question->options()
+                    ->where('is_correct', 1)
+                    ->first();
+
+                if (
+                    $correctOption &&
+                    $correctOption->option_text == $answer
+                ) {
+                    $mark = $question->mark;
+                    $isCorrect = true;
+                } else {
+                    $isCorrect = false;
+                }
+
+                $totalScore += $mark;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | ESSAY
+            |--------------------------------------------------------------------------
+            */
+            if ($question->question_type === 'essay') {
+                $mark = null;
+                $isCorrect = null;
+                $auto = false;
+            }
+
+            $examAnswer = ExamAnswer::create([
+                'exam_id'           => $request->exam_id,
+                'student_id'        => $request->student_id,
+                'question_id'       => $question->id,
+                'answer'            => $answer,
+                'mark'              => $mark,
+                'is_auto_corrected' => $auto,
+                'is_correct'        => $isCorrect,
             ]);
 
-        } catch (\Exception $e) {
+            /*
+            |--------------------------------------------------------------------------
+            | Save Answer Image
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($item['image'])) {
 
-            DB::rollBack();
+                $mediaId = $item['image'];
 
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
+                if (is_array($mediaId)) {
+                    if (isset($mediaId['id'])) {
+                        $mediaId = $mediaId['id'];
+                    } else {
+                        $mediaId = reset($mediaId);
+                    }
+                }
+
+                DB::table('mediable')->insert([
+                    'model_type' => ExamAnswer::class,
+                    'model_id'   => $examAnswer->id,
+                    'media_id'   => $mediaId,
+                    'collection' => 'answer_image',
+                ]);
+            }
         }
+
+        DB::commit();
+
+        return response()->json([
+            'status' => true,
+            'auto_score' => $totalScore,
+            'message' => 'Exam submitted successfully',
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ], 500);
     }
+}
 
 /////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
 
