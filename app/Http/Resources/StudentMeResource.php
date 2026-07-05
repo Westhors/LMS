@@ -68,6 +68,7 @@ class StudentMeResource extends JsonResource
                     'exam' => [
                         'id' => $exam->id,
                         'title' => $exam->title,
+                        'course_detail_id' => $exam->course_detail_id,
                         'total_marks' => $exam->total_marks,
                         'type' => $exam->type,
                     ],
