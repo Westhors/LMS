@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('sub_domain')->unique()->nullable();
+            $table->string('second_sub_domain')->unique()->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->string('backgroud_color')->nullable();

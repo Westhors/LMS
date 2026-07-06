@@ -59,6 +59,7 @@ class TeacherController extends BaseController
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
+            $data['second_sub_domain'] = substr($data['sub_domain'], 0, -1);
             $teacher = $this->crudRepository->create($data);
             if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $teacher);
