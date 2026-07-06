@@ -13,6 +13,7 @@ class TeacherResource extends JsonResource
             'name' => $this->name ?? null,
             'email' => $this->email ?? null,
             'sub_domain' => $this->sub_domain ?? null,
+            'second_sub_domain' => $this->second_sub_domain ?? null,
             'phone' => $this->phone ?? null,
             'active' => $this->active ?? null,
             'theme' => $this->theme ?? null,
