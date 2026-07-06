@@ -88,8 +88,7 @@ Route::put('/teacher/{id}/{column}', [TeacherController::class, 'toggle']);
 Route::apiResource('teacher', TeacherController::class);
 
 // IMPORTANT: keep this LAST
-Route::get('/{teacher:sub_domain}', [TeacherController::class, 'subDomain']);
-
+Route::get('/{teacher}', [TeacherController::class, 'subDomain']);
 //////////////////////////////////////////////////////////teacher//////////////////////////////////////
 
 
