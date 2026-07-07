@@ -17,8 +17,11 @@ class Teacher extends BaseModel
     protected $guarded = ['id'];
     public function resolveRouteBinding($value, $field = null)
     {
-        return static::query()
-            ->where('sub_domain', $value)
+        if (is_numeric($value)) {
+            return static::findOrFail($value);
+        }
+
+        return static::where('sub_domain', $value)
             ->orWhere('second_sub_domain', $value)
             ->firstOrFail();
     }
