@@ -28,5 +28,11 @@ class Stage extends BaseModel
     {
         return $this->hasMany(Subject::class);
     }
+
+    public function distinctiveMarkForTeacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
 }
+
 

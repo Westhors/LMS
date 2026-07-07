@@ -25,8 +25,10 @@ class StageRequest extends FormRequest
             'name' => 'required|string',
             'name_ar' => 'required|string',
             'position' => 'nullable',
+            'distinctive_mark_for_teacher_id' => 'nullable',
             'active' => 'boolean',
         ];
     }
 }
+
 
