@@ -13,9 +13,18 @@ class Teacher extends BaseModel
     protected $with = [
         'media',
     ];
-    
-    protected $guarded = ['id'];
 
+    protected $guarded = ['id'];
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if (is_numeric($value)) {
+            return static::findOrFail($value);
+        }
+
+        return static::where('sub_domain', $value)
+            ->orWhere('second_sub_domain', $value)
+            ->firstOrFail();
+    }
     protected $casts = [
         'active' => 'boolean'
     ];
