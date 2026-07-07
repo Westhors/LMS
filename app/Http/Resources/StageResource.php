@@ -25,6 +25,7 @@ class StageResource extends JsonResource
                         'id' => $subject->id,
                         'name' => $subject->name,
                         'name_ar' => $subject->name_ar,
+                        'name_stage' => $this->name_ar,
                         'active' => $subject->active,
                     ];
                 }),
