@@ -61,7 +61,7 @@ class AboutUpdateRequest extends FormRequest
             'seo_title' => 'nullable|string',
             'seo_description' => 'nullable|string',
             'seo_keywords' => 'nullable|string',
-
+            'google_site_verification' => 'nullable|string',
             // Open Graph
             'og_title' => 'nullable|string',
             'og_description' => 'nullable|string',

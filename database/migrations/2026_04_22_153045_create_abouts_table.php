@@ -50,6 +50,7 @@ return new class extends Migration
 
             // SEO
             $table->string('seo_title')->nullable();
+            $table->string('google_site_verification')->nullable();
             $table->text('seo_description')->nullable();
             $table->text('seo_keywords')->nullable();
 

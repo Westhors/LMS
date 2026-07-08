@@ -26,6 +26,7 @@ class StudentMeResource extends JsonResource
 
 
 
+
             'barcode' => $this->barcode,
             'region' => $this->region,
             'code_parent' => $this->code_parent,
@@ -40,6 +41,7 @@ class StudentMeResource extends JsonResource
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
             'stage' => $this->whenLoaded('stage'),
+            'centerHour' => $this->centerHour,
 
             'created_at' => $this->created_at,
 

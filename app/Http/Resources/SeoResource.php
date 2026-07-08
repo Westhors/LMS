@@ -30,6 +30,7 @@ class SeoResource extends JsonResource
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
             'seo_keywords' => $this->seo_keywords,
+            'google_site_verification' => 'nullable|string',
 
             'og_title' => $this->og_title,
             'og_description' => $this->og_description,
