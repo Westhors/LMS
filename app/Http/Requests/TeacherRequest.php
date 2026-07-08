@@ -22,12 +22,12 @@ class TeacherRequest extends FormRequest
             'password' => 'nullable|string|min:6',
             'phone' => 'required|string|max:20',
 
-            'stage' => 'required|array|min:1',
-            'stage.*.stage_id' => 'required|exists:stages,id',
+            'stage' => 'nullable|array|min:1',
+            'stage.*.stage_id' => 'nullable|exists:stages,id',
             'stage.*.image' => 'nullable|exists:media,id',
 
-            'subject' => 'required|array|min:1',
-            'subject.*.subject_id' => 'required|exists:subjects,id',
+            'subject' => 'nullable|array|min:1',
+            'subject.*.subject_id' => 'nullable|exists:subjects,id',
         ];
     }
 }
