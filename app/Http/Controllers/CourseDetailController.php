@@ -10,6 +10,7 @@ use App\Interfaces\CourseDetailRepositoryInterface;
 use App\Models\CourseDetail;
 use App\Models\CourseDetailAttendance;
 use App\Models\CourseDetailView;
+use App\Models\Student;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
@@ -140,34 +141,41 @@ class CourseDetailController extends BaseController
     }
 
 
+
+
     public function show(CourseDetail $courseDetail)
     {
         try {
 
-            $student = auth()->user();
+            $user = auth()->user();
 
-            $viewsCount = CourseDetailView::where(
-                'course_detail_id',
-                $courseDetail->id
-            )->where(
-                'student_id',
-                $student->id
-            )->count();
+            // تسجيل المشاهدة للطلاب فقط
+            if ($user instanceof Student) {
 
-            if (
-                $courseDetail->available_watch_count !== null &&
-                $viewsCount >= $courseDetail->available_watch_count
-            ) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'عدد مشاهدات الدرس انتهت'
-                ], 403);
+                $viewsCount = CourseDetailView::where(
+                    'course_detail_id',
+                    $courseDetail->id
+                )->where(
+                    'student_id',
+                    $user->id
+                )->count();
+
+                if (
+                    $courseDetail->available_watch_count !== null &&
+                    $viewsCount >= $courseDetail->available_watch_count
+                ) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'عدد مشاهدات الدرس انتهت'
+                    ], 403);
+                }
+
+                CourseDetailView::create([
+                    'course_detail_id' => $courseDetail->id,
+                    'student_id' => $user->id,
+                ]);
             }
 
-            CourseDetailView::create([
-                'course_detail_id' => $courseDetail->id,
-                'student_id' => $student->id,
-            ]);
             $courseDetail->load([
                 'course',
                 'exams',
