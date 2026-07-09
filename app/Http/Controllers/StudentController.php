@@ -346,14 +346,16 @@ class StudentController extends BaseController
             'courseDetail'
         ])
         ->where('course_detail_id', $request->course_detail_id)
-        ->where('attended', 1) // لو عندك عمود attended بقيمة 1 للحضور
+        ->where('attended', 1)
         ->get();
 
         if ($attendance->isEmpty()) {
             return response()->json([
-                'success' => false,
-                'message' => 'No students attended this lesson'
-            ], 404);
+                'success' => true,
+                'count' => 0,
+                'message' => 'No students attended this lesson',
+                'data' => []
+            ]);
         }
 
         return response()->json([
