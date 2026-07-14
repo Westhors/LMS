@@ -38,7 +38,7 @@ class CourseDetailResource extends JsonResource
             'course' => new CourseResource($this->whenLoaded('course')),
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
-
+            'link_drive' => $this->link_drive ?? null,
             'available_watch_count' => $this->available_watch_count,
             'usedWatchCount' => $viewsCount,
             'remainingWatchCount' => $remaining,

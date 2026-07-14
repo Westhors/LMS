@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('link_video')->nullable();
             $table->text('description_ar')->nullable();
             $table->string('content_link')->nullable(); // لو فيديو يوتيوب أو لينك زووم
+            $table->string('link_drive')->nullable(); // لو فيديو يوتيوب أو لينك زووم
             $table->date('lession_date')->nullable(); // يوم الحصة
             $table->time('lession_time')->nullable(); // وقت الحصة
             $table->string('available_watch_count')->nullable();

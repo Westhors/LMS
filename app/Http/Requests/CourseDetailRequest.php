@@ -18,6 +18,7 @@ class CourseDetailRequest extends FormRequest
             'description'  => 'nullable|string',
             'description_ar' => 'nullable|string',
             'content_link' => 'nullable|url',
+            'link_drive' => 'nullable|url',
             'available_watch_count' => 'nullable',
 
 
