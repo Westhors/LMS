@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('name_ar')->nullable();
+            $table->string('sub_title')->nullable();
             $table->text('description_ar')->nullable();
 
             $table->text('facebook_meta')->nullable();

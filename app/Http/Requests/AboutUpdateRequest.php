@@ -27,7 +27,7 @@ class AboutUpdateRequest extends FormRequest
             'description' => 'nullable|string',
             'name_ar' => 'nullable|string',
             'description_ar' => 'nullable|string',
-
+            'sub_title' => 'nullable|string',
             'google_meta' => 'nullable|string',
             'facebook_meta' => 'nullable|string',
             'tiktok_meta' => 'nullable|string',

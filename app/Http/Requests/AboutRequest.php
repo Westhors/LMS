@@ -27,7 +27,7 @@ class AboutRequest extends FormRequest
             'description' => 'required|string',
             'name_ar' => 'required|string',
             'description_ar' => 'required|string',
-
+            'sub_title' => 'nullable|string',
             'google_meta' => 'nullable|string',
             'facebook_meta' => 'nullable|string',
             'tiktok_meta' => 'nullable|string',

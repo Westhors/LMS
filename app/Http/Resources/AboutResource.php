@@ -14,7 +14,7 @@ class AboutResource extends JsonResource
             'description' => $this->description,
             'name_ar' => $this->name_ar,
             'description_ar' => $this->description_ar,
-
+            'sub_title' => $this->sub_title,
             'facebook_meta' => $this->facebook_meta,
             'google_meta' => $this->google_meta,
             'tiktok_meta' => $this->tiktok_meta,
