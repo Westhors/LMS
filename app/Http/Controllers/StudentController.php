@@ -299,20 +299,79 @@ class StudentController extends BaseController
         }
     }
 
-    public function showAttendance(Request $request)
+   public function showAttendance(Request $request)
     {
         $request->validate([
             'course_detail_id' => 'required|exists:course_details,id',
-            'student_id' => 'required|exists:students,id',
+            'student_id' => 'nullable|exists:students,id',
+            'barcode' => 'nullable|string',
         ]);
 
+        if (!$request->filled('student_id') && !$request->filled('barcode')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'student_id or barcode is required'
+            ], 422);
+        }
+
+        // ==========================
+        // تسجيل الحضور بالباركود
+        // ==========================
+        if ($request->filled('barcode')) {
+
+            $student = Student::where('barcode', $request->barcode)->first();
+
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Student not found'
+                ], 404);
+            }
+
+            $attendance = CourseDetailAttendance::with(['student', 'courseDetail'])
+                ->where('course_detail_id', $request->course_detail_id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            if (!$attendance) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Attendance record not found'
+                ], 404);
+            }
+
+            if ($attendance->attended) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Student already attended',
+                    'data' => $attendance
+                ]);
+            }
+
+            $attendance->update([
+                'attended' => true,
+                'attended_at' => now(),
+            ]);
+
+            $attendance->refresh();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Attendance recorded successfully',
+                'data' => $attendance
+            ]);
+        }
+
+        // ==========================
+        // الاستعلام عن الحضور بالـ ID
+        // ==========================
         $attendance = CourseDetailAttendance::with([
             'student',
             'courseDetail'
         ])
-        ->where('course_detail_id', $request->course_detail_id)
-        ->where('student_id', $request->student_id)
-        ->first();
+            ->where('course_detail_id', $request->course_detail_id)
+            ->where('student_id', $request->student_id)
+            ->first();
 
         if (!$attendance) {
             return response()->json([
