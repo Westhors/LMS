@@ -303,104 +303,34 @@ class StudentController extends BaseController
     {
         $request->validate([
             'course_detail_id' => 'required|exists:course_details,id',
-            'student_id' => 'required',
+            'student_id' => 'required|exists:students,id',
         ]);
-
-        // ==========================
-        // أولاً: نجرب القيمة كـ Student ID
-        // ==========================
-        $student = Student::find($request->student_id);
-
-        if ($student) {
-
-            $attendance = CourseDetailAttendance::with([
-                'student',
-                'courseDetail'
-            ])
-            ->where('course_detail_id', $request->course_detail_id)
-            ->where('student_id', $student->id)
-            ->first();
-
-            if (!$attendance) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Attendance not found'
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'id' => $attendance->id,
-                    'attended' => $attendance->attended,
-                    'attended_at' => $attendance->attended_at,
-                    'student' => $attendance->student,
-                    'course_detail' => $attendance->courseDetail,
-                    'created_at' => $attendance->created_at,
-                    'updated_at' => $attendance->updated_at,
-                ]
-            ]);
-        }
-
-        // ==========================
-        // ثانياً: نجرب القيمة كـ Barcode
-        // ==========================
-        $student = Student::where('barcode', $request->student_id)->first();
-
-        if (!$student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Student not found'
-            ], 404);
-        }
 
         $attendance = CourseDetailAttendance::with([
             'student',
             'courseDetail'
         ])
         ->where('course_detail_id', $request->course_detail_id)
-        ->where('student_id', $student->id)
+        ->where('student_id', $request->student_id)
         ->first();
 
         if (!$attendance) {
             return response()->json([
                 'success' => false,
-                'message' => 'Attendance record not found'
+                'message' => 'Attendance not found'
             ], 404);
         }
 
-        // لو حاضر بالفعل
-        if ($attendance->attended) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Student already attended',
-                'data' => [
-                    'id' => $attendance->id,
-                    'attended' => true,
-                    'attended_at' => $attendance->attended_at,
-                    'student' => $attendance->student,
-                    'course_detail' => $attendance->courseDetail,
-                ]
-            ]);
-        }
-
-        // تسجيل الحضور
-        $attendance->update([
-            'attended' => true,
-            'attended_at' => now(),
-        ]);
-
-        $attendance->refresh();
-
         return response()->json([
             'success' => true,
-            'message' => 'Attendance recorded successfully',
             'data' => [
                 'id' => $attendance->id,
-                'attended' => true,
+                'attended' => $attendance->attended,
                 'attended_at' => $attendance->attended_at,
                 'student' => $attendance->student,
                 'course_detail' => $attendance->courseDetail,
+                'created_at' => $attendance->created_at,
+                'updated_at' => $attendance->updated_at,
             ]
         ]);
     }
