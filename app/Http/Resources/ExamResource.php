@@ -66,8 +66,8 @@ class ExamResource extends JsonResource
                         $student = $answers->first()->student;
 
                         return [
-                            'id' => $student->id,
-                            'name' => $student->name,
+                           'id' => optional($student)->id,
+                            'name' => optional($student)->name,
 
                             'answers' => $answers->map(function ($answer) {
 
