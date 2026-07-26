@@ -62,13 +62,17 @@ class AdminController extends Controller
         $assistant = AssistantTeacher::where('email', $email)->first();
 
         if ($assistant && Hash::check($password, $assistant->password)) {
+
             $token = $assistant->createToken('auth_token')->plainTextToken;
+
+            $assistantData = $assistant->toArray();
+            $assistantData['id'] = $assistant->teacher_id;
 
             return response()->json([
                 'message' => 'Login success',
                 'role'    => 'assistant_teacher',
                 'token'   => $token,
-                'data'    => $assistant,
+                'data'    => $assistantData,
             ]);
         }
 
