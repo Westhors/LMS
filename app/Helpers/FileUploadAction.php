@@ -92,7 +92,10 @@ class FileUploadAction
 
         if (!$hasPermission) {
             return response()->json([
-                'message' => 'ليس لديك صلاحية'
+                'result'  => 'Error',
+                'data'    => null,
+                'message' => 'ليس لديك صلاحية',
+                'status'  => 403,
             ], 403);
         }
 
