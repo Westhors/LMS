@@ -174,6 +174,7 @@ Route::put('/exam/{id}/{column}', [ExamController::class, 'toggle']);
 Route::apiResource('exam', ExamController::class);
 
 Route::post('exam/add-questions', [ExamController::class, 'addQuestions']); // New route for
+Route::post('exams/add-questions-from-bank', [ExamController::class, 'addQuestionsFromBank']);
 Route::post('exam/submit', [ExamController::class, 'submitExam']); // New route for submitting exam answers
 Route::post('exam/grade-essay', [ExamController::class, 'gradeEssay']); // New route for grading essay answers
 Route::get('exam/result/{examId}/{studentId}', [ExamController::class, 'result']);

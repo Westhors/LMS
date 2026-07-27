@@ -42,4 +42,8 @@ class QuestionBank extends Model
     {
         return $this->belongsTo(Subject::class);
     }
+    public function courseDetail()
+    {
+        return $this->belongsTo(CourseDetail::class);
+    }
 }

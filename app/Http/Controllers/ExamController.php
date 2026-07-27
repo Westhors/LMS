@@ -190,13 +190,14 @@ class ExamController extends BaseController
                 */
 
                 $bankQuestion = QuestionBank::create([
-                    'teacher_id'     => $exam->teacher_id,
-                    'stage_id'       => $exam->stage_id,
-                    'subject_id'     => $exam->courseDetail?->course?->subject_id,
-                    'question_type'  => $q['question_type'],
-                    'question'       => $q['question'],
-                    'mark'           => $q['mark'] ?? 1,
-                    'correct_answer' => $q['correct_answer'] ?? null,
+                    'teacher_id'       => $exam->teacher_id,
+                    'stage_id'         => $exam->stage_id,
+                    'subject_id'       => $exam->courseDetail?->course?->subject_id,
+                    'course_detail_id' => $exam->course_detail_id,
+                    'question_type'    => $q['question_type'],
+                    'question'         => $q['question'],
+                    'mark'             => $q['mark'] ?? 1,
+                    'correct_answer'   => $q['correct_answer'] ?? null,
                 ]);
 
                 /*
@@ -292,6 +293,7 @@ class ExamController extends BaseController
             ], 500);
         }
     }
+
 //////////////////////////////////////////// submitExam ////////////////////////////////////
     public function getQuestions($examId)
     {
@@ -338,122 +340,122 @@ class ExamController extends BaseController
     }
 //////////////////////////////////////////// getQuestions ////////////////////////////////////
 
-public function submitExam(Request $request)
-{
-    $request->validate([
-        'exam_id' => 'required|exists:exams,id',
-        'student_id' => 'required|exists:students,id',
-        'answers' => 'required|array',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-
-        // تحويل الداتا الجديدة للشكل القديم
-        $answers = collect($request->answers)->map(function ($item) {
-
-            if (is_array($item['answer'] ?? null)) {
-                return [
-                    'question_id' => $item['question_id'],
-                    'answer' => $item['answer']['text'] ?? null,
-                    'image' => $item['answer']['images'][0] ?? null,
-                ];
-            }
-
-            return $item;
-        })->toArray();
-
-        foreach ($answers as $item) {
-
-            $question = ExamQuestion::findOrFail($item['question_id']);
-
-            $answer = $item['answer'] ?? null;
-
-            $mark = 0;
-            $isCorrect = null;
-            $auto = false;
-
-            // TRUE / FALSE
-            if ($question->question_type === 'true_false') {
-
-                $auto = true;
-
-                if ($answer == $question->correct_answer) {
-                    $mark = $question->mark;
-                    $isCorrect = true;
-                } else {
-                    $isCorrect = false;
-                }
-            }
-
-            // Multiple Choice
-            if ($question->question_type === 'multiple_choice') {
-
-                $auto = true;
-
-                $correctOption = $question->options()
-                    ->where('is_correct', 1)
-                    ->first();
-
-                if (
-                    $correctOption &&
-                    $correctOption->option_text == $answer
-                ) {
-                    $mark = $question->mark;
-                    $isCorrect = true;
-                } else {
-                    $isCorrect = false;
-                }
-            }
-
-            // Essay
-            if ($question->question_type === 'essay') {
-                $mark = null;
-                $isCorrect = null;
-                $auto = false;
-            }
-
-            $examAnswer = ExamAnswer::create([
-                'exam_id' => $request->exam_id,
-                'student_id' => $request->student_id,
-                'question_id' => $question->id,
-                'answer' => $answer,
-                'mark' => $mark,
-                'is_auto_corrected' => $auto,
-                'is_correct' => $isCorrect,
-            ]);
-
-            // حفظ الصورة إن وجدت
-            if (!empty($item['image'])) {
-
-                DB::table('mediable')->insert([
-                    'model_type' => \App\Models\ExamAnswer::class,
-                    'model_id'   => $examAnswer->id,
-                    'media_id'   => $item['image'],
-                    'collection' => 'answer_image',
-                ]);
-            }
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Exam submitted successfully',
+    public function submitExam(Request $request)
+    {
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'student_id' => 'required|exists:students,id',
+            'answers' => 'required|array',
         ]);
 
-    } catch (\Exception $e) {
+        DB::beginTransaction();
 
-        DB::rollBack();
+        try {
 
-        return response()->json([
-            'status' => false,
-            'message' => $e->getMessage(),
-            'line' => $e->getLine(),
-        ], 500);
+            // تحويل الداتا الجديدة للشكل القديم
+            $answers = collect($request->answers)->map(function ($item) {
+
+                if (is_array($item['answer'] ?? null)) {
+                    return [
+                        'question_id' => $item['question_id'],
+                        'answer' => $item['answer']['text'] ?? null,
+                        'image' => $item['answer']['images'][0] ?? null,
+                    ];
+                }
+
+                return $item;
+            })->toArray();
+
+            foreach ($answers as $item) {
+
+                $question = ExamQuestion::findOrFail($item['question_id']);
+
+                $answer = $item['answer'] ?? null;
+
+                $mark = 0;
+                $isCorrect = null;
+                $auto = false;
+
+                // TRUE / FALSE
+                if ($question->question_type === 'true_false') {
+
+                    $auto = true;
+
+                    if ($answer == $question->correct_answer) {
+                        $mark = $question->mark;
+                        $isCorrect = true;
+                    } else {
+                        $isCorrect = false;
+                    }
+                }
+
+                // Multiple Choice
+                if ($question->question_type === 'multiple_choice') {
+
+                    $auto = true;
+
+                    $correctOption = $question->options()
+                        ->where('is_correct', 1)
+                        ->first();
+
+                    if (
+                        $correctOption &&
+                        $correctOption->option_text == $answer
+                    ) {
+                        $mark = $question->mark;
+                        $isCorrect = true;
+                    } else {
+                        $isCorrect = false;
+                    }
+                }
+
+                // Essay
+                if ($question->question_type === 'essay') {
+                    $mark = null;
+                    $isCorrect = null;
+                    $auto = false;
+                }
+
+                $examAnswer = ExamAnswer::create([
+                    'exam_id' => $request->exam_id,
+                    'student_id' => $request->student_id,
+                    'question_id' => $question->id,
+                    'answer' => $answer,
+                    'mark' => $mark,
+                    'is_auto_corrected' => $auto,
+                    'is_correct' => $isCorrect,
+                ]);
+
+                // حفظ الصورة إن وجدت
+                if (!empty($item['image'])) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\ExamAnswer::class,
+                        'model_id'   => $examAnswer->id,
+                        'media_id'   => $item['image'],
+                        'collection' => 'answer_image',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Exam submitted successfully',
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+            ], 500);
+        }
     }
-}
 /////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
 
     public function gradeEssay(Request $request)
@@ -528,6 +530,7 @@ public function submitExam(Request $request)
                 'teacher',
                 'stage',
                 'subject',
+                'courseDetail',
                 'question_image'
             ]);
             if (!empty($filters['teacher_id'])) {
@@ -540,6 +543,10 @@ public function submitExam(Request $request)
 
             if (!empty($filters['subject_id'])) {
                 $query->where('subject_id', $filters['subject_id']);
+            }
+
+            if (!empty($filters['course_detail_id'])) {
+                $query->where('course_detail_id', $filters['course_detail_id']);
             }
 
             if (!empty($filters['question_type'])) {
@@ -595,5 +602,103 @@ public function submitExam(Request $request)
         }
     }
 
+    public function addQuestionsFromBank(Request $request)
+    {
+        $result = (new FileUploadAction())->checkAssistantPermission('questions', 'create');
+        if ($result !== true) {
+            return $result;
+        }
+
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'question_bank_ids' => 'required|array|min:1',
+            'question_bank_ids.*' => 'exists:question_banks,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $bankQuestions = QuestionBank::with([
+                'options',
+                'question_image',
+            ])->whereIn('id', $request->question_bank_ids)->get();
+
+            $createdQuestions = [];
+
+            foreach ($bankQuestions as $bankQuestion) {
+
+                // إنشاء سؤال داخل الامتحان
+                $examQuestion = ExamQuestion::create([
+                    'exam_id'        => $request->exam_id,
+                    'question_type'  => $bankQuestion->question_type,
+                    'question'       => $bankQuestion->question,
+                    'mark'           => $bankQuestion->mark,
+                    'correct_answer' => $bankQuestion->correct_answer,
+                ]);
+
+                // نسخ صورة السؤال
+                foreach ($bankQuestion->question_image as $image) {
+
+                    DB::table('mediable')->insert([
+                        'model_type' => \App\Models\ExamQuestion::class,
+                        'model_id'   => $examQuestion->id,
+                        'media_id'   => $image->id,
+                        'collection' => 'question_image',
+                    ]);
+                }
+
+                // نسخ الاختيارات
+                foreach ($bankQuestion->options as $option) {
+
+                    $examOption = QuestionOption::create([
+                        'question_id'      => $examQuestion->id,
+                        'question_bank_id' => $bankQuestion->id,
+                        'option_text'      => $option->option_text,
+                        'is_correct'       => $option->is_correct,
+                    ]);
+
+                    // نسخ صورة الاختيار إن وجدت
+                    $optionImages = DB::table('mediable')
+                        ->where('model_type', \App\Models\QuestionBankOption::class)
+                        ->where('model_id', $option->id)
+                        ->where('collection', 'option_bank_image')
+                        ->get();
+
+                    foreach ($optionImages as $image) {
+
+                        DB::table('mediable')->insert([
+                            'model_type' => \App\Models\QuestionOption::class,
+                            'model_id'   => $examOption->id,
+                            'media_id'   => $image->media_id,
+                            'collection' => 'option_image',
+                        ]);
+                    }
+                }
+
+                $createdQuestions[] = [
+                    'exam_question_id' => $examQuestion->id,
+                    'question' => $examQuestion->question,
+                ];
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Questions added successfully from question bank.',
+                'data' => $createdQuestions,
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
 

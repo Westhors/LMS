@@ -14,6 +14,7 @@ class QuestionBankResource extends JsonResource
             'teacher' => $this->teacher->name,
             'stage' => $this->stage->name,
             'subject' => $this->subject->name,
+            'course_detail' => $this->courseDetail ? $this->courseDetail->name : null,
             'question_type' => $this->question_type,
             'question' => $this->question,
             'mark' => $this->mark,

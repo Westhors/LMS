@@ -21,4 +21,5 @@ class QuestionOption extends BaseModel
         return $this->belongsTo(ExamQuestion::class, 'question_id');
     }
 
+
 }
