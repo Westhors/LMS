@@ -20,7 +20,7 @@ class QuestionBankResource extends JsonResource
             'subject' => $this->subject?->name,
             'subject_id' => $this->subject?->id,
 
-            'course_detail' => $this->courseDetail ? $this->courseDetail->name : null,
+            'course_detail' => $this->courseDetail?->titles[0] ?? null,
             'course_detail_id' => $this->courseDetail ? $this->courseDetail->id : null,
             'question_type' => $this->question_type,
             'question' => $this->question,
