@@ -12,9 +12,13 @@ class QuestionBankResource extends JsonResource
         return [
             'id' => $this->id,
             'teacher' => $this->teacher->name,
+            'teacher_id' => $this->teacher->id,
             'stage' => $this->stage->name,
+            'stage_id' => $this->stage->id,
             'subject' => $this->subject->name,
+            'subject_id' => $this->subject->id,
             'course_detail' => $this->courseDetail ? $this->courseDetail->name : null,
+            'course_detail_id' => $this->courseDetail ? $this->courseDetail->id : null,
             'question_type' => $this->question_type,
             'question' => $this->question,
             'mark' => $this->mark,
