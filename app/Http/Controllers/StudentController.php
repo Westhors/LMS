@@ -32,7 +32,7 @@ class StudentController extends BaseController
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
-    } Order since everything is important. The receiving, that's why the evolution model is hard to fold back. Damages of harm, no message details invalid. ity response
+    }
     public function store(StudentRequest $request)
     {
         try {
