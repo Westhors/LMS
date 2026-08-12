@@ -373,5 +373,8 @@ Route::post('/course-detail-attendance', [StudentController::class, 'showAttenda
 Route::post('/all/course-detail-attendance', [StudentController::class, 'allAttendance']);
 Route::post('/all/attendance-index', [StudentController::class, 'attendanceIndex']);
 
-
+Route::delete(
+    'attendance/{courseDetail}/{student}',
+    [StudentController::class, 'removeAttendance']
+);
 //////////////////////////////////////////////////////////diffrent request//////////////////////////////////////

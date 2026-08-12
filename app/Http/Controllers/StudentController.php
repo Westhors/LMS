@@ -623,7 +623,6 @@ class StudentController extends BaseController
                             ->first();
 
                         $student->attendance = $attendance;
-
                     } else {
 
                         $student->attendance = null;
@@ -678,7 +677,38 @@ class StudentController extends BaseController
                 'Attendance fetched successfully',
                 StudentAttendanceResource::collection($students)
             );
+        } catch (\Exception $e) {
 
+            return JsonResponse::respondError(
+                $e->getMessage()
+            );
+        }
+    }
+
+    public function removeAttendance($courseDetail,$student) {
+        try {
+
+            $attendance = CourseDetailAttendance::where(
+                'course_detail_id',
+                $courseDetail
+            )
+                ->where(
+                    'student_id',
+                    $student
+                )
+                ->first();
+
+            if (!$attendance) {
+                return JsonResponse::respondError(
+                    'Attendance record not found'
+                );
+            }
+
+            $attendance->delete();
+
+            return JsonResponse::respondSuccess(
+                'Student attendance removed successfully'
+            );
         } catch (\Exception $e) {
 
             return JsonResponse::respondError(
