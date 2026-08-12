@@ -371,6 +371,7 @@ Route::get('payment-codes/report', [PaymentCodeController::class, 'paymentCodesR
 Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
 Route::post('/course-detail-attendance', [StudentController::class, 'showAttendance']);
 Route::post('/all/course-detail-attendance', [StudentController::class, 'allAttendance']);
+Route::post('/all/attendance-index', [StudentController::class, 'attendanceIndex']);
 
 
 //////////////////////////////////////////////////////////diffrent request//////////////////////////////////////

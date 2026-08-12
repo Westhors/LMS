@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
 use App\Http\Requests\StudentRequest;
+use App\Http\Resources\StudentAttendanceResource;
 use App\Http\Resources\StudentResource;
 use App\Interfaces\StudentRepositoryInterface;
+use App\Models\CourseDetail;
 use App\Models\CourseDetailAttendance;
+use App\Models\Enrollment;
 use App\Models\Student;
 use App\Traits\HttpResponses;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class StudentController extends BaseController
 {
@@ -36,7 +41,7 @@ class StudentController extends BaseController
     public function store(StudentRequest $request)
     {
         try {
-           $student = $this->crudRepository->create($request->validated());
+            $student = $this->crudRepository->create($request->validated());
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -90,7 +95,6 @@ class StudentController extends BaseController
                     'message' => 'Invalid credentials or inactive account'
                 ], 401);
             }
-
         } else {
 
             $student = Student::where('code_parent', $request->password)
@@ -289,7 +293,6 @@ class StudentController extends BaseController
                 'status' => true,
                 'message' => 'Attendance marked successfully'
             ]);
-
         } catch (\Exception $e) {
 
             return response()->json([
@@ -310,9 +313,9 @@ class StudentController extends BaseController
             'student',
             'courseDetail'
         ])
-        ->where('course_detail_id', $request->course_detail_id)
-        ->where('student_id', $request->student_id)
-        ->first();
+            ->where('course_detail_id', $request->course_detail_id)
+            ->where('student_id', $request->student_id)
+            ->first();
 
         if (!$attendance) {
             return response()->json([
@@ -345,8 +348,8 @@ class StudentController extends BaseController
             'student',
             'courseDetail'
         ])
-        ->where('course_detail_id', $request->course_detail_id)
-        ->get();
+            ->where('course_detail_id', $request->course_detail_id)
+            ->get();
 
         if ($attendance->isEmpty()) {
             return response()->json([
@@ -382,5 +385,305 @@ class StudentController extends BaseController
             'message' => 'Student device has been reset successfully.'
         ]);
     }
-}
 
+    public function attendanceIndex(Request $request)
+    {
+        try {
+
+            $filters = $request->input('filters', []);
+
+            $teacherId = $filters['teacher_id'] ?? null;
+            $courseDetailId = $filters['course_detail_id'] ?? null;
+
+            $studentId = $filters['student_id'] ?? null;
+            $name = $filters['name'] ?? null;
+            $phone = $filters['phone'] ?? null;
+            $barcode = $filters['barcode'] ?? null;
+
+            $stageId = $filters['stage_id'] ?? null;
+            $centerHourId = $filters['center_hour_id'] ?? null;
+            $typeOfAttendance = $filters['type_of_attendance'] ?? null;
+
+            $orderBy = $request->input('orderBy', 'id');
+            $orderByDirection = $request->input('orderByDirection', 'desc');
+
+            $perPage = $request->input('perPage', 10);
+            $paginate = $request->input('paginate', 1);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate
+            |--------------------------------------------------------------------------
+            */
+
+            if (!$teacherId) {
+                return JsonResponse::respondError(
+                    'teacher_id is required'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Enrollments
+            |--------------------------------------------------------------------------
+            */
+
+            $query = Enrollment::with('student')
+                ->whereIn('type', [
+                    'course',
+                    'semester',
+                    'lesson',
+                ])
+                ->whereHas('student', function ($query) use (
+                    $teacherId,
+                    $studentId,
+                    $name,
+                    $phone,
+                    $barcode,
+                    $stageId,
+                    $centerHourId,
+                    $typeOfAttendance
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Teacher
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $query->where(
+                        'teacher_id',
+                        $teacherId
+                    );
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Student ID
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($studentId)) {
+                        $query->where(
+                            'id',
+                            $studentId
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Student Name
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($name)) {
+                        $query->where(
+                            'name',
+                            'like',
+                            '%' . $name . '%'
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Phone
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($phone)) {
+                        $query->where(
+                            'phone',
+                            'like',
+                            '%' . $phone . '%'
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Barcode
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($barcode)) {
+                        $query->where(
+                            'barcode',
+                            'like',
+                            '%' . $barcode . '%'
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Stage
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($stageId)) {
+                        $query->where(
+                            'stage_id',
+                            $stageId
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Center Hour
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($centerHourId)) {
+                        $query->where(
+                            'center_hour_id',
+                            $centerHourId
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Type Of Attendance
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($typeOfAttendance)) {
+                        $query->where(
+                            'type_of_attendance',
+                            $typeOfAttendance
+                        );
+                    }
+                });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Course Detail
+            |--------------------------------------------------------------------------
+            |
+            | لو course_detail_id موجود:
+            | هات فقط الطلاب اللي اشتروا / حجزوا الدرس نفسه.
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($courseDetailId)) {
+
+                $query->where(
+                    'type',
+                    'lesson'
+                );
+
+                $query->where(
+                    'course_detail_id',
+                    $courseDetailId
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Order
+            |--------------------------------------------------------------------------
+            */
+
+            $query->orderBy(
+                $orderBy,
+                $orderByDirection
+            );
+
+            $enrollments = $query->get();
+
+            if ($enrollments->isEmpty()) {
+                return JsonResponse::respondError(
+                    'No enrolled students found'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Students + Attendance
+            |--------------------------------------------------------------------------
+            */
+
+            $students = $enrollments
+                ->map(function ($enrollment) use ($courseDetailId) {
+
+                    $student = $enrollment->student;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Attendance
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!empty($courseDetailId)) {
+
+                        $attendance = CourseDetailAttendance::where(
+                            'course_detail_id',
+                            $courseDetailId
+                        )
+                            ->where(
+                                'student_id',
+                                $student->id
+                            )
+                            ->first();
+
+                        $student->attendance = $attendance;
+
+                    } else {
+
+                        $student->attendance = null;
+                    }
+
+                    return $student;
+                })
+                ->values();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            if ($paginate) {
+
+                $currentPage = Paginator::resolveCurrentPage();
+
+                $currentPageItems = $students
+                    ->slice(
+                        ($currentPage - 1) * $perPage,
+                        $perPage
+                    )
+                    ->values();
+
+                $paginatedItems = new LengthAwarePaginator(
+                    $currentPageItems,
+                    $students->count(),
+                    $perPage,
+                    $currentPage,
+                    [
+                        'path' => Paginator::resolveCurrentPath()
+                    ]
+                );
+
+                return StudentAttendanceResource::collection(
+                    $paginatedItems
+                )->additional([
+                    'status' => true,
+                    'message' => 'Attendance fetched successfully'
+                ]);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Without Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            return JsonResponse::respondSuccess(
+                'Attendance fetched successfully',
+                StudentAttendanceResource::collection($students)
+            );
+
+        } catch (\Exception $e) {
+
+            return JsonResponse::respondError(
+                $e->getMessage()
+            );
+        }
+    }
+}

@@ -34,7 +34,7 @@ class StudentRequest extends FormRequest
             'user_agent' => 'nullable|string',
 
             'region' => 'nullable|string',
-            'phone_parent' => 'nullable|different:phone',
+            'phone_parent' => 'required|different:phone',
             'type_of_attendance' => 'nullable|in:center,online',
             'gender' => 'nullable|in:male,female',
             'type_of_study' => 'nullable|in:general,azhar',

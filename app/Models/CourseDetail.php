@@ -5,96 +5,96 @@ namespace App\Models;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class CourseDetail extends BaseModel
-{
-    protected $table = 'course_details';
-
-    use HasFactory;
-
-    use HasMedia;
-
-    protected $with = [
-        'media',
-    ];
-    protected $casts = [
-        'titles' => 'array',
-        'titles_ar' => 'array',
-        'link_video' => 'array',
-    ];
-    protected $guarded = ['id'];
-    public function views()
+    class CourseDetail extends BaseModel
     {
-        return $this->hasMany(CourseDetailView::class);
+        protected $table = 'course_details';
+
+        use HasFactory;
+
+        use HasMedia;
+
+        protected $with = [
+            'media',
+        ];
+        protected $casts = [
+            'titles' => 'array',
+            'titles_ar' => 'array',
+            'link_video' => 'array',
+        ];
+        protected $guarded = ['id'];
+        public function views()
+        {
+            return $this->hasMany(CourseDetailView::class);
+        }
+
+        public function course()
+        {
+            return $this->belongsTo(Course::class)->withDefault();
+        }
+
+        public function exams()
+        {
+            return $this->hasMany(Exam::class)
+                ->where('type', 'exam');
+        }
+
+        public function assignments()
+        {
+            return $this->hasMany(Exam::class)
+                ->where('type', 'assignment');
+        }
+
+        public function students()
+        {
+            return $this->belongsToMany(
+                Student::class,
+                'enrollments',
+                'course_detail_id',
+                'student_id'
+            )
+            ->where('type', 'lesson');
+        }
+
+        public function checkStudentPassedExam()
+        {
+        $user = auth()->user();
+
+
+
+        if (!$user) {
+            return false;
+        }
+
+
+        if ($user instanceof Teacher) {
+            return true;
+        }
+
+        if (!($user instanceof Student)) {
+            return false;
+        }
+
+        $exam = $this->exams()->first();
+
+        if (!$exam) {
+            return true;
+        }
+
+
+
+        $studentTotal = ExamAnswer::where('exam_id', $exam->id)
+            ->where('student_id', $user->id)
+            ->sum('mark');
+
+        return $studentTotal >= $exam->total_must_pass_marks;
     }
 
-    public function course()
-    {
-        return $this->belongsTo(Course::class)->withDefault();
+
+        public function attendances()
+        {
+            return $this->hasMany(
+                CourseDetailAttendance::class
+            );
+        }
+
     }
-
-    public function exams()
-    {
-        return $this->hasMany(Exam::class)
-            ->where('type', 'exam');
-    }
-
-    public function assignments()
-    {
-        return $this->hasMany(Exam::class)
-            ->where('type', 'assignment');
-    }
-
-    public function students()
-    {
-        return $this->belongsToMany(
-            Student::class,
-            'enrollments',
-            'course_detail_id',
-            'student_id'
-        )
-        ->where('type', 'lesson');
-    }
-
-    public function checkStudentPassedExam()
-    {
-     $user = auth()->user();
-
-
-
-    if (!$user) {
-        return false;
-    }
-
-
-    if ($user instanceof Teacher) {
-        return true;
-    }
-
-    if (!($user instanceof Student)) {
-        return false;
-    }
-
-    $exam = $this->exams()->first();
-
-    if (!$exam) {
-        return true;
-    }
-
-
-
-    $studentTotal = ExamAnswer::where('exam_id', $exam->id)
-        ->where('student_id', $user->id)
-        ->sum('mark');
-
-    return $studentTotal >= $exam->total_must_pass_marks;
-}
-
-
-    public function attendances()
-    {
-        return $this->hasMany(
-            CourseDetailAttendance::class
-        );
-    }
-
-}

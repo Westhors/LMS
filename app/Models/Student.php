@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Student extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable ,HasMedia , SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasMedia, SoftDeletes;
 
     protected $with = [
         'media',
@@ -47,7 +47,10 @@ class Student extends Authenticatable
     {
         return $this->hasMany(ExamAnswer::class);
     }
-
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
     public function lessonAttendances()
     {
         return $this->hasMany(
