@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\JsonResponse;
 use App\Http\Resources\AdminResource;
+use App\Http\Resources\AssistantTeacherResource;
 use App\Http\Resources\TeacherAdminResource;
 use App\Models\Admin;
 use Illuminate\Http\Request;
@@ -91,18 +92,34 @@ class AdminController extends Controller
                 return JsonResponse::respondError('Unauthenticated', 401);
             }
 
-            if ($user instanceof Teacher) {
-                return JsonResponse::respondSuccess(
-                    'Teacher Fetched Successfully',
-                    new TeacherAdminResource($user)
-                );
+            // Admin
+            if ($user instanceof Admin) {
+                return response()->json([
+                    'message' => 'Authenticated',
+                    'role'    => 'admin',
+                    'data'    => new AdminResource($user),
+                ]);
             }
 
-            if ($user instanceof Admin) {
-                return JsonResponse::respondSuccess(
-                    'Admin Fetched Successfully',
-                    new AdminResource($user)
-                );
+            // Teacher
+            if ($user instanceof Teacher) {
+                return response()->json([
+                    'message' => 'Authenticated',
+                    'role'    => 'teacher',
+                    'data'    => new TeacherAdminResource($user),
+                ]);
+            }
+
+            // AssistantTeacher (نفس login)
+            if ($user instanceof AssistantTeacher) {
+                $assistantData = $user->toArray();
+                $assistantData['id'] = $user->teacher_id;
+
+                return response()->json([
+                    'message' => 'Authenticated',
+                    'role'    => 'assistant_teacher',
+                    'data'    => $assistantData,
+                ]);
             }
 
             return JsonResponse::respondError('Unknown User Type', 400);
