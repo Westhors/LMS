@@ -83,51 +83,49 @@ class AdminController extends Controller
         ], 401);
     }
 
-    public function checkAuth(Request $request)
-    {
-        try {
-            $user = $request->user();
+public function checkAuth(Request $request)
+{
+    try {
+        $user = $request->user();
 
-            if (!$user) {
-                return JsonResponse::respondError('Unauthenticated', 401);
-            }
-
-            // Admin
-            if ($user instanceof Admin) {
-                return response()->json([
-                    'message' => 'Authenticated',
-                    'role'    => 'admin',
-                    'data'    => new AdminResource($user),
-                ]);
-            }
-
-            // Teacher
-            if ($user instanceof Teacher) {
-                return response()->json([
-                    'message' => 'Authenticated',
-                    'role'    => 'teacher',
-                    'data'    => new TeacherAdminResource($user),
-                ]);
-            }
-
-            // AssistantTeacher (نفس login)
-            if ($user instanceof AssistantTeacher) {
-                $assistantData = $user->toArray();
-                $assistantData['id'] = $user->teacher_id;
-
-                return response()->json([
-                    'message' => 'Authenticated',
-                    'role'    => 'assistant_teacher',
-                    'data'    => $assistantData,
-                ]);
-            }
-
-            return JsonResponse::respondError('Unknown User Type', 400);
-
-        } catch (Exception $e) {
-            return JsonResponse::respondError($e->getMessage());
+        if (!$user) {
+            return JsonResponse::respondError('Unauthenticated', 401);
         }
+
+        if ($user instanceof Admin) {
+            return JsonResponse::respondSuccess(
+                'Admin Fetched Successfully',
+                new AdminResource($user)
+            );
+        }
+
+        if ($user instanceof Teacher) {
+            return JsonResponse::respondSuccess(
+                'Teacher Fetched Successfully',
+                new TeacherAdminResource($user)
+            );
+        }
+
+        if ($user instanceof AssistantTeacher) {
+
+            $teacher = Teacher::find($user->teacher_id);
+
+            if (!$teacher) {
+                return JsonResponse::respondError('Teacher Not Found', 404);
+            }
+
+            return JsonResponse::respondSuccess(
+                'Teacher Fetched Successfully',
+                new TeacherAdminResource($teacher)
+            );
+        }
+
+        return JsonResponse::respondError('Unknown User Type', 400);
+
+    } catch (Exception $e) {
+        return JsonResponse::respondError($e->getMessage());
     }
+}
 
     public function logout(Request $request)
     {
