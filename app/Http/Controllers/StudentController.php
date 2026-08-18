@@ -342,31 +342,95 @@ class StudentController extends BaseController
     {
         $request->validate([
             'course_detail_id' => 'required|exists:course_details,id',
-            'student_id' => 'required|exists:students,id',
+            'student_id' => 'nullable|exists:students,id',
         ]);
 
-        $attendance = CourseDetailAttendance::with([
-            'student',
-            'courseDetail'
-        ])
-            ->where('course_detail_id', $request->course_detail_id)
-            ->where('student_id', $request->student_id)
-            ->first();
+        try {
 
-        if (!$attendance) {
+            /*
+        |--------------------------------------------------------------------------
+        | لو تم إرسال student_id
+        | سجل الحضور لو الطالب مش موجود
+        |--------------------------------------------------------------------------
+        */
+
+            if ($request->filled('student_id')) {
+
+                $attendance = CourseDetailAttendance::with([
+                    'student',
+                    'courseDetail'
+                ])
+                    ->where('course_detail_id', $request->course_detail_id)
+                    ->where('student_id', $request->student_id)
+                    ->first();
+
+                // الطالب موجود بالفعل
+                if ($attendance) {
+
+                    return response()->json([
+                        'success' => true,
+                        'count' => 1,
+                        'message' => 'Student is already marked as present',
+                        'data' => $attendance
+                    ]);
+                }
+
+                // الطالب غير موجود -> تسجيل الحضور
+                $attendance = CourseDetailAttendance::create([
+                    'course_detail_id' => $request->course_detail_id,
+                    'student_id' => $request->student_id,
+                ]);
+
+                $attendance->load([
+                    'student',
+                    'courseDetail'
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'count' => 1,
+                    'message' => 'Attendance recorded successfully',
+                    'data' => $attendance
+                ], 201);
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | لو مفيش student_id
+        | رجع كل حضور الدرس
+        |--------------------------------------------------------------------------
+        */
+
+            $attendance = CourseDetailAttendance::with([
+                'student',
+                'courseDetail'
+            ])
+                ->where('course_detail_id', $request->course_detail_id)
+                ->get();
+
+            if ($attendance->isEmpty()) {
+
+                return response()->json([
+                    'success' => true,
+                    'count' => 0,
+                    'message' => 'No students found for this lesson',
+                    'data' => []
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
-                'count' => 0,
-                'message' => 'Attendance record not found',
-                'data' => null
+                'count' => $attendance->count(),
+                'data' => $attendance
             ]);
-        }
+        } catch (\Exception $e) {
 
-        return response()->json([
-            'success' => true,
-            'count' => 1,
-            'data' => $attendance
-        ]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function resetStudentDevice(Student $student)
