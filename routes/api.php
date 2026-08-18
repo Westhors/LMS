@@ -287,7 +287,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('student/logout', [StudentController::class, 'logout']);
     Route::get('student/check-auth', [StudentController::class, 'checkAuth']);
     Route::delete('/student/delete', [StudentController::class, 'delete']);
-
 });
 
 

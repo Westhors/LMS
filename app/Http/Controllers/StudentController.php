@@ -342,6 +342,7 @@ class StudentController extends BaseController
     {
         $request->validate([
             'course_detail_id' => 'required|exists:course_details,id',
+            'student_id' => 'required|exists:students,id',
         ]);
 
         $attendance = CourseDetailAttendance::with([
@@ -349,20 +350,21 @@ class StudentController extends BaseController
             'courseDetail'
         ])
             ->where('course_detail_id', $request->course_detail_id)
-            ->get();
+            ->where('student_id', $request->student_id)
+            ->first();
 
-        if ($attendance->isEmpty()) {
+        if (!$attendance) {
             return response()->json([
                 'success' => true,
                 'count' => 0,
-                'message' => 'No students found for this lesson',
-                'data' => []
+                'message' => 'Attendance record not found',
+                'data' => null
             ]);
         }
 
         return response()->json([
             'success' => true,
-            'count' => $attendance->count(),
+            'count' => 1,
             'data' => $attendance
         ]);
     }
@@ -685,7 +687,8 @@ class StudentController extends BaseController
         }
     }
 
-    public function removeAttendance($courseDetail,$student) {
+    public function removeAttendance($courseDetail, $student)
+    {
         try {
 
             $attendance = CourseDetailAttendance::where(
