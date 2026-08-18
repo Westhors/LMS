@@ -349,37 +349,46 @@ class StudentController extends BaseController
 
             /*
         |--------------------------------------------------------------------------
-        | لو تم إرسال student_id
-        | سجل الحضور لو الطالب مش موجود
+        | تسجيل حضور طالب
         |--------------------------------------------------------------------------
         */
 
             if ($request->filled('student_id')) {
 
-                $attendance = CourseDetailAttendance::with([
-                    'student',
-                    'courseDetail'
-                ])
-                    ->where('course_detail_id', $request->course_detail_id)
-                    ->where('student_id', $request->student_id)
-                    ->first();
+                $courseDetailId = $request->course_detail_id;
+                $studentId = $request->student_id;
 
-                // الطالب موجود بالفعل
-                if ($attendance) {
+                /*
+            |--------------------------------------------------------------------------
+            | 1. تأكد أن الطالب مشترك في الدرس
+            |--------------------------------------------------------------------------
+            */
 
-                    return response()->json([
-                        'success' => true,
-                        'count' => 1,
-                        'message' => 'Student is already marked as present',
-                        'data' => $attendance
-                    ]);
-                }
+                $enrollment = Enrollment::firstOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'type' => 'lesson',
+                        'course_detail_id' => $courseDetailId,
+                    ],
+                    [
+                        'course_id' => null,
+                        'semester_id' => null,
+                        'book_id' => null,
+                    ]
+                );
 
-                // الطالب غير موجود -> تسجيل الحضور
-                $attendance = CourseDetailAttendance::create([
-                    'course_detail_id' => $request->course_detail_id,
-                    'student_id' => $request->student_id,
-                ]);
+                /*
+            |--------------------------------------------------------------------------
+            | 2. سجل الحضور إذا لم يكن مسجلًا
+            |--------------------------------------------------------------------------
+            */
+
+                $attendance = CourseDetailAttendance::firstOrCreate(
+                    [
+                        'course_detail_id' => $courseDetailId,
+                        'student_id' => $studentId,
+                    ]
+                );
 
                 $attendance->load([
                     'student',
@@ -390,6 +399,7 @@ class StudentController extends BaseController
                     'success' => true,
                     'count' => 1,
                     'message' => 'Attendance recorded successfully',
+                    'enrolled' => true,
                     'data' => $attendance
                 ], 201);
             }
@@ -397,8 +407,7 @@ class StudentController extends BaseController
 
             /*
         |--------------------------------------------------------------------------
-        | لو مفيش student_id
-        | رجع كل حضور الدرس
+        | جلب كل حضور الدرس
         |--------------------------------------------------------------------------
         */
 
