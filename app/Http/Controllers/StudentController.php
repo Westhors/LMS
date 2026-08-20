@@ -792,4 +792,31 @@ class StudentController extends BaseController
             );
         }
     }
+
+
+    public function studentCourseDelete($course_id, $student_id)
+    {
+        try {
+            $enrollment = Enrollment::where('student_id', $student_id)
+                ->where('course_id', $course_id)
+                ->where('type', 'course')
+                ->first();
+            if (!$enrollment) {
+
+                return JsonResponse::respondError(
+                    'Student is not enrolled in this course'
+                );
+            }
+
+            $enrollment->delete();
+            return JsonResponse::respondSuccess(
+                'Student course enrollment deleted successfully'
+            );
+        } catch (\Exception $e) {
+
+            return JsonResponse::respondError(
+                $e->getMessage()
+            );
+        }
+    }
 }
