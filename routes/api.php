@@ -371,7 +371,7 @@ Route::post('/pass-student', [ExamAnswerController::class, 'passStudent']);
 Route::post('/course-detail-attendance', [StudentController::class, 'showAttendance']);
 Route::post('/all/course-detail-attendance', [StudentController::class, 'allAttendance']);
 Route::post('/all/attendance-index', [StudentController::class, 'attendanceIndex']);
-Route::post('/student-delete/course/{course_id}/{student_id}', [StudentController::class, 'studentCourseDelete']);
+Route::delete('/student-delete/course/{course_id}/{student_id}', [StudentController::class, 'studentCourseDelete']);
 
 Route::delete(
     'attendance/{courseDetail}/{student}',
