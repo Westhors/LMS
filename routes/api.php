@@ -166,6 +166,7 @@ Route::apiResource('book', BookController::class);
 
 Route::post('exam/index', [ExamController::class, 'index']);
 Route::post('bank-questions/index', [ExamController::class, 'bankIndex']);
+Route::delete('bank-questions/{id}', [ExamController::class, 'bankQuestionsDelete']);
 Route::post('exam/restore', [ExamController::class, 'restore']);
 Route::delete('exam/delete', [ExamController::class, 'destroy']);
 Route::delete('exam/force-delete', [ExamController::class, 'forceDelete']);

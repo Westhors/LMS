@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+
 class ExamController extends BaseController
 {
     use HttpResponses;
@@ -49,10 +50,10 @@ class ExamController extends BaseController
             if ($result !== true) {
                 return $result;
             }
-           $exam = $this->crudRepository->create($request->validated());
-           if (request('image') !== null) {
+            $exam = $this->crudRepository->create($request->validated());
+            if (request('image') !== null) {
                 $this->crudRepository->AddMediaCollection('image', $exam);
-           }
+            }
             return JsonResponse::respondSuccess(trans(JsonResponse::MSG_ADDED_SUCCESSFULLY));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -63,7 +64,7 @@ class ExamController extends BaseController
     public function show(Exam $exam): ?\Illuminate\Http\JsonResponse
     {
         try {
-            $exam->load(['questions', 'answers.student','courseDetail', 'stage', 'teacher']);
+            $exam->load(['questions', 'answers.student', 'courseDetail', 'stage', 'teacher']);
             return JsonResponse::respondSuccess('Item Fetched Successfully', new ExamResource($exam));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
@@ -131,12 +132,12 @@ class ExamController extends BaseController
 
 
 
-/////////////////////////////////////////// addQuestions //////////////////////////////////////////////
+    /////////////////////////////////////////// addQuestions //////////////////////////////////////////////
     public function addQuestions(Request $request)
     {
         $result = (new FileUploadAction())->checkAssistantPermission('questions', 'create');
-                if ($result !== true) {
-                    return $result;
+        if ($result !== true) {
+            return $result;
         }
         $request->validate([
             'exam_id'   => 'required|exists:exams,id',
@@ -282,7 +283,6 @@ class ExamController extends BaseController
                 'message' => 'Questions added successfully and saved to question bank',
                 'data'    => $createdQuestions
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -294,7 +294,7 @@ class ExamController extends BaseController
         }
     }
 
-//////////////////////////////////////////// submitExam ////////////////////////////////////
+    //////////////////////////////////////////// submitExam ////////////////////////////////////
     public function getQuestions($examId)
     {
         $exam = Exam::with([
@@ -338,7 +338,7 @@ class ExamController extends BaseController
             'data' => QuestionResource::collection($questions)
         ]);
     }
-//////////////////////////////////////////// getQuestions ////////////////////////////////////
+    //////////////////////////////////////////// getQuestions ////////////////////////////////////
 
     public function submitExam(Request $request)
     {
@@ -444,7 +444,6 @@ class ExamController extends BaseController
                 'status' => true,
                 'message' => 'Exam submitted successfully',
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -456,13 +455,13 @@ class ExamController extends BaseController
             ], 500);
         }
     }
-/////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
+    /////////////////////////////////////////////////////// gradeEssay ///////////////////////////////
 
     public function gradeEssay(Request $request)
     {
         $result = (new FileUploadAction())->checkAssistantPermission('correct-answers', 'create');
-            if ($result !== true) {
-                return $result;
+        if ($result !== true) {
+            return $result;
         }
         $request->validate([
             'answer_id' => 'required|exists:exam_answers,id',
@@ -482,7 +481,7 @@ class ExamController extends BaseController
         ]);
     }
 
-/////////////////////////////////////////////////////// result //////////////////////////////////////
+    /////////////////////////////////////////////////////// result //////////////////////////////////////
 
     public function result($examId, $studentId)
     {
@@ -595,7 +594,6 @@ class ExamController extends BaseController
                 'Question bank fetched successfully',
                 QuestionBankResource::collection($questions)
             );
-
         } catch (\Exception $e) {
 
             return JsonResponse::respondError($e->getMessage());
@@ -689,7 +687,6 @@ class ExamController extends BaseController
                 'message' => 'Questions added successfully from question bank.',
                 'data' => $createdQuestions,
             ]);
-
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -700,5 +697,30 @@ class ExamController extends BaseController
             ], 500);
         }
     }
-}
 
+    public function bankQuestionsDelete($id)
+    {
+        try {
+
+            $bankQuestion = QuestionBank::find($id);
+
+            if (!$bankQuestion) {
+
+                return JsonResponse::respondError(
+                    'Bank question not found'
+                );
+            }
+
+            $bankQuestion->delete();
+
+            return JsonResponse::respondSuccess(
+                'Bank question deleted successfully'
+            );
+        } catch (\Exception $e) {
+
+            return JsonResponse::respondError(
+                $e->getMessage()
+            );
+        }
+    }
+}
