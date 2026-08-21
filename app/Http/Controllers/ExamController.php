@@ -394,14 +394,12 @@ class ExamController extends BaseController
 
                     $auto = true;
 
-                    $correctOption = $question->options()
-                        ->where('is_correct', 1)
+                    // الاختيار الذي اختاره الطالب
+                    $selectedOption = $question->options()
+                        ->where('id', $answer)
                         ->first();
 
-                    if (
-                        $correctOption &&
-                        $correctOption->option_text == $answer
-                    ) {
+                    if ($selectedOption && $selectedOption->is_correct) {
                         $mark = $question->mark;
                         $isCorrect = true;
                     } else {
