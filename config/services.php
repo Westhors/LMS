@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'wzila' => [
+        'gateway_token' => env('WZILA_GATEWAY_TOKEN'),
+    ],
+
 ];

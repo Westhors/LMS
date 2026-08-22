@@ -22,6 +22,7 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\WhatsappController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -378,4 +379,22 @@ Route::delete(
     'attendance/{courseDetail}/{student}',
     [StudentController::class, 'removeAttendance']
 );
+//////////////////////////////////////////////////////////diffrent request//////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////diffrent request//////////////////////////////////////
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post(
+        '/whatsapp/connect',
+        [WhatsappController::class, 'connect']
+    ); 
+    Route::post(
+        '/whatsapp/send',
+        [WhatsappController::class, 'sendMessage']
+    );
+});
+
+
 //////////////////////////////////////////////////////////diffrent request//////////////////////////////////////

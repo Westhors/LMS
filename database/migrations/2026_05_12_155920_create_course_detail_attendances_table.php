@@ -23,11 +23,9 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            // حضر ولا لا
             $table->boolean('attended')
                 ->default(false);
 
-            // وقت الحضور
             $table->timestamp('attended_at')
                 ->nullable();
 

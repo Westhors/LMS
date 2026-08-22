@@ -6,9 +6,10 @@ use App\Traits\HasMedia;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
+
 class Teacher extends BaseModel
 {
-    use HasFactory,Authenticatable,HasApiTokens,HasMedia;
+    use HasFactory, Authenticatable, HasApiTokens, HasMedia;
 
     protected $with = [
         'media',
@@ -85,10 +86,15 @@ class Teacher extends BaseModel
         return $this->hasOne(Media::class, 'id', 'id')
             ->whereIn('id', function ($q) {
                 $q->select('media_id')
-                ->from('mediable')
-                ->where('teacher_id', $this->id)
-                ->where('collection', 'teacher_image');
+                    ->from('mediable')
+                    ->where('teacher_id', $this->id)
+                    ->where('collection', 'teacher_image');
             });
     }
-}
 
+
+    public function whatsappInstance()
+    {
+        return $this->hasOne(WhatsappInstance::class);
+    }
+}
