@@ -6,6 +6,7 @@ use App\Helpers\JsonResponse;
 use App\Models\WhatsappInstance;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use App\Models\Student;
 
 class WhatsappController extends BaseController
 {
@@ -235,16 +236,25 @@ class WhatsappController extends BaseController
     public function sendMessage(Request $request)
     {
         try {
-            $teacher = auth()->user();
 
-            $request->validate([
-                'phone' => ['required', 'string'],
-                'message' => ['required', 'string'],
-            ]);
+            $teacher = auth()->user();
 
             /*
         |--------------------------------------------------------------------------
-        | Get Teacher WhatsApp Instance
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+            $request->validate([
+                'student_id' => ['required', 'array', 'min:1'],
+                'student_id.*' => ['required', 'integer'],
+                'message' => ['required', 'string'],
+            ]);
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Get WhatsApp Instance
         |--------------------------------------------------------------------------
         */
 
@@ -253,6 +263,7 @@ class WhatsappController extends BaseController
                 $teacher->id
             )->first();
 
+
             if (!$instance) {
                 return response()->json([
                     'status' => false,
@@ -260,15 +271,26 @@ class WhatsappController extends BaseController
                 ], 404);
             }
 
+
             /*
         |--------------------------------------------------------------------------
-        | Format Phone
+        | Get Students
         |--------------------------------------------------------------------------
         */
 
-            $phone = preg_replace('/\D/', '', $request->phone);
+            $students = Student::whereIn(
+                'id',
+                $request->student_id
+            )->get();
 
-            $chatId = $phone . '@s.whatsapp.net';
+
+            if ($students->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No students found',
+                ], 404);
+            }
+
 
             /*
         |--------------------------------------------------------------------------
@@ -277,139 +299,251 @@ class WhatsappController extends BaseController
         */
 
             $accessToken = $instance->access_token;
-            $instanceId  = $instance->instance_id;
+            $instanceId = $instance->instance_id;
+
 
             /*
         |--------------------------------------------------------------------------
-        | Build URL
+        | Results
         |--------------------------------------------------------------------------
-        |
-        | IMPORTANT:
-        | Wzila expects all parameters in the URL.
-        | POST body must remain empty.
-        |
         */
 
-            $query = http_build_query([
-                'access_token' => $accessToken,
-                'instance_id'  => $instanceId,
-                'chat_id'      => $chatId,
-                'text'         => $request->message,
-            ]);
+            $sent = [];
+            $failed = [];
 
-            $url = 'https://apis.wzila.com/send-link?' . $query;
 
             /*
         |--------------------------------------------------------------------------
-        | Send exactly like Wzila Tester
+        | Send Message To Students
         |--------------------------------------------------------------------------
         */
 
-            $ch = curl_init();
+            foreach ($students as $student) {
 
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
+                /*
+            |--------------------------------------------------------------------------
+            | Get Phone
+            |--------------------------------------------------------------------------
+            */
 
-                CURLOPT_RETURNTRANSFER => true,
+                $phone = preg_replace(
+                    '/\D/',
+                    '',
+                    $student->phone
+                );
 
-                CURLOPT_POST => true,
 
-                // Empty body exactly like Wzila Tester
-                CURLOPT_POSTFIELDS => '',
+                /*
+            |--------------------------------------------------------------------------
+            | Convert Egyptian Phone
+            |
+            | 01062206359
+            | ↓
+            | 201062206359
+            |--------------------------------------------------------------------------
+            */
 
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/x-www-form-urlencoded',
-                    'Accept: application/json',
-                ],
+                if (str_starts_with($phone, '01')) {
 
-                CURLOPT_TIMEOUT => 30,
-            ]);
+                    $phone = '2' . $phone;
+                } elseif (str_starts_with($phone, '1')) {
 
-            $result = curl_exec($ch);
+                    // لو الرقم جاي بدون 0
+                    // 1062206359
+                    // ↓
+                    // 201062206359
 
-            $curlError = curl_error($ch);
+                    $phone = '20' . $phone;
+                } elseif (str_starts_with($phone, '20')) {
 
-            $httpCode = curl_getinfo(
-                $ch,
-                CURLINFO_HTTP_CODE
-            );
+                    // Already international format
 
-            curl_close($ch);
+                } else {
 
-            /*
-        |--------------------------------------------------------------------------
-        | cURL Error
-        |--------------------------------------------------------------------------
-        */
+                    $failed[] = [
+                        'student_id' => $student->id,
+                        'phone' => $student->phone,
+                        'message' => 'Invalid Egyptian phone number',
+                    ];
 
-            if ($curlError) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $curlError,
-                ], 500);
-            }
+                    continue;
+                }
 
-            /*
-        |--------------------------------------------------------------------------
-        | Decode Wzila Response
-        |--------------------------------------------------------------------------
-        */
 
-            $data = json_decode($result, true);
+                /*
+            |--------------------------------------------------------------------------
+            | WhatsApp Chat ID
+            |--------------------------------------------------------------------------
+            */
 
-            /*
-        |--------------------------------------------------------------------------
-        | Wzila Error
-        |--------------------------------------------------------------------------
-        */
+                $chatId = $phone . '@s.whatsapp.net';
 
-            if (
-                $httpCode !== 200 ||
-                ($data['status'] ?? null) !== 'success'
-            ) {
-                return response()->json([
-                    'status' => false,
 
-                    'message' =>
-                    $data['message'] ??
-                        'Wzila error',
+                /*
+            |--------------------------------------------------------------------------
+            | Build URL
+            |--------------------------------------------------------------------------
+            */
 
-                    'response' => $data,
+                $query = http_build_query([
+                    'access_token' => $accessToken,
+                    'instance_id' => $instanceId,
+                    'chat_id' => $chatId,
+                    'text' => $request->message,
+                ]);
 
-                    'debug' => [
-                        'instance_id' => $instanceId,
-                        'chat_id' => $chatId,
-                        'phone' => $phone,
-                        'http_status' => $httpCode,
+
+                $url =
+                    'https://apis.wzila.com/send-link?' .
+                    $query;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | Send Request
+            |--------------------------------------------------------------------------
+            */
+
+                $ch = curl_init();
+
+                curl_setopt_array($ch, [
+
+                    CURLOPT_URL => $url,
+
+                    CURLOPT_RETURNTRANSFER => true,
+
+                    CURLOPT_POST => true,
+
+                    CURLOPT_POSTFIELDS => '',
+
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/x-www-form-urlencoded',
+                        'Accept: application/json',
                     ],
-                ], 422);
+
+                    CURLOPT_TIMEOUT => 30,
+                ]);
+
+
+                $result = curl_exec($ch);
+
+                $curlError = curl_error($ch);
+
+                $httpCode = curl_getinfo(
+                    $ch,
+                    CURLINFO_HTTP_CODE
+                );
+
+                curl_close($ch);
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | cURL Error
+            |--------------------------------------------------------------------------
+            */
+
+                if ($curlError) {
+
+                    $failed[] = [
+                        'student_id' => $student->id,
+                        'phone' => $phone,
+                        'chat_id' => $chatId,
+                        'message' => $curlError,
+                    ];
+
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | Decode Response
+            |--------------------------------------------------------------------------
+            */
+
+                $data = json_decode(
+                    $result,
+                    true
+                );
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | Wzila Error
+            |--------------------------------------------------------------------------
+            */
+
+                if (
+                    $httpCode !== 200 ||
+                    ($data['status'] ?? null) !== 'success'
+                ) {
+
+                    $failed[] = [
+                        'student_id' => $student->id,
+                        'phone' => $phone,
+                        'chat_id' => $chatId,
+                        'message' =>
+                        $data['message'] ??
+                            'Wzila error',
+                    ];
+
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | Success
+            |--------------------------------------------------------------------------
+            */
+
+                $sent[] = [
+                    'student_id' => $student->id,
+                    'phone' => $phone,
+                    'chat_id' => $chatId,
+                ];
             }
+
 
             /*
         |--------------------------------------------------------------------------
-        | Success
+        | Final Response
         |--------------------------------------------------------------------------
         */
 
             return response()->json([
+
                 'status' => true,
 
                 'message' =>
-                'WhatsApp message sent successfully',
+                'WhatsApp messages processed successfully',
 
-                'response' => $data,
+                'total' =>
+                count($students),
+
+                'sent' =>
+                count($sent),
+
+                'failed' =>
+                count($failed),
 
                 'data' => [
-                    'instance_id' => $instanceId,
-                    'chat_id' => $chatId,
-                    'phone' => $phone,
+
+                    'sent' => $sent,
+
+                    'failed' => $failed,
+
                 ],
             ]);
         } catch (\Throwable $e) {
 
             return response()->json([
+
                 'status' => false,
+
                 'message' => $e->getMessage(),
+
             ], 500);
         }
     }
