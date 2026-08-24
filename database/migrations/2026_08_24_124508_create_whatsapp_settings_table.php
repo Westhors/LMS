@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('teacher_id')
-                ->constrained('users')
+                ->constrained('teachers')
                 ->cascadeOnDelete();
 
             $table->enum('recipient_type', [
