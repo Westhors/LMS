@@ -12,7 +12,7 @@ class WhatsappSettingController extends Controller
         try {
 
             $request->validate([
-                'recipientType' => [
+                'recipient_type' => [
                     'required',
                     'in:student,parent,both',
                 ],
@@ -21,7 +21,7 @@ class WhatsappSettingController extends Controller
             // المدرس اللي عامل Login
             $teacherId = auth()->id();
 
-            // نوع الـ Setting ثابت: exam
+            // ندور على Setting الامتحان الخاصة بالمدرس
             $setting = WhatsappSetting::where('teacher_id', $teacherId)
                 ->where('type', 'exam')
                 ->first();
@@ -30,7 +30,7 @@ class WhatsappSettingController extends Controller
 
                 // موجودة → Update
                 $setting->update([
-                    'recipient_type' => $request->recipientType,
+                    'recipient_type' => $request->recipient_type,
                 ]);
 
                 $message = 'WhatsApp setting updated successfully.';
@@ -39,7 +39,7 @@ class WhatsappSettingController extends Controller
                 // مش موجودة → Create
                 $setting = WhatsappSetting::create([
                     'teacher_id' => $teacherId,
-                    'recipient_type' => $request->recipientType,
+                    'recipient_type' => $request->recipient_type,
                     'type' => 'exam',
                 ]);
 
@@ -51,8 +51,8 @@ class WhatsappSettingController extends Controller
                 'message' => $message,
                 'data' => [
                     'id' => $setting->id,
-                    'teacherId' => $setting->teacher_id,
-                    'recipientType' => $setting->recipient_type,
+                    'teacher_id' => $setting->teacher_id,
+                    'recipient_type' => $setting->recipient_type,
                     'type' => $setting->type,
                 ],
             ], 200);
