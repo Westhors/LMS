@@ -23,6 +23,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\WhatsappController;
+use App\Http\Controllers\WhatsappSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -397,7 +398,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post(
         '/whatsapp/settings',
-        [WhatsappController::class, 'settingWhatsapp']
+        [WhatsappSettingController::class, 'settingWhatsapp']
     );
 });
 

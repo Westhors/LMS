@@ -9,37 +9,68 @@ class WhatsappSettingController extends Controller
 {
     public function settingWhatsapp(Request $request)
     {
-        $request->validate([
-            'teacherId' => ['required', 'integer', 'exists:users,id'],
+        try {
 
-            'recipientType' => [
-                'required',
-                'in:student,parent,both'
-            ],
+            $request->validate([
+                'recipientType' => [
+                    'required',
+                    'in:student,parent,both'
+                ],
 
-            'type' => [
-                'nullable',
-                'string',
-            ],
-        ]);
+                'type' => [
+                    'nullable',
+                    'string',
+                ],
+            ]);
 
-        $setting = WhatsappSetting::where('teacher_id', $request->teacherId)
-            ->where('type', $request->type)
-            ->firstOrFail();
+            // المدرس اللي عامل Login
+            $teacherId = auth()->id();
 
-        $setting->update([
-            'recipient_type' => $request->recipientType,
-        ]);
+            // ندور على الـ Setting الخاصة بالمدرس + النوع
+            $setting = WhatsappSetting::where('teacher_id', $teacherId)
+                ->where('type', 'exam')
+                ->first();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'WhatsApp setting updated successfully.',
-            'data' => [
-                'id' => $setting->id,
-                'teacherId' => $setting->teacher_id,
-                'recipientType' => $setting->recipient_type,
-                'type' => $setting->type,
-            ],
-        ]);
+            if ($setting) {
+
+                // موجودة → Update
+                $setting->update([
+                    'recipient_type' => $request->recipientType,
+                ]);
+
+                $message = 'WhatsApp setting updated successfully.';
+            } else {
+
+                // مش موجودة → Create
+                $setting = WhatsappSetting::create([
+                    'teacher_id' => $teacherId,
+                    'recipient_type' => $request->recipientType,
+                    'type' => $request->type,
+                ]);
+
+                $message = 'WhatsApp setting created successfully.';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'id' => $setting->id,
+                    'teacherId' => $setting->teacher_id,
+                    'recipientType' => $setting->recipient_type,
+                    'type' => $setting->type,
+                ],
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            throw $e;
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
