@@ -14,19 +14,14 @@ class WhatsappSettingController extends Controller
             $request->validate([
                 'recipientType' => [
                     'required',
-                    'in:student,parent,both'
-                ],
-
-                'type' => [
-                    'nullable',
-                    'string',
+                    'in:student,parent,both',
                 ],
             ]);
 
             // المدرس اللي عامل Login
             $teacherId = auth()->id();
 
-            // ندور على الـ Setting الخاصة بالمدرس + النوع
+            // نوع الـ Setting ثابت: exam
             $setting = WhatsappSetting::where('teacher_id', $teacherId)
                 ->where('type', 'exam')
                 ->first();
@@ -45,7 +40,7 @@ class WhatsappSettingController extends Controller
                 $setting = WhatsappSetting::create([
                     'teacher_id' => $teacherId,
                     'recipient_type' => $request->recipientType,
-                    'type' => $request->type,
+                    'type' => 'exam',
                 ]);
 
                 $message = 'WhatsApp setting created successfully.';
