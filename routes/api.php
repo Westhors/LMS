@@ -389,10 +389,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/whatsapp/connect',
         [WhatsappController::class, 'connect']
-    ); 
+    );
     Route::post(
         '/whatsapp/send',
         [WhatsappController::class, 'sendMessage']
+    );
+
+    Route::post(
+        '/whatsapp/settings',
+        [WhatsappController::class, 'settingWhatsapp']
     );
 });
 
