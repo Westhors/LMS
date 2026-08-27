@@ -10,6 +10,7 @@ use App\Http\Controllers\CourseDetailController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExamAnswerController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\ExamQuestionController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
@@ -184,7 +185,7 @@ Route::get('exam/result/{examId}/{studentId}', [ExamController::class, 'result']
 Route::get('/exams/{examId}/questions', [ExamController::class, 'getQuestions']);
 //////////////////////////////////////////////////////////exam//////////////////////////////////////
 
-
+Route::delete('/exam-questions/{id}', [ExamQuestionController::class, 'destroy']);
 
 //////////////////////////////////////////////////////////Feature//////////////////////////////////////
 
