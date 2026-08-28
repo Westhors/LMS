@@ -73,6 +73,7 @@ class StudentController extends BaseController
         ]);
     }
 
+
     public function login(Request $request)
     {
         $request->validate([
@@ -82,6 +83,12 @@ class StudentController extends BaseController
             'device_id' => 'required|string',
             'fingerprint' => 'required|string',
         ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Find Student
+    |--------------------------------------------------------------------------
+    */
 
         if ($request->type === 'student') {
 
@@ -109,7 +116,12 @@ class StudentController extends BaseController
             }
         }
 
-        // الحساب متوقف
+        /*
+    |--------------------------------------------------------------------------
+    | Check if account is already blocked
+    |--------------------------------------------------------------------------
+    */
+
         if ($student->device_blocked) {
             return response()->json([
                 'status' => false,
@@ -117,11 +129,17 @@ class StudentController extends BaseController
             ], 403);
         }
 
-        // أول تسجيل أو بعد Reset
-        if (
-            empty($student->device_id) ||
-            empty($student->fingerprint)
-        ) {
+        /*
+    |--------------------------------------------------------------------------
+    | First Login / After Device Reset
+    |--------------------------------------------------------------------------
+    |
+    | device_id هو المعرف الأساسي للجهاز.
+    | fingerprint لا يستخدم لمنع تسجيل الدخول.
+    |
+    */
+
+        if (empty($student->device_id)) {
 
             $student->update([
                 'device_id' => $request->device_id,
@@ -130,17 +148,22 @@ class StudentController extends BaseController
                 'user_agent' => $request->userAgent(),
             ]);
         }
-        // جهاز مختلف
-        elseif (
-            $student->device_id !== $request->device_id ||
-            $student->fingerprint !== $request->fingerprint
-        ) {
+
+        /*
+    |--------------------------------------------------------------------------
+    | Different Device
+    |--------------------------------------------------------------------------
+    |
+    | لو device_id مختلف => جهاز مختلف => إيقاف الحساب
+    |
+    */ elseif ($student->device_id !== $request->device_id) {
 
             $student->update([
                 'device_blocked' => true,
                 'device_blocked_at' => now(),
             ]);
 
+            // حذف التوكنات الحالية
             $student->tokens()->delete();
 
             return response()->json([
@@ -148,21 +171,43 @@ class StudentController extends BaseController
                 'message' => 'تم إيقاف الحساب لأنك حاولت تسجيل الدخول من جهاز آخر. برجاء التواصل مع الدعم أو المدرس لإعادة تفعيل الحساب.'
             ], 403);
         }
-        // نفس الجهاز
-        else {
+
+        /*
+    |--------------------------------------------------------------------------
+    | Same Device
+    |--------------------------------------------------------------------------
+    |
+    | نفس الجهاز حتى لو المتصفح مختلف.
+    | نقوم بتحديث بيانات المتصفح فقط.
+    |
+    */ else {
+
             $student->update([
+                'fingerprint' => $request->fingerprint,
                 'last_ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
         }
 
-        // تسجيل دخول طبيعي
+        /*
+    |--------------------------------------------------------------------------
+    | Login
+    |--------------------------------------------------------------------------
+    */
+
+        // حذف التوكن القديم حتى يكون هناك جلسة واحدة فعالة
         $student->tokens()->delete();
 
         $token = $student->createToken(
             'token',
             [$request->type]
         )->plainTextToken;
+
+        /*
+    |--------------------------------------------------------------------------
+    | Response
+    |--------------------------------------------------------------------------
+    */
 
         return response()->json([
             'status' => true,
@@ -172,7 +217,6 @@ class StudentController extends BaseController
             'data' => new StudentResource($student),
         ]);
     }
-
 
     public function delete(Request $request)
     {
