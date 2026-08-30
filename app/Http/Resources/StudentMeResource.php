@@ -17,12 +17,12 @@ class StudentMeResource extends JsonResource
             'name' => $this->name,
             'phone' => $this->phone,
             'phone_parent' => $this->phone_parent,
-            'device_id'=> $this->device_id,
-            'fingerprint'=> $this->fingerprint,
-            'last_ip'=> $this->last_ip,
-            'user_agent'=> $this->user_agent,
-            'device_blocked'=> $this->device_blocked,
-            'device_blocked_at'=> $this->device_blocked_at,
+            'device_id' => $this->device_id,
+            'fingerprint' => $this->fingerprint,
+            'last_ip' => $this->last_ip,
+            'user_agent' => $this->user_agent,
+            'device_blocked' => $this->device_blocked,
+            'device_blocked_at' => $this->device_blocked_at,
 
 
 
@@ -50,7 +50,7 @@ class StudentMeResource extends JsonResource
         ];
     }
 
-       private function formatByType($type)
+    private function formatByType($type)
     {
         return $this->answers
             ->filter(function ($answer) use ($type) {
@@ -83,6 +83,43 @@ class StudentMeResource extends JsonResource
                             ->where('question_id', $q->id)
                             ->first();
 
+                        $studentAnswerValue = null;
+
+                        // Essay
+                        if ($q->question_type === 'essay') {
+
+                            $studentAnswerValue = $studentAnswer?->answer;
+                        }
+
+                        // True / False
+                        elseif ($q->question_type === 'true_false') {
+
+                            if ($studentAnswer) {
+                                $value = strtolower(trim((string) $studentAnswer->answer));
+
+                                if ($value === 'true' || $value === '1') {
+                                    $studentAnswerValue = 'صح';
+                                } elseif ($value === 'false' || $value === '0') {
+                                    $studentAnswerValue = 'غلط';
+                                } else {
+                                    $studentAnswerValue = $studentAnswer->answer;
+                                }
+                            }
+                        }
+
+                        // Multiple Choice
+                        elseif ($q->question_type === 'multiple_choice') {
+
+                            if ($studentAnswer?->answer) {
+
+                                $option = $q->options
+                                    ->where('id', $studentAnswer->answer)
+                                    ->first();
+
+                                $studentAnswerValue = $option?->option_text;
+                            }
+                        }
+
                         return [
                             'id' => $studentAnswer?->id,
                             'question_id' => $q->id,
@@ -91,7 +128,8 @@ class StudentMeResource extends JsonResource
                             'question_type' => $q->question_type,
                             'correct_answer' => $q->correct_answer,
 
-                            'student_answer' => $studentAnswer?->answer,
+                            'student_answer' => $studentAnswerValue,
+
                             'is_correct' => $studentAnswer?->is_correct,
                             'mark_obtained' => $studentAnswer?->mark,
                         ];
