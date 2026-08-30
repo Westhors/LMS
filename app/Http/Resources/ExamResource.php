@@ -59,35 +59,55 @@ class ExamResource extends JsonResource
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'students' => $this->whenLoaded('answers', function () {
                 return $this->answers
-                    ->load('student')
+                    ->load([
+                        'student',
+                        'question.options'
+                    ])
                     ->groupBy('student_id')
                     ->map(function ($answers) {
 
                         $student = $answers->first()->student;
 
-                        return ['id' => optional($student)->id, 'name' => optional($student)->name, 'answers' => $answers->map(function ($answer) {
-                            $question = $answer->question;
-                            $studentAnswer = null; /* |-------------------------------------------------------------------------- | Essay |-------------------------------------------------------------------------- */
-                            if ($question?->question_type === 'essay') {
-                                $studentAnswer = $answer->answer;
-                            } /* |-------------------------------------------------------------------------- | True / False |-------------------------------------------------------------------------- */ elseif ($question?->question_type === 'true_false') {
-                                if ($answer->answer === null) {
-                                    $studentAnswer = null;
-                                } elseif (strtolower(trim((string) $answer->answer)) === 'true' || $answer->answer == 1) {
-                                    $studentAnswer = 'صح';
-                                } elseif (strtolower(trim((string) $answer->answer)) === 'false' || $answer->answer == 0) {
-                                    $studentAnswer = 'غلط';
-                                } else {
-                                    $studentAnswer = $answer->answer;
-                                }
-                            } /* |-------------------------------------------------------------------------- | Multiple Choice |-------------------------------------------------------------------------- */ elseif ($question?->question_type === 'multiple_choice') {
-                                if ($answer->answer !== null) {
-                                    $option = $question->options->where('id', $answer->answer)->first();
-                                    $studentAnswer = $option?->option_text;
-                                }
-                            }
-                            return ['id' => $answer->id, 'question_id' => $answer->question_id, 'answer' => $studentAnswer, 'mark' => $answer->mark, 'is_auto_corrected' => $answer->is_auto_corrected, 'is_correct' => $answer->is_correct, 'image' => $this->getAnswerImage($answer->id), 'created_at' => $answer->created_at?->format('Y-m-d H:i:s'),];
-                        })->values(),];
+                        return [
+                            'id' => optional($student)->id,
+                            'name' => optional($student)->name,
+
+                            'answers' => $answers->map(function ($answer) {
+
+                                $image = DB::table('mediable')
+                                    ->join('media', 'media.id', '=', 'mediable.media_id')
+                                    ->where('mediable.model_type', \App\Models\ExamAnswer::class)
+                                    ->where('mediable.model_id', $answer->id)
+                                    ->where('mediable.collection', 'answer_image')
+                                    ->first();
+
+                                return [
+                                    'id' => $answer->id,
+                                    'question_id' => $answer->question_id,
+                                    'answer' => $answer->question?->question_type === 'true_false'
+                                        ? ($answer->answer == 1 || strtolower($answer->answer) === 'true' ? 'صح' : 'غلط')
+                                        : ($answer->question?->question_type === 'multiple_choice'
+                                            ? $answer->question?->options?->firstWhere('id', $answer->answer)?->option_text
+                                            : $answer->answer),
+                                    'mark' => $answer->mark,
+                                    'is_auto_corrected' => $answer->is_auto_corrected,
+                                    'is_correct' => $answer->is_correct,
+
+                                    'image' => $image ? [
+                                        'id' => $image->id,
+                                        'name' => $image->name,
+                                        'mimeType' => $image->mime_type,
+                                        'size' => $image->size,
+                                        'authorId' => $image->author_id,
+                                        'previewUrl' => '/storage/' . $image->file_path,
+                                        'fullUrl' => asset('storage/' . $image->file_path),
+                                        'createdAt' => optional($image->created_at)?->format('d F, Y'),
+                                    ] : null,
+
+                                    'created_at' => $answer->created_at?->format('Y-m-d H:i:s'),
+                                ];
+                            })->values(),
+                        ];
                     })->values();
             }),
             'total_marks' => $this->total_marks,
