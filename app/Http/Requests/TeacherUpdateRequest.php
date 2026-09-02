@@ -25,7 +25,8 @@ class TeacherUpdateRequest extends FormRequest
             'password' => 'nullable|string|min:6',
 
             'phone' => 'nullable|string|max:20',
-
+            'expire_date' => 'nullable|date',
+            'show_expire_message' => 'nullable|boolean',
             'stage' => 'nullable|array',
             'stage.*.stage_id' => 'required_with:stage|exists:stages,id',
             'stage.*.image' => 'nullable|exists:media,id',

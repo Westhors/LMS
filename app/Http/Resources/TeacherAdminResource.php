@@ -13,8 +13,10 @@ class TeacherAdminResource extends JsonResource
             'name' => $this->name,
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
-            'type' =>"teacher",
+            'type' => "teacher",
             'role' => 'teacher',
+            'expire_date' => $this->expire_date,
+            'show_expire_message' => (bool) $this->show_expire_message,
         ];
     }
 }

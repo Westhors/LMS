@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('backgroud_color')->nullable();
             $table->string('font_color')->nullable();
             $table->string('password')->nullable();
-
             $table->boolean('active')->default(1);
             $table->softDeletes();
             $table->timestamps();

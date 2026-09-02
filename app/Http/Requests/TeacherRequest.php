@@ -21,7 +21,8 @@ class TeacherRequest extends FormRequest
             'sub_domain' => 'required|string|unique:teachers,sub_domain,' . $teacherId,
             'password' => 'nullable|string|min:6',
             'phone' => 'required|string|max:20',
-
+            'expire_date' => 'nullable|date',
+            'show_expire_message' => 'nullable|boolean',
             'stage' => 'sometimes|array',
             'stage.*.stage_id' => 'required|exists:stages,id',
             'stage.*.image' => 'nullable|exists:media,id',
