@@ -14,6 +14,7 @@ use App\Http\Controllers\ExamQuestionController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LessonNoteController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PaymentCodeController;
@@ -403,5 +404,17 @@ Route::middleware('auth:sanctum')->group(function () {
     );
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post(
+        '/lessons/{courseDetailId}/note',
+        [LessonNoteController::class, 'storeOrUpdate']
+    );
+
+    Route::get(
+        '/lessons/{courseDetailId}/note',
+        [LessonNoteController::class, 'show']
+    );
+});
 
 //////////////////////////////////////////////////////////diffrent request//////////////////////////////////////
