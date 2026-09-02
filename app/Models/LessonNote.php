@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-class LessonNote extends BaseModel
+use Illuminate\Database\Eloquent\Model;
+
+class LessonNote extends Model
 {
     protected $table = 'lesson_notes';
 
