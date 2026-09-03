@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\WhatsappInstance;
 use App\Models\WhatsappSetting;
 use Illuminate\Http\Request;
 
@@ -67,5 +68,24 @@ class WhatsappSettingController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function deleteWhatsappInstance($teacherId)
+    {
+        $instance = WhatsappInstance::where('teacher_id', $teacherId)->first();
+
+        if (!$instance) {
+            return response()->json([
+                'status' => false,
+                'message' => 'WhatsApp instance not found',
+            ], 404);
+        }
+
+        $instance->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'WhatsApp instance deleted successfully',
+        ]);
     }
 }

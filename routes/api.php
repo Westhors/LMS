@@ -402,6 +402,10 @@ Route::middleware('auth:sanctum')->group(function () {
         '/whatsapp/settings',
         [WhatsappSettingController::class, 'settingWhatsapp']
     );
+    Route::delete(
+        '/teachers/{teacher}/whatsapp-instance',
+        [WhatsappController::class, 'deleteWhatsappInstance']
+    );
 });
 
 Route::middleware('auth:sanctum')->group(function () {
