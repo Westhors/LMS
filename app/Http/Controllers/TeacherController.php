@@ -98,7 +98,7 @@ class TeacherController extends BaseController
 
     public function show(Teacher $teacher): \Illuminate\Http\JsonResponse
     {
-       
+
         try {
             $teacher->load([
                 'stages',
@@ -741,6 +741,7 @@ class TeacherController extends BaseController
             'birth_date' => 'nullable|date',
             'type_of_attendance' => 'nullable|string',
             'stage_id' => 'nullable|exists:stages,id',
+            'type_of_study' => 'nullable|in:general,azhar',
         ]);
 
         $student = Student::findOrFail($request->student_id);
@@ -751,6 +752,7 @@ class TeacherController extends BaseController
             'phone_parent',
             'birth_date',
             'type_of_attendance',
+            'type_of_study',
             'stage_id',
         ]);
 
