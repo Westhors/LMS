@@ -11,12 +11,23 @@ class CourseDetailResource extends JsonResource
     public function toArray($request)
     {
         $studentId = auth('sanctum')->id() ?? auth()->id();
+
         $isPurchased = false;
 
         if ($studentId) {
             $isPurchased = Enrollment::where('student_id', $studentId)
-                ->where('type', 'lesson')
-                ->where('course_detail_id', $this->id)
+                ->where(function ($query) {
+                    $query->where(function ($q) {
+                        // اشترى الدرس نفسه
+                        $q->where('type', 'lesson')
+                            ->where('course_detail_id', $this->id);
+                    })
+                        ->orWhere(function ($q) {
+                            // اشترى الكورس بالكامل
+                            $q->where('type', 'course')
+                                ->where('course_id', $this->course_id);
+                        });
+                })
                 ->exists();
         }
         $viewsCount = 0;
