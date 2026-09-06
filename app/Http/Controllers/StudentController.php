@@ -131,63 +131,20 @@ class StudentController extends BaseController
 
         /*
     |--------------------------------------------------------------------------
-    | First Login / After Device Reset
+    | Update Browser / Device Information
     |--------------------------------------------------------------------------
     |
-    | device_id هو المعرف الأساسي للجهاز.
-    | fingerprint لا يستخدم لمنع تسجيل الدخول.
+    | لا نستخدم device_id لمنع الدخول.
+    | لأن Browser مختلف على نفس الجهاز قد ينتج device_id مختلف.
     |
     */
 
-        if (empty($student->device_id)) {
-
-            $student->update([
-                'device_id' => $request->device_id,
-                'fingerprint' => $request->fingerprint,
-                'last_ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Different Device
-    |--------------------------------------------------------------------------
-    |
-    | لو device_id مختلف => جهاز مختلف => إيقاف الحساب
-    |
-    */ elseif ($student->device_id !== $request->device_id) {
-
-            $student->update([
-                'device_blocked' => true,
-                'device_blocked_at' => now(),
-            ]);
-
-            // حذف التوكنات الحالية
-            $student->tokens()->delete();
-
-            return response()->json([
-                'status' => false,
-                'message' => 'تم إيقاف الحساب لأنك حاولت تسجيل الدخول من جهاز آخر. برجاء التواصل مع الدعم أو المدرس لإعادة تفعيل الحساب.'
-            ], 403);
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Same Device
-    |--------------------------------------------------------------------------
-    |
-    | نفس الجهاز حتى لو المتصفح مختلف.
-    | نقوم بتحديث بيانات المتصفح فقط.
-    |
-    */ else {
-
-            $student->update([
-                'fingerprint' => $request->fingerprint,
-                'last_ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        }
+        $student->update([
+            'device_id' => $request->device_id,
+            'fingerprint' => $request->fingerprint,
+            'last_ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         /*
     |--------------------------------------------------------------------------
@@ -195,7 +152,7 @@ class StudentController extends BaseController
     |--------------------------------------------------------------------------
     */
 
-        // حذف التوكن القديم حتى يكون هناك جلسة واحدة فعالة
+        // حذف التوكن القديم حتى تكون جلسة واحدة فعالة
         $student->tokens()->delete();
 
         $token = $student->createToken(
