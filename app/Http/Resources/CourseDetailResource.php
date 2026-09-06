@@ -15,21 +15,48 @@ class CourseDetailResource extends JsonResource
         $isPurchased = false;
 
         if ($studentId) {
+
+            // Get semester_id from the course that belongs to this lesson
+            $semesterId = $this->course?->semester_id;
+
             $isPurchased = Enrollment::where('student_id', $studentId)
-                ->where(function ($query) {
+                ->where(function ($query) use ($semesterId) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | 1. Student purchased this lesson directly
+                    |--------------------------------------------------------------------------
+                    */
                     $query->where(function ($q) {
-                        // اشترى الدرس نفسه
                         $q->where('type', 'lesson')
                             ->where('course_detail_id', $this->id);
                     })
+
+                        /*
+                    |--------------------------------------------------------------------------
+                    | 2. Student purchased the whole course
+                    |--------------------------------------------------------------------------
+                    */
                         ->orWhere(function ($q) {
-                            // اشترى الكورس بالكامل
                             $q->where('type', 'course')
                                 ->where('course_id', $this->course_id);
                         });
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | 3. Student purchased the whole semester
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($semesterId) {
+                        $query->orWhere(function ($q) use ($semesterId) {
+                            $q->where('type', 'semester')
+                                ->where('semester_id', $semesterId);
+                        });
+                    }
                 })
                 ->exists();
         }
+
         $viewsCount = 0;
         $remaining = null;
 
