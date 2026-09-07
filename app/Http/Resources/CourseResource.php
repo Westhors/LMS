@@ -3,15 +3,37 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use App\Models\Enrollment;
 class CourseResource extends JsonResource
 {
     public function toArray($request)
     {
+        $studentId = auth('sanctum')->id() ?? auth()->id();
+
+        $isPurchased = false;
+
+        if ($studentId) {
+            $isPurchased = Enrollment::where('student_id', $studentId)
+                ->where(function ($query) {
+                    // اشترى الكورس نفسه
+                    $query->where(function ($q) {
+                        $q->where('type', 'course')
+                            ->where('course_id', $this->id);
+                    })
+
+                        // أو اشترى الـ Semester
+                        ->orWhere(function ($q) {
+                            $q->where('type', 'semester')
+                                ->where('semester_id', $this->semester_id);
+                        });
+                })
+                ->exists();
+        }
         $offerDiscount = $this->offer?->offer_discount ?? 0;
         $discountAmount = ($this->price * $offerDiscount) / 100;
         return [
             'id' => $this->id,
+            'isPurchased' => $isPurchased,
             'teacher_id' => $this->teacher_id,
             'teacher' => new TeacherResource($this->whenLoaded('teacher')),
             'stage_id' => $this->stage_id,
