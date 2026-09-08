@@ -51,7 +51,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Enrollment::class);
     }
-    public function lessonAttendances()
+    public function attendance()
     {
         return $this->hasMany(
             CourseDetailAttendance::class

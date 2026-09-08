@@ -30,19 +30,22 @@ class StudentAttendanceResource extends JsonResource
             'governorate' => $this->governorate,
             'school_name' => $this->school_name,
             'type_of_study' => $this->type_of_study,
-            'imageUrl' => $this->getFirstMediaUrl(),
-            'image' => new MediaResource($this->getFirstMedia()),
+
             'teacher_id' => $this->teacher_id,
             'stage_id' => $this->stage_id,
             'stage' => $this->whenLoaded('stage'),
+
             'center_hour_id' => $this->center_hour_id,
-            'centerHour' => $this->centerHour,
+            'centerHour' => $this->whenLoaded('centerHour'),
+
             'attendance' => [
-                'attended' => $this->attendance?->attended ?? false,
+                'attended' => (bool) ($this->attendance?->attended ?? false),
                 'attended_at' => $this->attendance?->attended_at,
             ],
+
             'joined_at' => optional($this->pivot?->created_at)
-                ->format('d F, Y h:i A') ?? null,
+                ->format('d F, Y h:i A'),
+
             'created_at' => $this->created_at,
         ];
     }
