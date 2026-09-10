@@ -25,6 +25,7 @@ class TeacherResource extends JsonResource
 
             'imageUrl' => $this->getFirstMediaUrl(),
             'image' => new MediaResource($this->getFirstMedia()),
+            'expire_date' => $this->expire_date ?? null,
 
 
             'logoUrl' => $this->getFirstMediaUrl('logo'),
