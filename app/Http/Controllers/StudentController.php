@@ -449,11 +449,39 @@ class StudentController extends BaseController
     }
 
 
+
     public function attendanceIndex(Request $request)
     {
         $filters = $request->input('filters', []);
 
-        $attendances = CourseDetailAttendance::query()
+        $orderBy = $request->input('orderBy', 'id');
+        $orderByDirection = $request->input('orderByDirection', 'asc');
+
+        $perPage = (int) $request->input('perPage', 10);
+        $paginate = $request->boolean('paginate', true);
+
+        $allowedOrderBy = [
+            'id',
+            'created_at',
+            'course_detail_id',
+            'student_id',
+            'attended',
+            'attended_at',
+        ];
+
+        if (!in_array($orderBy, $allowedOrderBy)) {
+            $orderBy = 'id';
+        }
+
+        if (!in_array($orderByDirection, ['asc', 'desc'])) {
+            $orderByDirection = 'asc';
+        }
+
+        if ($perPage < 1) {
+            $perPage = 10;
+        }
+
+        $query = CourseDetailAttendance::query()
             ->with([
                 'student.stage',
                 'student.centerHour',
@@ -462,7 +490,10 @@ class StudentController extends BaseController
             ->when(
                 !empty($filters['course_detail_id']),
                 fn($query) =>
-                $query->where('course_detail_id', $filters['course_detail_id'])
+                $query->where(
+                    'course_detail_id',
+                    $filters['course_detail_id']
+                )
             )
 
             ->whereHas('student', function ($query) use ($filters) {
@@ -471,25 +502,39 @@ class StudentController extends BaseController
                     ->when(
                         !empty($filters['name']),
                         fn($q) =>
-                        $q->where('name', 'like', '%' . $filters['name'] . '%')
+                        $q->where(
+                            'name',
+                            'like',
+                            '%' . $filters['name'] . '%'
+                        )
                     )
 
                     ->when(
                         !empty($filters['phone']),
                         fn($q) =>
-                        $q->where('phone', 'like', '%' . $filters['phone'] . '%')
+                        $q->where(
+                            'phone',
+                            'like',
+                            '%' . $filters['phone'] . '%'
+                        )
                     )
 
                     ->when(
                         !empty($filters['stage_id']),
                         fn($q) =>
-                        $q->where('stage_id', $filters['stage_id'])
+                        $q->where(
+                            'stage_id',
+                            $filters['stage_id']
+                        )
                     )
 
                     ->when(
                         !empty($filters['center_hour_id']),
                         fn($q) =>
-                        $q->where('center_hour_id', $filters['center_hour_id'])
+                        $q->where(
+                            'center_hour_id',
+                            $filters['center_hour_id']
+                        )
                     )
 
                     ->when(
@@ -514,26 +559,58 @@ class StudentController extends BaseController
                     ->when(
                         !empty($filters['teacher_id']),
                         fn($q) =>
-                        $q->where('teacher_id', $filters['teacher_id'])
+                        $q->where(
+                            'teacher_id',
+                            $filters['teacher_id']
+                        )
                     );
             })
 
-            ->latest('id')
-            ->get();
+            ->orderBy($orderBy, $orderByDirection);
 
-        return $attendances->map(function ($attendance) {
+        if ($paginate) {
 
-            $student = $attendance->student;
+            $attendances = $query->paginate($perPage);
 
-            if (!$student) {
-                return null;
-            }
+            $attendances->getCollection()->transform(function ($attendance) {
 
-            $student->setRelation('attendance', $attendance);
+                $student = $attendance->student;
 
-            return new StudentAttendanceResource($student);
-        })->filter()->values();
+                if (!$student) {
+                    return null;
+                }
+
+                $student->setRelation('attendance', $attendance);
+
+                return new StudentAttendanceResource($student);
+            });
+
+            $attendances->setCollection(
+                $attendances->getCollection()
+                    ->filter()
+                    ->values()
+            );
+
+            return $attendances;
+        }
+
+        return $query->get()
+            ->map(function ($attendance) {
+
+                $student = $attendance->student;
+
+                if (!$student) {
+                    return null;
+                }
+
+                $student->setRelation('attendance', $attendance);
+
+                return new StudentAttendanceResource($student);
+            })
+            ->filter()
+            ->values();
     }
+
 
 
 
