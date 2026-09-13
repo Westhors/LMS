@@ -449,7 +449,6 @@ class StudentController extends BaseController
     }
 
 
-
     public function attendanceIndex(Request $request)
     {
         $filters = $request->input('filters', []);
@@ -535,7 +534,6 @@ class StudentController extends BaseController
             return new StudentAttendanceResource($student);
         })->filter()->values();
     }
-
 
 
 
