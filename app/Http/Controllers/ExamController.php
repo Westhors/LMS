@@ -6,6 +6,7 @@ use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\ExamRequest;
 use App\Http\Resources\AnswerResource;
+use App\Http\Resources\ExamDashboardResource;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\QuestionBankResource;
 use App\Http\Resources\QuestionResource;
@@ -38,6 +39,16 @@ class ExamController extends BaseController
     {
         try {
             $Exams = ExamResource::collection($this->crudRepository->all(['questions', 'answers', 'courseDetail', 'stage', 'teacher'], [], ['*']));
+            return $Exams->additional(JsonResponse::success());
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function indexExamsDashboard()
+    {
+        try {
+            $Exams = ExamDashboardResource::collection($this->crudRepository->all(['questions', 'answers', 'courseDetail', 'stage', 'teacher'], [], ['*']));
             return $Exams->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
