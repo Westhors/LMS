@@ -6,6 +6,7 @@ use App\Helpers\FileUploadAction;
 use App\Helpers\JsonResponse;
 use App\Http\Requests\CourseRequest;
 use App\Http\Requests\StageRequest;
+use App\Http\Resources\CourseDashboardResource;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\StageResource;
 use App\Interfaces\CourseRepositoryInterface;
@@ -30,6 +31,16 @@ class CourseController extends BaseController
     {
         try {
             $Courses = CourseResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject', 'semester', 'details'], [], ['*']));
+            return $Courses->additional(JsonResponse::success());
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+        public function indexCourseDashboard()
+    {
+        try {
+            $Courses = CourseDashboardResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject', 'semester', 'details'], [], ['*']));
             return $Courses->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
