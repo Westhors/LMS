@@ -48,7 +48,7 @@ class ExamController extends BaseController
     public function indexExamsDashboard()
     {
         try {
-            $Exams = ExamDashboardResource::collection($this->crudRepository->all(['questions', 'answers', 'courseDetail', 'stage', 'teacher'], [], ['*']));
+            $Exams = ExamDashboardResource::collection($this->crudRepository->all([], [], ['*']));
             return $Exams->additional(JsonResponse::success());
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
