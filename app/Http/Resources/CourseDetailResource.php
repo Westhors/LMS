@@ -87,7 +87,7 @@ class CourseDetailResource extends JsonResource
             'titles_ar' => $this->titles_ar,
             'link_drive' => $this->link_drive ?? null,
             'available_watch_count' => $this->available_watch_count,
-            'usedWatchCount' => $viewsCount,
+            'usedWatchCount' => 5000,
             'remainingWatchCount' => $remaining,
 
             'link_video' => $this->must_pass_to_unlock
