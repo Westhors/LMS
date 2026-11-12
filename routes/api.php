@@ -88,6 +88,7 @@ Route::delete('teacher/delete', [TeacherController::class, 'destroy']);
 Route::delete('teacher/force-delete', [TeacherController::class, 'forceDelete']);
 Route::post('teacher/update/{teacher}', [TeacherController::class, 'forceUpdate']);
 Route::put('/teacher/{id}/{column}', [TeacherController::class, 'toggle']);
+Route::put('/teacher-dashboard/{id}', [TeacherController::class, 'showTeacherDashboard']);
 
 Route::apiResource('teacher', TeacherController::class);
 

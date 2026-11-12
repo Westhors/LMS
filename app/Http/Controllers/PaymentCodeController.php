@@ -8,6 +8,7 @@ use App\Models\PaymentCode;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+
 class PaymentCodeController extends BaseController
 {
     use HttpResponses;
@@ -22,8 +23,8 @@ class PaymentCodeController extends BaseController
     public function generateCodes(Request $request)
     {
         $result = (new FileUploadAction())->checkAssistantPermission('payment-codes', 'create');
-            if ($result !== true) {
-                return $result;
+        if ($result !== true) {
+            return $result;
         }
         $request->validate([
             'type' => 'required|in:wallet,course,semester,lesson',
@@ -64,56 +65,55 @@ class PaymentCodeController extends BaseController
         ]);
     }
 
+
+
     public function index(Request $request)
     {
         $query = PaymentCode::with('student');
 
-        // 🎯 المدرس
-        $query->when(auth()->check(), function ($q) {
-            $q->where('teacher_id', auth()->id());
-        });
+        // Teacher
+        if (auth()->check()) {
+            $query->where('teacher_id', auth()->id());
+        }
 
-        // 🔍 Filters
+        // Filters
         $filters = $request->input('filters', []);
 
-        $query->when($filters['amount'] ?? null, function ($q, $value) {
-            $q->where('amount', $value);
-        });
+        foreach (
+            [
+                'amount',
+                'course_id',
+                'semester_id',
+                'course_detail_id',
+                'type_code',
+            ] as $filter
+        ) {
+            if (isset($filters[$filter]) && $filters[$filter] !== '') {
+                $query->where($filter, $filters[$filter]);
+            }
+        }
 
-        $query->when($filters['course_id'] ?? null, function ($q, $value) {
-            $q->where('course_id', $value);
-        });
-
-        $query->when($filters['semester_id'] ?? null, function ($q, $value) {
-            $q->where('semester_id', $value);
-        });
-
-        $query->when($filters['course_detail_id'] ?? null, function ($q, $value) {
-            $q->where('course_detail_id', $value);
-        });
-
-        $query->when($filters['type_code'] ?? null, function ($q, $value) {
-            $q->where('type_code', $value);
-        });
-
-        // 🔎 Search by code
+        // Search
         if ($request->filled('search')) {
-            $query->where('code', 'like', '%' . $request->search . '%');
+            $search = $request->input('search');
+            $query->where('code', 'like', "%{$search}%");
         }
 
         $codes = $query->get();
 
-        // إضافة اسم الطالب لكل كود
+        // Add student name
         $codes->each(function ($code) {
             $code->student_name = $code->student?->name;
         });
+
+        // Group by type once
+        $grouped = $codes->groupBy('type');
 
         return response()->json([
             'status' => true,
             'data' => [
 
-                // 💰 Wallet
-                'wallet' => $codes->where('type', 'wallet')
+                'wallet' => $grouped->get('wallet', collect())
                     ->groupBy('amount')
                     ->map(function ($items, $amount) {
                         return [
@@ -123,8 +123,7 @@ class PaymentCodeController extends BaseController
                         ];
                     })->values(),
 
-                // 🎓 Courses
-                'courses' => $codes->where('type', 'course')
+                'courses' => $grouped->get('course', collect())
                     ->groupBy('course_id')
                     ->map(function ($items, $courseId) {
                         return [
@@ -134,8 +133,7 @@ class PaymentCodeController extends BaseController
                         ];
                     })->values(),
 
-                // 📚 Semesters
-                'semesters' => $codes->where('type', 'semester')
+                'semesters' => $grouped->get('semester', collect())
                     ->groupBy('semester_id')
                     ->map(function ($items, $semesterId) {
                         return [
@@ -145,8 +143,7 @@ class PaymentCodeController extends BaseController
                         ];
                     })->values(),
 
-                // 📖 Lessons
-                'lessons' => $codes->where('type', 'lesson')
+                'lessons' => $grouped->get('lesson', collect())
                     ->groupBy('course_detail_id')
                     ->map(function ($items, $lessonId) {
                         return [
@@ -158,6 +155,8 @@ class PaymentCodeController extends BaseController
             ]
         ]);
     }
+
+
 
     public function delete(Request $request)
     {
@@ -211,7 +210,4 @@ class PaymentCodeController extends BaseController
             ],
         ]);
     }
-
-
 }
-

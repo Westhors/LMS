@@ -6,6 +6,7 @@ use App\Helpers\JsonResponse;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\TeacherRequest;
 use App\Http\Requests\TeacherUpdateRequest;
+use App\Http\Resources\TeacherDashboardResource;
 use App\Http\Resources\TeacherResource;
 use App\Interfaces\TeacherRepositoryInterface;
 use App\Models\Book;
@@ -133,6 +134,15 @@ class TeacherController extends BaseController
                 new TeacherResource($teacher)
             );
 
+        } catch (Exception $e) {
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+    public function showTeacherDashboard(Teacher $teacher)
+    {
+        try {
+            return JsonResponse::respondSuccess('Item Fetched Successfully', new TeacherDashboardResource($teacher));
         } catch (Exception $e) {
             return JsonResponse::respondError($e->getMessage());
         }
