@@ -38,7 +38,7 @@ class CourseController extends BaseController
         }
     }
 
-        public function indexCourseDashboard()
+    public function indexCourseDashboard()
     {
         try {
             $Courses = CourseDashboardResource::collection($this->crudRepository->all(['teacher', 'stage', 'subject', 'semester', 'details'], [], ['*']));
@@ -68,7 +68,7 @@ class CourseController extends BaseController
     public function show(Course $course): ?\Illuminate\Http\JsonResponse
     {
         try {
-           $studentId = auth()->id();
+            $studentId = auth()->id();
 
             $course->load([
                 'teacher',
@@ -104,19 +104,21 @@ class CourseController extends BaseController
     }
 
 
-    public function frontEndShow(Course $course): ?\Illuminate\Http\JsonResponse
+    public function frontEndShow(Course $course): \Illuminate\Http\JsonResponse
     {
         try {
-           $studentId = auth()->id();
+
+            $studentId = auth()->id();
+
             $course->load([
                 'details'
-
             ]);
+
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
                 new FrontEndCourseResource($course)
             );
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return JsonResponse::respondError($e->getMessage());
         }
