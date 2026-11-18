@@ -104,15 +104,15 @@ class CourseController extends BaseController
     }
 
 
-    public function frontEndShow(Course $course): \Illuminate\Http\JsonResponse
+    public function frontEndShow($id): \Illuminate\Http\JsonResponse
     {
         try {
 
             $studentId = auth()->id();
 
-            $course->load([
+            $course = Course::with([
                 'details'
-            ]);
+            ])->findOrFail($id);
 
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
