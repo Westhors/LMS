@@ -8,11 +8,60 @@ use App\Models\Enrollment;
 
 class SimpleCourseDetailResource extends JsonResource
 {
+
+
     public function toArray($request)
     {
+        $studentId = auth('sanctum')->id() ?? auth()->id();
+
+        $isPurchased = false;
+
+        if ($studentId) {
+
+            // Get semester_id from the course that belongs to this lesson
+            $semesterId = $this->course?->semester_id;
+
+            $isPurchased = Enrollment::where('student_id', $studentId)
+                ->where(function ($query) use ($semesterId) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | 1. Student purchased this lesson directly
+                    |--------------------------------------------------------------------------
+                    */
+                    $query->where(function ($q) {
+                        $q->where('type', 'lesson')
+                            ->where('course_detail_id', $this->id);
+                    })
+
+                        /*
+                    |--------------------------------------------------------------------------
+                    | 2. Student purchased the whole course
+                    |--------------------------------------------------------------------------
+                    */
+                        ->orWhere(function ($q) {
+                            $q->where('type', 'course')
+                                ->where('course_id', $this->course_id);
+                        });
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | 3. Student purchased the whole semester
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($semesterId) {
+                        $query->orWhere(function ($q) use ($semesterId) {
+                            $q->where('type', 'semester')
+                                ->where('semester_id', $semesterId);
+                        });
+                    }
+                })
+                ->exists();
+        }
         return [
             'id' => $this->id,
             'course_id' => $this->course_id,
+            'is_purchased' => $isPurchased,
             'titles' => $this->titles,
             'titles_ar' => $this->titles_ar,
             'lession_date' => $this->lession_date,
