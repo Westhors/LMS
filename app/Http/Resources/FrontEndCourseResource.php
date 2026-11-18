@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Enrollment;
+class FrontEndCourseResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        $studentId = auth('sanctum')->id() ?? auth()->id();
+
+        $isPurchased = false;
+
+        if ($studentId) {
+            $isPurchased = Enrollment::where('student_id', $studentId)
+                ->where(function ($query) {
+                    // اشترى الكورس نفسه
+                    $query->where(function ($q) {
+                        $q->where('type', 'course')
+                            ->where('course_id', $this->id);
+                    })
+
+                        // أو اشترى الـ Semester
+                        ->orWhere(function ($q) {
+                            $q->where('type', 'semester')
+                                ->where('semester_id', $this->semester_id);
+                        });
+                })
+                ->exists();
+        }
+        $offerDiscount = $this->offer?->offer_discount ?? 0;
+        $discountAmount = ($this->price * $offerDiscount) / 100;
+        return [
+            'id' => $this->id,
+            'isPurchased' => $isPurchased,
+            // 'teacher_id' => $this->teacher_id,
+            // 'teacher' => new TeacherResource($this->whenLoaded('teacher')),
+            'stage_id' => $this->stage_id,
+            // 'stage' => new StageResource($this->whenLoaded('stage')),
+
+            'stage_name_ar' => $this->stage->name_ar ?? null,
+            'stage_name_er' => $this->stage->name_er ?? null,
+
+            'subject_id' => $this->subject_id,
+            // 'subject' => new SubjectResource($this->whenLoaded('subject')),
+            'subject_name_er' => $this->subject->name_er ?? null,
+            'subject_name_ar' => $this->subject->name_ar ?? null,
+            'semester_id' => $this->semester_id,
+            // 'semester' => new SemesterResource($this->semester),
+            'semester_name_ar' => $this->semester->name_ar ?? null,
+            'semester_name_er' => $this->semester->name_er ?? null,
+
+
+            'original_price' => $this->price,
+            'price' => $this->price - $discountAmount,
+            'discount' => $discountAmount,
+            'offer_id' => $this->offer_id,
+            'offer_discount' => $offerDiscount,
+            // بيانات العرض
+            'offer_start_date' => $this->offer?->start_date,
+            'offer_end_date' => $this->offer?->end_date,
+
+            'details' => SimpleCourseDetailResource::collection(
+                $this->whenLoaded('details')
+            ),
+            'title' => $this->title,
+            'title_ar' => $this->title_ar,
+            'description' => $this->description,
+            'description_ar' => $this->description_ar,
+            'about' => $this->about,
+            'about_ar' => $this->about_ar,
+            'hour_time_course' => $this->hour_time_course,
+            'type' => $this->type,
+            'count_student' => $this->count_student,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
+            'active' => $this->active ?? null,
+            'star' => $this->star ?? null,
+            'link_video' => $this->link_video,
+            'imageUrl' => $this->getFirstMediaUrl(),
+            'image' => new MediaResource($this->getFirstMedia()),
+            // 'students' => StudentResource::collection(
+            //     $this->whenLoaded('students')
+            // ),
+            'time_duration' => $this->time_duration ?? null,
+            'createdAt' => optional($this->created_at)->format('d F, Y'),
+        ];
+    }
+}

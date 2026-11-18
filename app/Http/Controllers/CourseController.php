@@ -8,6 +8,7 @@ use App\Http\Requests\CourseRequest;
 use App\Http\Requests\StageRequest;
 use App\Http\Resources\CourseDashboardResource;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\FrontEndCourseResource;
 use App\Http\Resources\StageResource;
 use App\Interfaces\CourseRepositoryInterface;
 use App\Models\Course;
@@ -95,6 +96,25 @@ class CourseController extends BaseController
             return JsonResponse::respondSuccess(
                 'Item Fetched Successfully',
                 new CourseResource($course)
+            );
+        } catch (Exception $e) {
+
+            return JsonResponse::respondError($e->getMessage());
+        }
+    }
+
+
+    public function frontEndShow(Course $course): ?\Illuminate\Http\JsonResponse
+    {
+        try {
+           $studentId = auth()->id();
+            $course->load([
+                'details'
+
+            ]);
+            return JsonResponse::respondSuccess(
+                'Item Fetched Successfully',
+                new FrontEndCourseResource($course)
             );
         } catch (Exception $e) {
 

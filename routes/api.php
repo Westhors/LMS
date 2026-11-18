@@ -133,6 +133,7 @@ Route::post('course/index', [CourseController::class, 'index']);
 Route::post('course-dashboard/index', [CourseController::class, 'indexCourseDashboard']);
 
 Route::post('course/restore', [CourseController::class, 'restore']);
+Route::get('front-end-course/{id}', [CourseController::class, 'frontEndShow']);
 Route::delete('course/delete', [CourseController::class, 'destroy']);
 Route::delete('course/force-delete', [CourseController::class, 'forceDelete']);
 Route::post('course/update/{course}', [CourseController::class, 'forceUpdate']);
