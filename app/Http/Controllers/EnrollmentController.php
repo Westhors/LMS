@@ -6,6 +6,10 @@ use App\Http\Resources\BookResource;
 use App\Http\Resources\CourseDetailResource;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\SemesterResource;
+use App\Http\Resources\SimpleBookResource;
+use App\Http\Resources\SimpleCourseDetailResource;
+use App\Http\Resources\SimpleCourseResource;
+use App\Http\Resources\SimpleSemesterResource;
 use App\Http\Resources\StudentMeResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Book;
@@ -456,10 +460,10 @@ public function requestEnroll(Request $request)
             'status' => true,
             'data' => [
                 'student' => new StudentMeResource($student),
-                'semesters' => SemesterResource::collection($semesters),
-                'courses'   => CourseResource::collection($courses),
-                'lessons'   => CourseDetailResource::collection($lessons),
-                'books'     => BookResource::collection($books),
+                'semesters' => SimpleSemesterResource::collection($semesters),
+                'courses'   => SimpleCourseResource::collection($courses),
+                'lessons'   => SimpleCourseDetailResource::collection($lessons),
+                'books'     => SimpleBookResource::collection($books),
             ]
         ]);
     }
